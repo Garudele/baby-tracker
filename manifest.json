@@ -1,0 +1,11 @@
+{
+  "name": "Mi Bebé - Seguimiento",
+  "short_name": "Mi Bebé",
+  "description": "Seguimiento de crecimiento, medicinas y estudios de tu bebé",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#F5F7FF",
+  "theme_color": "#6C63FF",
+  "orientation": "portrait",
+  "icons": []
+}

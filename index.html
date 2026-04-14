@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#6C63FF">
+<title>Mi Bebé - Seguimiento</title>
+<link rel="manifest" href="manifest.json">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #6C63FF;
+  --primary-light: #8B83FF;
+  --bg: #F5F7FF;
+  --card: #FFFFFF;
+  --text: #2D3436;
+  --text-light: #636E72;
+  --success: #00B894;
+  --warning: #FDCB6E;
+  --danger: #E17055;
+  --baby-pink: #FD79A8;
+  --baby-blue: #74B9FF;
+  --shadow: 0 4px 15px rgba(108,99,255,0.15);
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+.header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  padding: 20px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+.header h1 { font-size: 1.4em; }
+.header p { font-size: 0.85em; opacity: 0.9; margin-top: 4px; }
+.baby-emoji { font-size: 1.6em; }
+
+/* Tabs */
+.tab-bar {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+.tab {
+  flex: 1;
+  padding: 10px 5px;
+  text-align: center;
+  font-size: 0.7em;
+  color: var(--text-light);
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.tab.active { color: var(--primary); font-weight: 700; }
+.tab-icon { font-size: 1.8em; display: block; margin-bottom: 2px; }
+
+/* Sections */
+.section { display: none; padding: 15px; }
+.section.active { display: block; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 15px;
+  box-shadow: var(--shadow);
+}
+.card h3 {
+  font-size: 1em;
+  margin-bottom: 12px;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 14px;
+}
+.form-group label {
+  display: block;
+  font-size: 0.85em;
+  color: var(--text-light);
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #E8E8FF;
+  border-radius: 12px;
+  font-size: 1em;
+  transition: border-color 0.3s;
+  background: #FAFBFF;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.form-group textarea { resize: vertical; min-height: 60px; }
+
+.btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 1em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+}
+.btn-primary:active { transform: scale(0.97); }
+.btn-danger {
+  background: var(--danger);
+  color: white;
+  padding: 8px 14px;
+  font-size: 0.8em;
+  width: auto;
+  border-radius: 8px;
+}
+.btn-small {
+  padding: 8px 16px;
+  font-size: 0.85em;
+  width: auto;
+  border-radius: 10px;
+}
+
+/* Records list */
+.record {
+  background: #FAFBFF;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  border-left: 4px solid var(--primary);
+  position: relative;
+}
+.record .date {
+  font-size: 0.78em;
+  color: var(--text-light);
+  margin-bottom: 4px;
+}
+.record .detail {
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+.record .delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 1.1em;
+  cursor: pointer;
+  opacity: 0.5;
+}
+.record.medicine { border-left-color: var(--success); }
+.record.study { border-left-color: var(--baby-pink); }
+
+/* Growth chart */
+.growth-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+.stat-card {
+  background: linear-gradient(135deg, #FAFBFF, #F0F0FF);
+  border-radius: 14px;
+  padding: 15px;
+  text-align: center;
+}
+.stat-card .value {
+  font-size: 1.8em;
+  font-weight: 800;
+  color: var(--primary);
+}
+.stat-card .label {
+  font-size: 0.75em;
+  color: var(--text-light);
+  margin-top: 4px;
+}
+.stat-card.pink .value { color: var(--baby-pink); }
+.stat-card.blue .value { color: var(--baby-blue); }
+
+/* Chart */
+.chart-container {
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+canvas { max-width: 100%; }
+
+/* Empty state */
+.empty {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-light);
+  font-size: 0.9em;
+}
+.empty-icon { font-size: 3em; margin-bottom: 10px; }
+
+/* Baby setup */
+.setup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+.setup-container .baby-big { font-size: 5em; margin-bottom: 20px; }
+.setup-container h2 { margin-bottom: 20px; color: var(--primary); }
+.setup-card { width: 100%; max-width: 400px; }
+
+/* Month selector */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+.month-nav button {
+  background: var(--primary);
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.2em;
+  cursor: pointer;
+}
+.month-nav span {
+  font-weight: 700;
+  font-size: 1.1em;
+  min-width: 120px;
+  text-align: center;
+}
+
+.toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--success);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9em;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* Export */
+.export-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.export-btns .btn { flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="baby-emoji">👶</span>
+  <h1 id="headerTitle">Mi Bebé</h1>
+  <p id="headerSub">Seguimiento de crecimiento</p>
+</div>
+
+<div class="toast" id="toast">Guardado ✓</div>
+
+<!-- SETUP -->
+<div class="section active" id="setupSection">
+  <div class="setup-container">
+    <div class="baby-big">🍼</div>
+    <h2>¡Bienvenida!</h2>
+    <div class="card setup-card">
+      <div class="form-group">
+        <label>Nombre del bebé</label>
+        <input type="text" id="babyName" placeholder="Ej: Sofía">
+      </div>
+      <div class="form-group">
+        <label>Fecha de nacimiento</label>
+        <input type="date" id="babyBirth">
+      </div>
+      <div class="form-group">
+        <label>Sexo</label>
+        <select id="babySex">
+          <option value="girl">Niña 👧</option>
+          <option value="boy">Niño 👦</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Peso al nacer (kg)</label>
+        <input type="number" step="0.01" id="birthWeight" placeholder="Ej: 3.20">
+      </div>
+      <div class="form-group">
+        <label>Talla al nacer (cm)</label>
+        <input type="number" step="0.1" id="birthHeight" placeholder="Ej: 50">
+      </div>
+      <button class="btn btn-primary" onclick="saveBaby()">Comenzar 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="section" id="dashSection">
+  <div class="growth-summary">
+    <div class="stat-card blue">
+      <div class="value" id="currentWeight">--</div>
+      <div class="label">Peso (kg)</div>
+    </div>
+    <div class="stat-card pink">
+      <div class="value" id="currentHeight">--</div>
+      <div class="label">Talla (cm)</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="currentAge">--</div>
+      <div class="label">Edad</div>
+    </div>
+    <div class="stat-card">
+      <div class="value" id="totalRecords">0</div>
+      <div class="label">Registros</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📈 Curva de Crecimiento</h3>
+    <div class="chart-container">
+      <canvas id="growthChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📋 Últimos registros</h3>
+    <div id="recentRecords"></div>
+  </div>
+</div>
+
+<!-- CRECIMIENTO -->
+<div class="section" id="growthSection">
+  <div class="card">
+    <h3>📏 Registrar Medidas</h3>
+    <div class="form-group">
+      <label>Fecha</label>
+      <input type="date" id="growthDate">
+    </div>
+    <div class="form-group">
+      <label>Peso (kg)</label>
+      <input type="number" step="0.01" id="growthWeight" placeholder="Ej: 5.40">
+    </div>
+    <div class="form-group">
+      <label>Talla (cm)</label>
+      <input type="number" step="0.1" id="growthHeight" placeholder="Ej: 60.5">
+    </div>
+    <div class="form-group">
+      <label>Perímetro cefálico (cm) - opcional</label>
+      <input type="number" step="0.1" id="growthHead" placeholder="Ej: 38">
+    </div>
+    <div class="form-group">
+      <label>Notas (opcional)</label>
+      <textarea id="growthNotes" placeholder="Observaciones..."></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="saveGrowth()">Guardar Medidas 📏</button>
+  </div>
+
+  <div class="card">
+    <h3>📊 Historial de Medidas</h3>
+    <div id="growthList"></div>
+  </div>
+</div>
+
+<!-- MEDICINAS -->
+<div class="section" id="medSection">
+  <div class="card">
+    <h3>💊 Registrar Medicina</h3>
+    <div class="form-group">
+      <label>Fecha</label>
+      <input type="date" id="medDate">
+    </div>
+    <div class="form-group">
+      <label>Nombre del medicamento</label>
+      <input type="text" id="medName" placeholder="Ej: Paracetamol">
+    </div>
+    <div class="form-group">
+      <label>Dosis</label>
+      <input type="text" id="medDose" placeholder="Ej: 2.5 ml cada 8 horas">
+    </div>
+    <div class="form-group">
+      <label>Motivo</label>
+      <input type="text" id="medReason" placeholder="Ej: Fiebre">
+    </div>
+    <div class="form-group">
+      <label>Recetado por</label>
+      <input type="text" id="medDoctor" placeholder="Ej: Dr. García">
+    </div>
+    <div class="form-group">
+      <label>Notas (opcional)</label>
+      <textarea id="medNotes" placeholder="Indicaciones adicionales..."></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="saveMedicine()">Guardar Medicina 💊</button>
+  </div>
+
+  <div class="card">
+    <h3>📋 Historial de Medicinas</h3>
+    <div id="medList"></div>
+  </div>
+</div>
+
+<!-- ESTUDIOS -->
+<div class="section" id="studySection">
+  <div class="card">
+    <h3>🔬 Registrar Estudio</h3>
+    <div class="form-group">
+      <label>Fecha</label>
+      <input type="date" id="studyDate">
+    </div>
+    <div class="form-group">
+      <label>Tipo de estudio</label>
+      <select id="studyType">
+        <option value="sangre">Análisis de sangre 🩸</option>
+        <option value="orina">Análisis de orina</option>
+        <option value="ultrasonido">Ultrasonido</option>
+        <option value="rayosx">Rayos X</option>
+        <option value="tamiz">Tamiz neonatal</option>
+        <option value="audiometria">Audiometría</option>
+        <option value="vacuna">Vacuna 💉</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Nombre del estudio</label>
+      <input type="text" id="studyName" placeholder="Ej: Biometría hemática">
+    </div>
+    <div class="form-group">
+      <label>Lugar / Laboratorio</label>
+      <input type="text" id="studyPlace" placeholder="Ej: Hospital General">
+    </div>
+    <div class="form-group">
+      <label>Resultado (opcional)</label>
+      <textarea id="studyResult" placeholder="Resultados o valores importantes..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Notas (opcional)</label>
+      <textarea id="studyNotes" placeholder="Observaciones del doctor..."></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="saveStudy()">Guardar Estudio 🔬</button>
+  </div>
+
+  <div class="card">
+    <h3>📋 Historial de Estudios</h3>
+    <div id="studyList"></div>
+  </div>
+</div>
+
+<!-- AJUSTES -->
+<div class="section" id="settingsSection">
+  <div class="card">
+    <h3>👶 Datos del Bebé</h3>
+    <div class="form-group">
+      <label>Nombre</label>
+      <input type="text" id="editName">
+    </div>
+    <div class="form-group">
+      <label>Fecha de nacimiento</label>
+      <input type="date" id="editBirth">
+    </div>
+    <div class="form-group">
+      <label>Sexo</label>
+      <select id="editSex">
+        <option value="girl">Niña 👧</option>
+        <option value="boy">Niño 👦</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="updateBaby()" style="margin-bottom:10px">Actualizar ✏️</button>
+  </div>
+
+  <div class="card">
+    <h3>💾 Respaldo de Datos</h3>
+    <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Exporta todos los datos para no perderlos.</p>
+    <div class="export-btns">
+      <button class="btn btn-primary btn-small" onclick="exportData()">Exportar 📤</button>
+      <button class="btn btn-primary btn-small" style="background:var(--success)" onclick="document.getElementById('importFile').click()">Importar 📥</button>
+    </div>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    <button class="btn btn-danger" style="margin-top:15px;width:100%" onclick="resetAll()">Borrar Todo ⚠️</button>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab active" onclick="switchTab('dash')">
+    <span class="tab-icon">🏠</span>Inicio
+  </button>
+  <button class="tab" onclick="switchTab('growth')">
+    <span class="tab-icon">📏</span>Medidas
+  </button>
+  <button class="tab" onclick="switchTab('med')">
+    <span class="tab-icon">💊</span>Medicinas
+  </button>
+  <button class="tab" onclick="switchTab('study')">
+    <span class="tab-icon">🔬</span>Estudios
+  </button>
+  <button class="tab" onclick="switchTab('settings')">
+    <span class="tab-icon">⚙️</span>Ajustes
+  </button>
+</div>
+
+<script>
+// ===== DATA LAYER =====
+const DB = {
+  get(key) { try { return JSON.parse(localStorage.getItem('baby_' + key)); } catch { return null; } },
+  set(key, val) { localStorage.setItem('baby_' + key, JSON.stringify(val)); },
+  push(key, item) {
+    const arr = this.get(key) || [];
+    item.id = Date.now();
+    arr.push(item);
+    this.set(key, arr);
+    return item;
+  },
+  remove(key, id) {
+    const arr = (this.get(key) || []).filter(i => i.id !== id);
+    this.set(key, arr);
+  }
+};
+
+// ===== BABY SETUP =====
+function saveBaby() {
+  const name = document.getElementById('babyName').value.trim();
+  const birth = document.getElementById('babyBirth').value;
+  if (!name || !birth) { alert('Completa nombre y fecha de nacimiento'); return; }
+
+  const baby = {
+    name,
+    birth,
+    sex: document.getElementById('babySex').value,
+    birthWeight: parseFloat(document.getElementById('birthWeight').value) || null,
+    birthHeight: parseFloat(document.getElementById('birthHeight').value) || null
+  };
+  DB.set('info', baby);
+
+  // Save birth measurements as first growth record
+  if (baby.birthWeight || baby.birthHeight) {
+    DB.push('growth', {
+      date: birth,
+      weight: baby.birthWeight,
+      height: baby.birthHeight,
+      head: null,
+      notes: 'Medidas al nacer'
+    });
+  }
+
+  initApp();
+  showToast('¡Bebé registrado!');
+}
+
+function updateBaby() {
+  const baby = DB.get('info');
+  baby.name = document.getElementById('editName').value.trim();
+  baby.birth = document.getElementById('editBirth').value;
+  baby.sex = document.getElementById('editSex').value;
+  DB.set('info', baby);
+  initApp();
+  showToast('Datos actualizados');
+}
+
+// ===== GROWTH =====
+function saveGrowth() {
+  const date = document.getElementById('growthDate').value;
+  const weight = parseFloat(document.getElementById('growthWeight').value);
+  const height = parseFloat(document.getElementById('growthHeight').value);
+  if (!date || (!weight && !height)) { alert('Completa fecha y al menos peso o talla'); return; }
+
+  DB.push('growth', {
+    date,
+    weight: weight || null,
+    height: height || null,
+    head: parseFloat(document.getElementById('growthHead').value) || null,
+    notes: document.getElementById('growthNotes').value.trim()
+  });
+
+  document.getElementById('growthWeight').value = '';
+  document.getElementById('growthHeight').value = '';
+  document.getElementById('growthHead').value = '';
+  document.getElementById('growthNotes').value = '';
+  renderGrowth();
+  renderDashboard();
+  showToast('Medidas guardadas');
+}
+
+function renderGrowth() {
+  const list = (DB.get('growth') || []).sort((a, b) => b.date.localeCompare(a.date));
+  const el = document.getElementById('growthList');
+  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📏</div>Sin registros aún</div>'; return; }
+  el.innerHTML = list.map(r => `
+    <div class="record">
+      <button class="delete-btn" onclick="deleteRecord('growth',${r.id})">🗑️</button>
+      <div class="date">📅 ${formatDate(r.date)} — ${getAgeAt(r.date)}</div>
+      <div class="detail">
+        ${r.weight ? '⚖️ Peso: <b>' + r.weight + ' kg</b>' : ''}
+        ${r.weight && r.height ? ' &nbsp;|&nbsp; ' : ''}
+        ${r.height ? '📏 Talla: <b>' + r.height + ' cm</b>' : ''}
+        ${r.head ? '<br>🧠 P. Cefálico: <b>' + r.head + ' cm</b>' : ''}
+        ${r.notes ? '<br>📝 ' + r.notes : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== MEDICINES =====
+function saveMedicine() {
+  const date = document.getElementById('medDate').value;
+  const name = document.getElementById('medName').value.trim();
+  if (!date || !name) { alert('Completa fecha y nombre del medicamento'); return; }
+
+  DB.push('medicines', {
+    date,
+    name,
+    dose: document.getElementById('medDose').value.trim(),
+    reason: document.getElementById('medReason').value.trim(),
+    doctor: document.getElementById('medDoctor').value.trim(),
+    notes: document.getElementById('medNotes').value.trim()
+  });
+
+  document.getElementById('medName').value = '';
+  document.getElementById('medDose').value = '';
+  document.getElementById('medReason').value = '';
+  document.getElementById('medDoctor').value = '';
+  document.getElementById('medNotes').value = '';
+  renderMedicines();
+  renderDashboard();
+  showToast('Medicina guardada');
+}
+
+function renderMedicines() {
+  const list = (DB.get('medicines') || []).sort((a, b) => b.date.localeCompare(a.date));
+  const el = document.getElementById('medList');
+  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">💊</div>Sin medicinas registradas</div>'; return; }
+  el.innerHTML = list.map(r => `
+    <div class="record medicine">
+      <button class="delete-btn" onclick="deleteRecord('medicines',${r.id})">🗑️</button>
+      <div class="date">📅 ${formatDate(r.date)}</div>
+      <div class="detail">
+        💊 <b>${r.name}</b>
+        ${r.dose ? '<br>📋 Dosis: ' + r.dose : ''}
+        ${r.reason ? '<br>🤒 Motivo: ' + r.reason : ''}
+        ${r.doctor ? '<br>👨‍⚕️ ' + r.doctor : ''}
+        ${r.notes ? '<br>📝 ' + r.notes : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== STUDIES =====
+function saveStudy() {
+  const date = document.getElementById('studyDate').value;
+  const name = document.getElementById('studyName').value.trim();
+  if (!date || !name) { alert('Completa fecha y nombre del estudio'); return; }
+
+  DB.push('studies', {
+    date,
+    type: document.getElementById('studyType').value,
+    name,
+    place: document.getElementById('studyPlace').value.trim(),
+    result: document.getElementById('studyResult').value.trim(),
+    notes: document.getElementById('studyNotes').value.trim()
+  });
+
+  document.getElementById('studyName').value = '';
+  document.getElementById('studyPlace').value = '';
+  document.getElementById('studyResult').value = '';
+  document.getElementById('studyNotes').value = '';
+  renderStudies();
+  renderDashboard();
+  showToast('Estudio guardado');
+}
+
+function renderStudies() {
+  const typeIcons = {
+    sangre: '🩸', orina: '🧪', ultrasonido: '📡', rayosx: '☢️',
+    tamiz: '🔬', audiometria: '👂', vacuna: '💉', otro: '📋'
+  };
+  const list = (DB.get('studies') || []).sort((a, b) => b.date.localeCompare(a.date));
+  const el = document.getElementById('studyList');
+  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🔬</div>Sin estudios registrados</div>'; return; }
+  el.innerHTML = list.map(r => `
+    <div class="record study">
+      <button class="delete-btn" onclick="deleteRecord('studies',${r.id})">🗑️</button>
+      <div class="date">📅 ${formatDate(r.date)}</div>
+      <div class="detail">
+        ${typeIcons[r.type] || '📋'} <b>${r.name}</b>
+        ${r.place ? '<br>🏥 ' + r.place : ''}
+        ${r.result ? '<br>📊 Resultado: ' + r.result : ''}
+        ${r.notes ? '<br>📝 ' + r.notes : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== DELETE =====
+function deleteRecord(key, id) {
+  if (confirm('¿Eliminar este registro?')) {
+    DB.remove(key, id);
+    renderAll();
+    showToast('Eliminado');
+  }
+}
+
+// ===== DASHBOARD =====
+function renderDashboard() {
+  const baby = DB.get('info');
+  if (!baby) return;
+
+  // Age
+  document.getElementById('currentAge').textContent = getAge(baby.birth);
+
+  // Latest measurements
+  const growth = (DB.get('growth') || []).sort((a, b) => a.date.localeCompare(b.date));
+  if (growth.length) {
+    const latest = growth[growth.length - 1];
+    document.getElementById('currentWeight').textContent = latest.weight ? latest.weight.toFixed(2) : '--';
+    document.getElementById('currentHeight').textContent = latest.height ? latest.height.toFixed(1) : '--';
+  }
+
+  // Total records
+  const total = (DB.get('growth') || []).length + (DB.get('medicines') || []).length + (DB.get('studies') || []).length;
+  document.getElementById('totalRecords').textContent = total;
+
+  // Recent records
+  renderRecentRecords();
+
+  // Chart
+  renderChart(growth);
+}
+
+function renderRecentRecords() {
+  const all = [];
+  (DB.get('growth') || []).forEach(r => all.push({ ...r, _type: 'growth', _icon: '📏' }));
+  (DB.get('medicines') || []).forEach(r => all.push({ ...r, _type: 'med', _icon: '💊', _label: r.name }));
+  (DB.get('studies') || []).forEach(r => all.push({ ...r, _type: 'study', _icon: '🔬', _label: r.name }));
+  all.sort((a, b) => b.date.localeCompare(a.date));
+
+  const el = document.getElementById('recentRecords');
+  const recent = all.slice(0, 5);
+  if (!recent.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📝</div>Agrega tu primer registro</div>'; return; }
+
+  el.innerHTML = recent.map(r => {
+    let text = '';
+    if (r._type === 'growth') {
+      text = `${r.weight ? r.weight + ' kg' : ''} ${r.height ? r.height + ' cm' : ''}`;
+    } else {
+      text = r._label;
+    }
+    return `<div class="record ${r._type === 'med' ? 'medicine' : r._type === 'study' ? 'study' : ''}">
+      <div class="date">${r._icon} ${formatDate(r.date)}</div>
+      <div class="detail">${text}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== CHART (simple canvas) =====
+function renderChart(growthData) {
+  const canvas = document.getElementById('growthChart');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.parentElement.clientWidth - 20;
+  canvas.height = 200;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const data = growthData.filter(r => r.weight);
+  if (data.length < 2) {
+    ctx.fillStyle = '#636E72';
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Necesitas al menos 2 registros de peso', canvas.width / 2, 100);
+    return;
+  }
+
+  const padding = { top: 20, right: 20, bottom: 40, left: 45 };
+  const w = canvas.width - padding.left - padding.right;
+  const h = canvas.height - padding.top - padding.bottom;
+
+  const weights = data.map(d => d.weight);
+  const minW = Math.min(...weights) * 0.9;
+  const maxW = Math.max(...weights) * 1.1;
+
+  // Grid
+  ctx.strokeStyle = '#E8E8FF';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = padding.top + (h / 4) * i;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, y);
+    ctx.lineTo(canvas.width - padding.right, y);
+    ctx.stroke();
+    ctx.fillStyle = '#636E72';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'right';
+    const val = maxW - ((maxW - minW) / 4) * i;
+    ctx.fillText(val.toFixed(1), padding.left - 5, y + 4);
+  }
+
+  // Line
+  ctx.strokeStyle = var_primary();
+  ctx.lineWidth = 3;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+
+  data.forEach((d, i) => {
+    const x = padding.left + (w / (data.length - 1)) * i;
+    const y = padding.top + h - ((d.weight - minW) / (maxW - minW)) * h;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Points and labels
+  data.forEach((d, i) => {
+    const x = padding.left + (w / (data.length - 1)) * i;
+    const y = padding.top + h - ((d.weight - minW) / (maxW - minW)) * h;
+
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = var_primary();
+    ctx.fill();
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Date label
+    ctx.fillStyle = '#636E72';
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = 'center';
+    const dateLabel = d.date.substring(5);
+    ctx.fillText(dateLabel, x, canvas.height - 5);
+  });
+
+  // Y axis label
+  ctx.save();
+  ctx.translate(12, canvas.height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillStyle = '#636E72';
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Peso (kg)', 0, 0);
+  ctx.restore();
+}
+
+function var_primary() { return '#6C63FF'; }
+
+// ===== HELPERS =====
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function getAge(birthStr) {
+  const birth = new Date(birthStr);
+  const now = new Date();
+  let months = (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
+  if (now.getDate() < birth.getDate()) months--;
+  if (months < 1) {
+    const days = Math.floor((now - birth) / 86400000);
+    return days + 'd';
+  }
+  if (months < 12) return months + 'm';
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  return y + 'a' + (m ? ' ' + m + 'm' : '');
+}
+
+function getAgeAt(dateStr) {
+  const baby = DB.get('info');
+  if (!baby) return '';
+  const birth = new Date(baby.birth);
+  const date = new Date(dateStr);
+  let months = (date.getFullYear() - birth.getFullYear()) * 12 + (date.getMonth() - birth.getMonth());
+  if (date.getDate() < birth.getDate()) months--;
+  if (months < 1) return 'Recién nacido';
+  if (months < 12) return months + ' mes' + (months > 1 ? 'es' : '');
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  return y + ' año' + (y > 1 ? 's' : '') + (m ? ' ' + m + ' mes' + (m > 1 ? 'es' : '') : '');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ===== TABS =====
+function switchTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(name + 'Section').classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ===== EXPORT / IMPORT =====
+function exportData() {
+  const data = {
+    info: DB.get('info'),
+    growth: DB.get('growth'),
+    medicines: DB.get('medicines'),
+    studies: DB.get('studies'),
+    exportDate: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `bebe_${data.info?.name || 'datos'}_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Datos exportados');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.info) DB.set('info', data.info);
+      if (data.growth) DB.set('growth', data.growth);
+      if (data.medicines) DB.set('medicines', data.medicines);
+      if (data.studies) DB.set('studies', data.studies);
+      initApp();
+      showToast('Datos importados');
+    } catch { alert('Archivo no válido'); }
+  };
+  reader.readAsText(file);
+}
+
+function resetAll() {
+  if (confirm('¿Estás segura? Se borrarán TODOS los datos.')) {
+    if (confirm('Esta acción no se puede deshacer. ¿Continuar?')) {
+      localStorage.removeItem('baby_info');
+      localStorage.removeItem('baby_growth');
+      localStorage.removeItem('baby_medicines');
+      localStorage.removeItem('baby_studies');
+      location.reload();
+    }
+  }
+}
+
+// ===== INIT =====
+function initApp() {
+  const baby = DB.get('info');
+  if (!baby) {
+    document.getElementById('setupSection').classList.add('active');
+    document.querySelector('.tab-bar').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('setupSection').classList.remove('active');
+  document.getElementById('dashSection').classList.add('active');
+  document.querySelector('.tab-bar').style.display = 'flex';
+
+  // Header
+  const emoji = baby.sex === 'girl' ? '👧' : '👦';
+  document.getElementById('headerTitle').textContent = emoji + ' ' + baby.name;
+  document.getElementById('headerSub').textContent = 'Nacimiento: ' + formatDate(baby.birth);
+
+  // Set today as default dates
+  const today = new Date().toISOString().split('T')[0];
+  ['growthDate', 'medDate', 'studyDate'].forEach(id => {
+    document.getElementById(id).value = today;
+  });
+
+  // Settings
+  document.getElementById('editName').value = baby.name;
+  document.getElementById('editBirth').value = baby.birth;
+  document.getElementById('editSex').value = baby.sex;
+
+  renderAll();
+}
+
+function renderAll() {
+  renderDashboard();
+  renderGrowth();
+  renderMedicines();
+  renderStudies();
+}
+
+// Start
+initApp();
+</script>
+</body>
+</html>
