@@ -17,8 +17,10 @@
   --primary-light: #8B83FF;
   --bg: #F5F7FF;
   --card: #FFFFFF;
+  --card-alt: #FAFBFF;
   --text: #2D3436;
   --text-light: #636E72;
+  --border: #E8E8FF;
   --success: #00B894;
   --warning: #FDCB6E;
   --danger: #E17055;
@@ -26,6 +28,29 @@
   --baby-blue: #74B9FF;
   --shadow: 0 4px 15px rgba(108,99,255,0.15);
 }
+body.dark {
+  --bg: #15172B;
+  --card: #232544;
+  --card-alt: #2A2D52;
+  --text: #ECEDFB;
+  --text-light: #9BA1C9;
+  --border: #353963;
+  --shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+body.dark .form-group input,
+body.dark .form-group select,
+body.dark .form-group textarea { background: var(--card-alt); color: var(--text); border-color: var(--border); }
+body.dark .stat-card { background: linear-gradient(135deg, var(--card-alt), #2F3260); }
+body.dark .record,
+body.dark .vac-row { background: var(--card-alt); }
+body.dark .reminder-card { background: linear-gradient(135deg, #4A3A0F, #6A5418); color: #FFE9A8; }
+body.dark .reminder-card h3 { color: #FFE9A8; }
+body.dark .reminder-item { background: rgba(0,0,0,0.25); color: #FFE9A8; }
+body.dark .next-appt-box { background: linear-gradient(135deg, #1E3A5C, #2A4F7A); }
+body.dark .next-appt-box .days { color: #B2C4FF; }
+body.dark .editing-banner { background: #4A3A0F; color: #FFE9A8; }
+body.dark .btn-cancel { background: var(--border); color: var(--text); }
+body.dark .tab-bar { background: var(--card); }
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg);
@@ -353,6 +378,83 @@ canvas { max-width: 100%; }
   text-transform: uppercase;
 }
 
+/* Photos */
+.photo-input { display: none; }
+.photo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card-alt);
+  border: 2px dashed var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 0.9em;
+  color: var(--text-light);
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.staged-photos, .record-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.staged-photos .thumb-wrap, .record-photos .thumb-wrap {
+  position: relative;
+  width: 70px;
+  height: 70px;
+}
+.thumb-wrap img {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  cursor: pointer;
+}
+.thumb-wrap .x {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: var(--danger);
+  color: white;
+  border: 2px solid var(--card);
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 0.75em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.photo-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.photo-modal.show { display: flex; }
+.photo-modal img { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+.photo-modal .close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.4em;
+  cursor: pointer;
+}
+
 /* Reminders */
 .reminder-card {
   background: linear-gradient(135deg, #FFF3CD, #FFE7A0);
@@ -619,6 +721,9 @@ canvas { max-width: 100%; }
       <label>Notas (opcional)</label>
       <textarea id="medNotes" placeholder="Indicaciones adicionales..."></textarea>
     </div>
+    <label class="photo-btn" for="medPhotoInput">📷 Adjuntar foto (receta, etc.)</label>
+    <input type="file" id="medPhotoInput" class="photo-input" accept="image/*" capture="environment" onchange="stagePhoto('med', event)">
+    <div class="staged-photos" id="medStagedPhotos"></div>
     <button class="btn btn-primary" id="medSaveBtn" onclick="saveMedicine()">Guardar Medicina 💊</button>
     <button class="btn btn-cancel" id="medCancelBtn" style="display:none" onclick="cancelEdit('med')">Cancelar edición</button>
   </div>
@@ -667,6 +772,9 @@ canvas { max-width: 100%; }
       <label>Notas (opcional)</label>
       <textarea id="studyNotes" placeholder="Observaciones del doctor..."></textarea>
     </div>
+    <label class="photo-btn" for="studyPhotoInput">📷 Adjuntar foto (resultados, etc.)</label>
+    <input type="file" id="studyPhotoInput" class="photo-input" accept="image/*" capture="environment" onchange="stagePhoto('study', event)">
+    <div class="staged-photos" id="studyStagedPhotos"></div>
     <button class="btn btn-primary" id="studySaveBtn" onclick="saveStudy()">Guardar Estudio 🔬</button>
     <button class="btn btn-cancel" id="studyCancelBtn" style="display:none" onclick="cancelEdit('study')">Cancelar edición</button>
   </div>
@@ -754,6 +862,11 @@ canvas { max-width: 100%; }
   </div>
 
   <div class="card">
+    <h3>🎨 Apariencia</h3>
+    <button class="btn btn-primary btn-small" onclick="toggleDarkMode()" id="darkToggleBtn">🌙 Activar modo oscuro</button>
+  </div>
+
+  <div class="card">
     <h3>📄 Reporte para el Pediatra</h3>
     <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Genera un PDF imprimible con todo el historial: medidas, gráficas OMS, vacunas, medicinas, estudios y citas.</p>
     <button class="btn btn-primary btn-small" onclick="printReport()">📄 Generar PDF</button>
@@ -769,6 +882,12 @@ canvas { max-width: 100%; }
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     <button class="btn btn-danger" style="margin-top:15px;width:100%" onclick="resetAll()">Borrar Todo ⚠️</button>
   </div>
+</div>
+
+<!-- PHOTO MODAL -->
+<div class="photo-modal" id="photoModal" onclick="closePhotoModal(event)">
+  <button class="close" onclick="closePhotoModal()">×</button>
+  <img id="photoModalImg" src="" alt="">
 </div>
 
 <!-- PRINT AREA (visible only on print) -->
@@ -878,6 +997,166 @@ const VACCINES = [
 
 // ===== EDIT STATE =====
 const editing = { growth: null, med: null, study: null, appt: null };
+const stagedPhotos = { med: [], study: [] }; // {blob, url, name}
+
+// ===== PHOTO STORAGE (IndexedDB) =====
+const PhotoDB = (() => {
+  let dbPromise;
+  function open() {
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve, reject) => {
+      const req = indexedDB.open('baby-photos', 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        const store = db.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
+        store.createIndex('ref', ['recordType', 'recordId']);
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+    return dbPromise;
+  }
+  function tx(mode = 'readonly') {
+    return open().then(db => db.transaction('photos', mode).objectStore('photos'));
+  }
+  return {
+    async add(recordType, recordId, blob, name) {
+      const store = await tx('readwrite');
+      return new Promise((resolve, reject) => {
+        const r = store.add({ recordType, recordId, blob, name: name || '', ts: Date.now() });
+        r.onsuccess = () => resolve(r.result);
+        r.onerror = () => reject(r.error);
+      });
+    },
+    async getByRecord(recordType, recordId) {
+      const store = await tx('readonly');
+      return new Promise((resolve, reject) => {
+        const r = store.index('ref').getAll([recordType, recordId]);
+        r.onsuccess = () => resolve(r.result || []);
+        r.onerror = () => reject(r.error);
+      });
+    },
+    async get(id) {
+      const store = await tx('readonly');
+      return new Promise((resolve, reject) => {
+        const r = store.get(id);
+        r.onsuccess = () => resolve(r.result);
+        r.onerror = () => reject(r.error);
+      });
+    },
+    async delete(id) {
+      const store = await tx('readwrite');
+      return new Promise((resolve, reject) => {
+        const r = store.delete(id);
+        r.onsuccess = () => resolve();
+        r.onerror = () => reject(r.error);
+      });
+    },
+    async deleteByRecord(recordType, recordId) {
+      const photos = await this.getByRecord(recordType, recordId);
+      for (const p of photos) await this.delete(p.id);
+    },
+    async clear() {
+      const store = await tx('readwrite');
+      return new Promise((resolve, reject) => {
+        const r = store.clear();
+        r.onsuccess = () => resolve();
+        r.onerror = () => reject(r.error);
+      });
+    }
+  };
+})();
+
+async function resizeImage(file, maxDim = 1400, quality = 0.85) {
+  const img = await new Promise((res, rej) => {
+    const i = new Image();
+    i.onload = () => res(i);
+    i.onerror = rej;
+    i.src = URL.createObjectURL(file);
+  });
+  const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+  const w = Math.round(img.width * scale);
+  const h = Math.round(img.height * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+  URL.revokeObjectURL(img.src);
+  return new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+}
+
+async function stagePhoto(kind, event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  try {
+    const blob = await resizeImage(file);
+    const url = URL.createObjectURL(blob);
+    stagedPhotos[kind].push({ blob, url, name: file.name });
+    renderStagedPhotos(kind);
+  } catch (err) {
+    alert('No se pudo procesar la imagen');
+    console.error(err);
+  }
+}
+
+function unstagePhoto(kind, idx) {
+  URL.revokeObjectURL(stagedPhotos[kind][idx].url);
+  stagedPhotos[kind].splice(idx, 1);
+  renderStagedPhotos(kind);
+}
+
+function renderStagedPhotos(kind) {
+  const el = document.getElementById(kind + 'StagedPhotos');
+  if (!el) return;
+  el.innerHTML = stagedPhotos[kind].map((p, i) => `
+    <div class="thumb-wrap">
+      <img src="${p.url}" onclick="openPhotoModal('${p.url}')">
+      <button class="x" onclick="unstagePhoto('${kind}', ${i})">×</button>
+    </div>
+  `).join('');
+}
+
+function clearStaged(kind) {
+  stagedPhotos[kind].forEach(p => URL.revokeObjectURL(p.url));
+  stagedPhotos[kind] = [];
+  renderStagedPhotos(kind);
+}
+
+async function persistStagedPhotos(kind, recordType, recordId) {
+  for (const p of stagedPhotos[kind]) {
+    await PhotoDB.add(recordType, recordId, p.blob, p.name);
+  }
+  clearStaged(kind);
+}
+
+async function renderRecordPhotos(recordType, recordId, containerId) {
+  const photos = await PhotoDB.getByRecord(recordType, recordId);
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!photos.length) { el.innerHTML = ''; return; }
+  el.innerHTML = '<div class="record-photos">' + photos.map(p => {
+    const url = URL.createObjectURL(p.blob);
+    return `<div class="thumb-wrap">
+      <img src="${url}" onclick="openPhotoModal('${url}')">
+      <button class="x" onclick="deleteRecordPhoto(${p.id}, '${recordType}', ${recordId}, '${containerId}')">×</button>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+async function deleteRecordPhoto(photoId, recordType, recordId, containerId) {
+  if (!confirm('¿Eliminar foto?')) return;
+  await PhotoDB.delete(photoId);
+  renderRecordPhotos(recordType, recordId, containerId);
+}
+
+function openPhotoModal(url) {
+  document.getElementById('photoModalImg').src = url;
+  document.getElementById('photoModal').classList.add('show');
+}
+function closePhotoModal(event) {
+  if (event && event.target.tagName === 'IMG') return;
+  document.getElementById('photoModal').classList.remove('show');
+}
 
 // ===== BABY SETUP =====
 function saveBaby() {
@@ -950,8 +1229,16 @@ function saveGrowth() {
     DB.update('growth', editing.growth, fields);
     showToast('Medidas actualizadas');
   } else {
-    DB.push('growth', fields);
-    showToast('Medidas guardadas');
+    // Avoid duplicates: if a record already exists on same date, ask to replace
+    const existing = (DB.get('growth') || []).find(r => r.date === date);
+    if (existing) {
+      if (!confirm('Ya hay un registro en esta fecha. ¿Reemplazarlo?')) return;
+      DB.update('growth', existing.id, fields);
+      showToast('Registro reemplazado');
+    } else {
+      DB.push('growth', fields);
+      showToast('Medidas guardadas');
+    }
   }
   cancelEdit('growth');
   renderGrowth();
@@ -1008,16 +1295,21 @@ function saveMedicine() {
     notes: document.getElementById('medNotes').value.trim()
   };
 
+  let recordId;
   if (editing.med) {
     DB.update('medicines', editing.med, fields);
+    recordId = editing.med;
     showToast('Medicina actualizada');
   } else {
-    DB.push('medicines', fields);
+    const saved = DB.push('medicines', fields);
+    recordId = saved.id;
     showToast('Medicina guardada');
   }
-  cancelEdit('med');
-  renderMedicines();
-  renderDashboard();
+  persistStagedPhotos('med', 'medicine', recordId).then(() => {
+    cancelEdit('med');
+    renderMedicines();
+    renderDashboard();
+  });
 }
 
 function editMedicine(id) {
@@ -1052,8 +1344,10 @@ function renderMedicines() {
         ${r.doctor ? '<br>👨‍⚕️ ' + r.doctor : ''}
         ${r.notes ? '<br>📝 ' + r.notes : ''}
       </div>
+      <div id="medPhotos_${r.id}"></div>
     </div>
   `).join('');
+  list.forEach(r => renderRecordPhotos('medicine', r.id, 'medPhotos_' + r.id));
 }
 
 // ===== STUDIES =====
@@ -1072,16 +1366,21 @@ function saveStudy() {
     notes: document.getElementById('studyNotes').value.trim()
   };
 
+  let recordId;
   if (editing.study) {
     DB.update('studies', editing.study, fields);
+    recordId = editing.study;
     showToast('Estudio actualizado');
   } else {
-    DB.push('studies', fields);
+    const saved = DB.push('studies', fields);
+    recordId = saved.id;
     showToast('Estudio guardado');
   }
-  cancelEdit('study');
-  renderStudies();
-  renderDashboard();
+  persistStagedPhotos('study', 'study', recordId).then(() => {
+    cancelEdit('study');
+    renderStudies();
+    renderDashboard();
+  });
 }
 
 function editStudy(id) {
@@ -1119,8 +1418,10 @@ function renderStudies() {
         ${r.result ? '<br>📊 Resultado: ' + r.result : ''}
         ${r.notes ? '<br>📝 ' + r.notes : ''}
       </div>
+      <div id="studyPhotos_${r.id}"></div>
     </div>
   `).join('');
+  list.forEach(r => renderRecordPhotos('study', r.id, 'studyPhotos_' + r.id));
 }
 
 // ===== CANCEL EDIT =====
@@ -1139,12 +1440,14 @@ function cancelEdit(kind) {
     document.getElementById('medEditBanner').style.display = 'none';
     document.getElementById('medSaveBtn').textContent = 'Guardar Medicina 💊';
     document.getElementById('medCancelBtn').style.display = 'none';
+    clearStaged('med');
   } else if (kind === 'study') {
     ['studyName','studyPlace','studyResult','studyNotes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('studyDate').value = today;
     document.getElementById('studyEditBanner').style.display = 'none';
     document.getElementById('studySaveBtn').textContent = 'Guardar Estudio 🔬';
     document.getElementById('studyCancelBtn').style.display = 'none';
+    clearStaged('study');
   } else if (kind === 'appt') {
     ['apptTime','apptDoctor','apptPlace','apptReason','apptNotes'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('apptDate').value = today;
@@ -1158,6 +1461,9 @@ function cancelEdit(kind) {
 function deleteRecord(key, id) {
   if (confirm('¿Eliminar este registro?')) {
     DB.remove(key, id);
+    // Also delete attached photos
+    if (key === 'medicines') PhotoDB.deleteByRecord('medicine', id);
+    if (key === 'studies') PhotoDB.deleteByRecord('study', id);
     renderAll();
     showToast('Eliminado');
   }
@@ -1277,10 +1583,11 @@ function renderChart(canvasId, growthData, metric, label, sex) {
   const xScale = age => padding.left + (w * (age - minAge) / (maxAge - minAge));
   const yScale = v => padding.top + h - ((v - minV) / (maxV - minV)) * h;
 
+  const isDark = document.body.classList.contains('dark');
   // Y grid + labels
-  ctx.strokeStyle = '#E8E8FF';
+  ctx.strokeStyle = isDark ? '#353963' : '#E8E8FF';
   ctx.lineWidth = 1;
-  ctx.fillStyle = '#636E72';
+  ctx.fillStyle = isDark ? '#9BA1C9' : '#636E72';
   ctx.font = '10px sans-serif';
   ctx.textAlign = 'right';
   for (let i = 0; i <= 4; i++) {
@@ -1354,7 +1661,7 @@ function renderChart(canvasId, growthData, metric, label, sex) {
   });
 
   // Axis labels
-  ctx.fillStyle = '#636E72';
+  ctx.fillStyle = isDark ? '#9BA1C9' : '#636E72';
   ctx.font = '11px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('Edad (meses)', canvas.width / 2, canvas.height - 2);
@@ -1569,7 +1876,26 @@ function emptyRow(cols, msg) {
   return `<tr><td colspan="${cols}" class="empty-row">${msg}</td></tr>`;
 }
 
-function printReport() {
+function blobToDataURL(blob) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.readAsDataURL(blob);
+  });
+}
+
+async function loadPhotosForRecords(recordType, records) {
+  const result = {};
+  for (const r of records) {
+    const photos = await PhotoDB.getByRecord(recordType, r.id);
+    if (photos.length) {
+      result[r.id] = await Promise.all(photos.map(p => blobToDataURL(p.blob)));
+    }
+  }
+  return result;
+}
+
+async function printReport() {
   const baby = DB.get('info');
   if (!baby) { alert('No hay datos del bebé'); return; }
 
@@ -1587,6 +1913,12 @@ function printReport() {
   const weightImg = renderChartToImage('weight', 'Peso (kg)');
   const heightImg = renderChartToImage('height', 'Talla (cm)');
   const headImg = growth.some(r => r.head) ? renderChartToImage('head', 'P. Cefálico (cm)') : '';
+
+  // Load photos
+  const medPhotos = await loadPhotosForRecords('medicine', meds);
+  const studyPhotos = await loadPhotosForRecords('study', studies);
+  const photoCellStyle = 'max-width:90px;max-height:90px;border-radius:4px;margin:2px';
+  const renderPhotos = urls => urls ? urls.map(u => `<img src="${u}" style="${photoCellStyle}">`).join('') : '';
 
   // Growth table
   const growthRows = growth.length
@@ -1621,26 +1953,32 @@ function printReport() {
 
   // Medicines table
   const medRows = meds.length
-    ? meds.map(r => `<tr>
-        <td>${formatDate(r.date)}</td>
-        <td>${escapeHTML(r.name)}</td>
-        <td>${escapeHTML(r.dose)}</td>
-        <td>${escapeHTML(r.reason)}</td>
-        <td>${escapeHTML(r.doctor)}</td>
-        <td>${escapeHTML(r.notes)}</td>
-      </tr>`).join('')
+    ? meds.map(r => {
+        const photos = renderPhotos(medPhotos[r.id]);
+        return `<tr>
+          <td>${formatDate(r.date)}</td>
+          <td>${escapeHTML(r.name)}</td>
+          <td>${escapeHTML(r.dose)}</td>
+          <td>${escapeHTML(r.reason)}</td>
+          <td>${escapeHTML(r.doctor)}</td>
+          <td>${escapeHTML(r.notes)}${photos ? '<br>' + photos : ''}</td>
+        </tr>`;
+      }).join('')
     : emptyRow(6, 'Sin registros');
 
   // Studies table
   const studyRows = studies.length
-    ? studies.map(r => `<tr>
-        <td>${formatDate(r.date)}</td>
-        <td>${escapeHTML(r.type)}</td>
-        <td>${escapeHTML(r.name)}</td>
-        <td>${escapeHTML(r.place)}</td>
-        <td>${escapeHTML(r.result)}</td>
-        <td>${escapeHTML(r.notes)}</td>
-      </tr>`).join('')
+    ? studies.map(r => {
+        const photos = renderPhotos(studyPhotos[r.id]);
+        return `<tr>
+          <td>${formatDate(r.date)}</td>
+          <td>${escapeHTML(r.type)}</td>
+          <td>${escapeHTML(r.name)}</td>
+          <td>${escapeHTML(r.place)}</td>
+          <td>${escapeHTML(r.result)}</td>
+          <td>${escapeHTML(r.notes)}${photos ? '<br>' + photos : ''}</td>
+        </tr>`;
+      }).join('')
     : emptyRow(6, 'Sin registros');
 
   // Appointments table
@@ -1716,6 +2054,22 @@ function printReport() {
   document.getElementById('printArea').innerHTML = html;
   // Wait for images to be ready before printing
   setTimeout(() => window.print(), 100);
+}
+
+// ===== DARK MODE =====
+function applyDarkMode() {
+  const dark = localStorage.getItem('baby_dark') === '1';
+  document.body.classList.toggle('dark', dark);
+  const btn = document.getElementById('darkToggleBtn');
+  if (btn) btn.textContent = dark ? '☀️ Activar modo claro' : '🌙 Activar modo oscuro';
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', dark ? '#15172B' : '#6C63FF');
+}
+
+function toggleDarkMode() {
+  const cur = localStorage.getItem('baby_dark') === '1';
+  localStorage.setItem('baby_dark', cur ? '0' : '1');
+  applyDarkMode();
+  renderDashboard(); // re-render charts so colors don't look off
 }
 
 // ===== VALIDACIÓN DE FECHAS =====
@@ -1928,7 +2282,8 @@ function resetAll() {
       localStorage.removeItem('baby_vaccines');
       localStorage.removeItem('baby_appointments');
       localStorage.removeItem('baby_lastNotify');
-      location.reload();
+      PhotoDB.clear().finally(() => location.reload());
+      return;
     }
   }
 }
@@ -1978,6 +2333,7 @@ function renderAll() {
 }
 
 // Start
+applyDarkMode();
 initApp();
 
 // ===== SERVICE WORKER =====
