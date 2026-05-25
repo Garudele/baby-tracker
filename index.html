@@ -288,6 +288,87 @@ canvas { max-width: 100%; }
   margin-top: 10px;
 }
 .export-btns .btn { flex: 1; }
+
+/* Edit / cancel */
+.record .edit-btn {
+  position: absolute;
+  top: 10px;
+  right: 38px;
+  background: none;
+  border: none;
+  font-size: 1.05em;
+  cursor: pointer;
+  opacity: 0.6;
+}
+.btn-cancel {
+  background: #E8E8FF;
+  color: var(--text);
+  margin-top: 8px;
+}
+.editing-banner {
+  background: #FFF3CD;
+  color: #856404;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 0.85em;
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Vacunas */
+.vac-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FAFBFF;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  border-left: 4px solid #B2BEC3;
+}
+.vac-row.applied { border-left-color: var(--success); background: #E8F8F2; }
+.vac-row.upcoming { border-left-color: var(--baby-blue); }
+.vac-row.overdue { border-left-color: var(--danger); background: #FFF0EC; }
+.vac-row .vac-info { flex: 1; }
+.vac-row .vac-name { font-weight: 700; font-size: 0.95em; }
+.vac-row .vac-meta { font-size: 0.78em; color: var(--text-light); margin-top: 3px; }
+.vac-row .vac-action {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.78em;
+  font-weight: 600;
+  cursor: pointer;
+}
+.vac-row.applied .vac-action { background: #B2BEC3; }
+.vac-group-title {
+  font-weight: 700;
+  color: var(--text-light);
+  font-size: 0.85em;
+  margin: 15px 0 8px;
+  text-transform: uppercase;
+}
+
+/* Chart legend */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  font-size: 0.75em;
+  color: var(--text-light);
+  margin-top: 5px;
+}
+.chart-legend span { display: flex; align-items: center; gap: 4px; }
+.chart-legend .swatch {
+  width: 14px;
+  height: 3px;
+  border-radius: 2px;
+  display: inline-block;
+}
 </style>
 </head>
 <body>
@@ -356,10 +437,27 @@ canvas { max-width: 100%; }
   </div>
 
   <div class="card">
-    <h3>📈 Curva de Crecimiento</h3>
+    <h3>📈 Peso vs. percentiles OMS</h3>
     <div class="chart-container">
-      <canvas id="growthChart" height="200"></canvas>
+      <canvas id="weightChart" height="220"></canvas>
     </div>
+    <div class="chart-legend">
+      <span><span class="swatch" style="background:#6C63FF"></span>Tu bebé</span>
+      <span><span class="swatch" style="background:#00B894"></span>P50 (media)</span>
+      <span><span class="swatch" style="background:#FDCB6E"></span>P3 / P97</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📏 Talla vs. percentiles OMS</h3>
+    <div class="chart-container">
+      <canvas id="heightChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>💉 Próximas vacunas</h3>
+    <div id="upcomingVaccines"></div>
   </div>
 
   <div class="card">
@@ -372,6 +470,7 @@ canvas { max-width: 100%; }
 <div class="section" id="growthSection">
   <div class="card">
     <h3>📏 Registrar Medidas</h3>
+    <div id="growthEditBanner" class="editing-banner" style="display:none">✏️ Editando registro existente</div>
     <div class="form-group">
       <label>Fecha</label>
       <input type="date" id="growthDate">
@@ -392,7 +491,8 @@ canvas { max-width: 100%; }
       <label>Notas (opcional)</label>
       <textarea id="growthNotes" placeholder="Observaciones..."></textarea>
     </div>
-    <button class="btn btn-primary" onclick="saveGrowth()">Guardar Medidas 📏</button>
+    <button class="btn btn-primary" id="growthSaveBtn" onclick="saveGrowth()">Guardar Medidas 📏</button>
+    <button class="btn btn-cancel" id="growthCancelBtn" style="display:none" onclick="cancelEdit('growth')">Cancelar edición</button>
   </div>
 
   <div class="card">
@@ -405,6 +505,7 @@ canvas { max-width: 100%; }
 <div class="section" id="medSection">
   <div class="card">
     <h3>💊 Registrar Medicina</h3>
+    <div id="medEditBanner" class="editing-banner" style="display:none">✏️ Editando registro existente</div>
     <div class="form-group">
       <label>Fecha</label>
       <input type="date" id="medDate">
@@ -429,7 +530,8 @@ canvas { max-width: 100%; }
       <label>Notas (opcional)</label>
       <textarea id="medNotes" placeholder="Indicaciones adicionales..."></textarea>
     </div>
-    <button class="btn btn-primary" onclick="saveMedicine()">Guardar Medicina 💊</button>
+    <button class="btn btn-primary" id="medSaveBtn" onclick="saveMedicine()">Guardar Medicina 💊</button>
+    <button class="btn btn-cancel" id="medCancelBtn" style="display:none" onclick="cancelEdit('med')">Cancelar edición</button>
   </div>
 
   <div class="card">
@@ -442,6 +544,7 @@ canvas { max-width: 100%; }
 <div class="section" id="studySection">
   <div class="card">
     <h3>🔬 Registrar Estudio</h3>
+    <div id="studyEditBanner" class="editing-banner" style="display:none">✏️ Editando registro existente</div>
     <div class="form-group">
       <label>Fecha</label>
       <input type="date" id="studyDate">
@@ -475,12 +578,22 @@ canvas { max-width: 100%; }
       <label>Notas (opcional)</label>
       <textarea id="studyNotes" placeholder="Observaciones del doctor..."></textarea>
     </div>
-    <button class="btn btn-primary" onclick="saveStudy()">Guardar Estudio 🔬</button>
+    <button class="btn btn-primary" id="studySaveBtn" onclick="saveStudy()">Guardar Estudio 🔬</button>
+    <button class="btn btn-cancel" id="studyCancelBtn" style="display:none" onclick="cancelEdit('study')">Cancelar edición</button>
   </div>
 
   <div class="card">
     <h3>📋 Historial de Estudios</h3>
     <div id="studyList"></div>
+  </div>
+</div>
+
+<!-- VACUNAS -->
+<div class="section" id="vacSection">
+  <div class="card">
+    <h3>💉 Esquema de Vacunación</h3>
+    <p style="font-size:0.82em;color:var(--text-light);margin-bottom:12px">Esquema básico recomendado (México). Toca "Marcar" cuando le apliquen una vacuna.</p>
+    <div id="vacList"></div>
   </div>
 </div>
 
@@ -520,19 +633,22 @@ canvas { max-width: 100%; }
 
 <!-- TAB BAR -->
 <div class="tab-bar">
-  <button class="tab active" onclick="switchTab('dash')">
+  <button class="tab active" data-tab="dash" onclick="switchTab('dash', this)">
     <span class="tab-icon">🏠</span>Inicio
   </button>
-  <button class="tab" onclick="switchTab('growth')">
+  <button class="tab" data-tab="growth" onclick="switchTab('growth', this)">
     <span class="tab-icon">📏</span>Medidas
   </button>
-  <button class="tab" onclick="switchTab('med')">
+  <button class="tab" data-tab="med" onclick="switchTab('med', this)">
     <span class="tab-icon">💊</span>Medicinas
   </button>
-  <button class="tab" onclick="switchTab('study')">
+  <button class="tab" data-tab="vac" onclick="switchTab('vac', this)">
+    <span class="tab-icon">💉</span>Vacunas
+  </button>
+  <button class="tab" data-tab="study" onclick="switchTab('study', this)">
     <span class="tab-icon">🔬</span>Estudios
   </button>
-  <button class="tab" onclick="switchTab('settings')">
+  <button class="tab" data-tab="settings" onclick="switchTab('settings', this)">
     <span class="tab-icon">⚙️</span>Ajustes
   </button>
 </div>
@@ -552,8 +668,66 @@ const DB = {
   remove(key, id) {
     const arr = (this.get(key) || []).filter(i => i.id !== id);
     this.set(key, arr);
+  },
+  update(key, id, fields) {
+    const arr = this.get(key) || [];
+    const idx = arr.findIndex(i => i.id === id);
+    if (idx >= 0) {
+      arr[idx] = { ...arr[idx], ...fields };
+      this.set(key, arr);
+    }
   }
 };
+
+// ===== WHO PERCENTILES (P3, P50, P97) =====
+const WHO = {
+  weight: {
+    boy: {0:[2.5,3.3,4.4],1:[3.4,4.5,5.8],2:[4.4,5.6,7.1],3:[5.1,6.4,8.0],4:[5.6,7.0,8.7],5:[6.1,7.5,9.3],6:[6.4,7.9,9.8],9:[7.1,8.9,11.0],12:[7.7,9.6,12.0],15:[8.3,10.3,12.8],18:[8.8,10.9,13.7],21:[9.2,11.5,14.5],24:[9.7,12.2,15.3]},
+    girl: {0:[2.4,3.2,4.2],1:[3.2,4.2,5.4],2:[4.0,5.1,6.6],3:[4.6,5.8,7.5],4:[5.1,6.4,8.2],5:[5.5,6.9,8.8],6:[5.8,7.3,9.3],9:[6.6,8.2,10.5],12:[7.1,8.9,11.5],15:[7.6,9.6,12.4],18:[8.1,10.2,13.2],21:[8.6,10.9,14.0],24:[9.0,11.5,14.8]}
+  },
+  height: {
+    boy: {0:[46.1,49.9,53.7],1:[50.8,54.7,58.6],2:[54.4,58.4,62.4],3:[57.3,61.4,65.5],4:[59.7,63.9,68.0],5:[61.7,65.9,70.1],6:[63.3,67.6,71.9],9:[67.5,72.0,76.5],12:[71.0,75.7,80.5],15:[74.1,79.1,84.2],18:[76.9,82.3,87.7],21:[79.4,85.1,90.9],24:[81.7,87.8,93.9]},
+    girl: {0:[45.4,49.1,52.9],1:[49.8,53.7,57.6],2:[53.0,57.1,61.1],3:[55.6,59.8,64.0],4:[57.8,62.1,66.4],5:[59.6,64.0,68.5],6:[61.2,65.7,70.3],9:[65.3,70.1,75.0],12:[68.9,74.0,79.2],15:[72.0,77.5,82.9],18:[74.9,80.7,86.5],21:[77.5,83.7,89.8],24:[80.0,86.4,92.9]}
+  }
+};
+
+function whoCurve(metric, sex, ageMonths) {
+  const data = WHO[metric][sex === 'boy' ? 'boy' : 'girl'];
+  const keys = Object.keys(data).map(Number).sort((a,b) => a-b);
+  if (ageMonths <= keys[0]) return data[keys[0]];
+  if (ageMonths >= keys[keys.length-1]) return data[keys[keys.length-1]];
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (ageMonths >= keys[i] && ageMonths <= keys[i+1]) {
+      const t = (ageMonths - keys[i]) / (keys[i+1] - keys[i]);
+      return data[keys[i]].map((v, j) => v + (data[keys[i+1]][j] - v) * t);
+    }
+  }
+}
+
+// ===== VACUNAS =====
+const VACCINES = [
+  { age: 0,  name: 'BCG', desc: 'Tuberculosis' },
+  { age: 0,  name: 'Hepatitis B (1ª dosis)', desc: 'Al nacer' },
+  { age: 2,  name: 'Hexavalente (1ª)', desc: 'DPaT + Hib + Hep B + Polio' },
+  { age: 2,  name: 'Rotavirus (1ª)', desc: '' },
+  { age: 2,  name: 'Neumocócica (1ª)', desc: '' },
+  { age: 4,  name: 'Hexavalente (2ª)', desc: '' },
+  { age: 4,  name: 'Rotavirus (2ª)', desc: '' },
+  { age: 4,  name: 'Neumocócica (2ª)', desc: '' },
+  { age: 6,  name: 'Hexavalente (3ª)', desc: '' },
+  { age: 6,  name: 'Influenza (1ª)', desc: 'Anual' },
+  { age: 7,  name: 'Influenza (refuerzo)', desc: '' },
+  { age: 12, name: 'SRP', desc: 'Sarampión, Rubéola, Paperas' },
+  { age: 12, name: 'Neumocócica (refuerzo)', desc: '' },
+  { age: 18, name: 'Hexavalente (refuerzo)', desc: '' },
+  { age: 18, name: 'Hepatitis A (1ª)', desc: '' },
+  { age: 24, name: 'Hepatitis A (2ª)', desc: '' },
+  { age: 48, name: 'DPT (refuerzo)', desc: '' },
+  { age: 48, name: 'SRP (refuerzo)', desc: '' }
+];
+
+// ===== EDIT STATE =====
+const editing = { growth: null, med: null, study: null };
 
 // ===== BABY SETUP =====
 function saveBaby() {
@@ -602,21 +776,39 @@ function saveGrowth() {
   const height = parseFloat(document.getElementById('growthHeight').value);
   if (!date || (!weight && !height)) { alert('Completa fecha y al menos peso o talla'); return; }
 
-  DB.push('growth', {
+  const fields = {
     date,
     weight: weight || null,
     height: height || null,
     head: parseFloat(document.getElementById('growthHead').value) || null,
     notes: document.getElementById('growthNotes').value.trim()
-  });
+  };
 
-  document.getElementById('growthWeight').value = '';
-  document.getElementById('growthHeight').value = '';
-  document.getElementById('growthHead').value = '';
-  document.getElementById('growthNotes').value = '';
+  if (editing.growth) {
+    DB.update('growth', editing.growth, fields);
+    showToast('Medidas actualizadas');
+  } else {
+    DB.push('growth', fields);
+    showToast('Medidas guardadas');
+  }
+  cancelEdit('growth');
   renderGrowth();
   renderDashboard();
-  showToast('Medidas guardadas');
+}
+
+function editGrowth(id) {
+  const r = (DB.get('growth') || []).find(i => i.id === id);
+  if (!r) return;
+  editing.growth = id;
+  document.getElementById('growthDate').value = r.date;
+  document.getElementById('growthWeight').value = r.weight || '';
+  document.getElementById('growthHeight').value = r.height || '';
+  document.getElementById('growthHead').value = r.head || '';
+  document.getElementById('growthNotes').value = r.notes || '';
+  document.getElementById('growthEditBanner').style.display = 'block';
+  document.getElementById('growthSaveBtn').textContent = 'Actualizar Medidas ✏️';
+  document.getElementById('growthCancelBtn').style.display = 'block';
+  switchTab('growth');
 }
 
 function renderGrowth() {
@@ -625,6 +817,7 @@ function renderGrowth() {
   if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📏</div>Sin registros aún</div>'; return; }
   el.innerHTML = list.map(r => `
     <div class="record">
+      <button class="edit-btn" onclick="editGrowth(${r.id})">✏️</button>
       <button class="delete-btn" onclick="deleteRecord('growth',${r.id})">🗑️</button>
       <div class="date">📅 ${formatDate(r.date)} — ${getAgeAt(r.date)}</div>
       <div class="detail">
@@ -644,23 +837,40 @@ function saveMedicine() {
   const name = document.getElementById('medName').value.trim();
   if (!date || !name) { alert('Completa fecha y nombre del medicamento'); return; }
 
-  DB.push('medicines', {
-    date,
-    name,
+  const fields = {
+    date, name,
     dose: document.getElementById('medDose').value.trim(),
     reason: document.getElementById('medReason').value.trim(),
     doctor: document.getElementById('medDoctor').value.trim(),
     notes: document.getElementById('medNotes').value.trim()
-  });
+  };
 
-  document.getElementById('medName').value = '';
-  document.getElementById('medDose').value = '';
-  document.getElementById('medReason').value = '';
-  document.getElementById('medDoctor').value = '';
-  document.getElementById('medNotes').value = '';
+  if (editing.med) {
+    DB.update('medicines', editing.med, fields);
+    showToast('Medicina actualizada');
+  } else {
+    DB.push('medicines', fields);
+    showToast('Medicina guardada');
+  }
+  cancelEdit('med');
   renderMedicines();
   renderDashboard();
-  showToast('Medicina guardada');
+}
+
+function editMedicine(id) {
+  const r = (DB.get('medicines') || []).find(i => i.id === id);
+  if (!r) return;
+  editing.med = id;
+  document.getElementById('medDate').value = r.date;
+  document.getElementById('medName').value = r.name || '';
+  document.getElementById('medDose').value = r.dose || '';
+  document.getElementById('medReason').value = r.reason || '';
+  document.getElementById('medDoctor').value = r.doctor || '';
+  document.getElementById('medNotes').value = r.notes || '';
+  document.getElementById('medEditBanner').style.display = 'block';
+  document.getElementById('medSaveBtn').textContent = 'Actualizar Medicina ✏️';
+  document.getElementById('medCancelBtn').style.display = 'block';
+  switchTab('med');
 }
 
 function renderMedicines() {
@@ -669,6 +879,7 @@ function renderMedicines() {
   if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">💊</div>Sin medicinas registradas</div>'; return; }
   el.innerHTML = list.map(r => `
     <div class="record medicine">
+      <button class="edit-btn" onclick="editMedicine(${r.id})">✏️</button>
       <button class="delete-btn" onclick="deleteRecord('medicines',${r.id})">🗑️</button>
       <div class="date">📅 ${formatDate(r.date)}</div>
       <div class="detail">
@@ -688,22 +899,41 @@ function saveStudy() {
   const name = document.getElementById('studyName').value.trim();
   if (!date || !name) { alert('Completa fecha y nombre del estudio'); return; }
 
-  DB.push('studies', {
+  const fields = {
     date,
     type: document.getElementById('studyType').value,
     name,
     place: document.getElementById('studyPlace').value.trim(),
     result: document.getElementById('studyResult').value.trim(),
     notes: document.getElementById('studyNotes').value.trim()
-  });
+  };
 
-  document.getElementById('studyName').value = '';
-  document.getElementById('studyPlace').value = '';
-  document.getElementById('studyResult').value = '';
-  document.getElementById('studyNotes').value = '';
+  if (editing.study) {
+    DB.update('studies', editing.study, fields);
+    showToast('Estudio actualizado');
+  } else {
+    DB.push('studies', fields);
+    showToast('Estudio guardado');
+  }
+  cancelEdit('study');
   renderStudies();
   renderDashboard();
-  showToast('Estudio guardado');
+}
+
+function editStudy(id) {
+  const r = (DB.get('studies') || []).find(i => i.id === id);
+  if (!r) return;
+  editing.study = id;
+  document.getElementById('studyDate').value = r.date;
+  document.getElementById('studyType').value = r.type || 'otro';
+  document.getElementById('studyName').value = r.name || '';
+  document.getElementById('studyPlace').value = r.place || '';
+  document.getElementById('studyResult').value = r.result || '';
+  document.getElementById('studyNotes').value = r.notes || '';
+  document.getElementById('studyEditBanner').style.display = 'block';
+  document.getElementById('studySaveBtn').textContent = 'Actualizar Estudio ✏️';
+  document.getElementById('studyCancelBtn').style.display = 'block';
+  switchTab('study');
 }
 
 function renderStudies() {
@@ -716,6 +946,7 @@ function renderStudies() {
   if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🔬</div>Sin estudios registrados</div>'; return; }
   el.innerHTML = list.map(r => `
     <div class="record study">
+      <button class="edit-btn" onclick="editStudy(${r.id})">✏️</button>
       <button class="delete-btn" onclick="deleteRecord('studies',${r.id})">🗑️</button>
       <div class="date">📅 ${formatDate(r.date)}</div>
       <div class="detail">
@@ -726,6 +957,31 @@ function renderStudies() {
       </div>
     </div>
   `).join('');
+}
+
+// ===== CANCEL EDIT =====
+function cancelEdit(kind) {
+  editing[kind] = null;
+  const today = new Date().toISOString().split('T')[0];
+  if (kind === 'growth') {
+    ['growthWeight','growthHeight','growthHead','growthNotes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('growthDate').value = today;
+    document.getElementById('growthEditBanner').style.display = 'none';
+    document.getElementById('growthSaveBtn').textContent = 'Guardar Medidas 📏';
+    document.getElementById('growthCancelBtn').style.display = 'none';
+  } else if (kind === 'med') {
+    ['medName','medDose','medReason','medDoctor','medNotes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('medDate').value = today;
+    document.getElementById('medEditBanner').style.display = 'none';
+    document.getElementById('medSaveBtn').textContent = 'Guardar Medicina 💊';
+    document.getElementById('medCancelBtn').style.display = 'none';
+  } else if (kind === 'study') {
+    ['studyName','studyPlace','studyResult','studyNotes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('studyDate').value = today;
+    document.getElementById('studyEditBanner').style.display = 'none';
+    document.getElementById('studySaveBtn').textContent = 'Guardar Estudio 🔬';
+    document.getElementById('studyCancelBtn').style.display = 'none';
+  }
 }
 
 // ===== DELETE =====
@@ -757,11 +1013,13 @@ function renderDashboard() {
   const total = (DB.get('growth') || []).length + (DB.get('medicines') || []).length + (DB.get('studies') || []).length;
   document.getElementById('totalRecords').textContent = total;
 
-  // Recent records
+  // Recent records & upcoming vaccines
   renderRecentRecords();
+  renderUpcomingVaccines();
 
-  // Chart
-  renderChart(growth);
+  // Charts
+  renderChart('weightChart', growth, 'weight', 'Peso (kg)', baby.sex);
+  renderChart('heightChart', growth, 'height', 'Talla (cm)', baby.sex);
 }
 
 function renderRecentRecords() {
@@ -789,94 +1047,242 @@ function renderRecentRecords() {
   }).join('');
 }
 
-// ===== CHART (simple canvas) =====
-function renderChart(growthData) {
-  const canvas = document.getElementById('growthChart');
+// ===== CHART with WHO percentiles =====
+function ageInMonths(birthStr, dateStr) {
+  const birth = new Date(birthStr + 'T12:00:00');
+  const date = new Date(dateStr + 'T12:00:00');
+  return ((date - birth) / (1000 * 60 * 60 * 24 * 30.4375));
+}
+
+function renderChart(canvasId, growthData, metric, label, sex) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
   const ctx = canvas.getContext('2d');
   canvas.width = canvas.parentElement.clientWidth - 20;
-  canvas.height = 200;
+  canvas.height = 220;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const data = growthData.filter(r => r.weight);
-  if (data.length < 2) {
+  const baby = DB.get('info');
+  if (!baby) return;
+
+  const data = growthData.filter(r => r[metric]).map(r => ({
+    age: ageInMonths(baby.birth, r.date),
+    value: r[metric]
+  })).sort((a,b) => a.age - b.age);
+
+  if (data.length < 1) {
     ctx.fillStyle = '#636E72';
     ctx.font = '14px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Necesitas al menos 2 registros de peso', canvas.width / 2, 100);
+    ctx.fillText('Agrega medidas para ver la gráfica', canvas.width / 2, 110);
     return;
   }
 
-  const padding = { top: 20, right: 20, bottom: 40, left: 45 };
+  const padding = { top: 15, right: 15, bottom: 35, left: 40 };
   const w = canvas.width - padding.left - padding.right;
   const h = canvas.height - padding.top - padding.bottom;
 
-  const weights = data.map(d => d.weight);
-  const minW = Math.min(...weights) * 0.9;
-  const maxW = Math.max(...weights) * 1.1;
+  // Age range: from 0 to max(current age + 1, last measure age + 1, 6)
+  const currentAge = ageInMonths(baby.birth, new Date().toISOString().split('T')[0]);
+  const lastAge = data.length ? data[data.length - 1].age : 0;
+  const maxAge = Math.min(24, Math.max(6, Math.ceil(Math.max(currentAge, lastAge) + 1)));
+  const minAge = 0;
 
-  // Grid
+  // Compute WHO percentile curves over age range
+  const steps = 30;
+  const whoPoints = [];
+  for (let i = 0; i <= steps; i++) {
+    const age = minAge + (maxAge - minAge) * (i / steps);
+    whoPoints.push({ age, vals: whoCurve(metric, sex, age) });
+  }
+
+  // Y range: include WHO P3 min and P97 max, plus actual data
+  const allVals = whoPoints.flatMap(p => p.vals).concat(data.map(d => d.value));
+  let minV = Math.min(...allVals) * 0.95;
+  let maxV = Math.max(...allVals) * 1.05;
+
+  const xScale = age => padding.left + (w * (age - minAge) / (maxAge - minAge));
+  const yScale = v => padding.top + h - ((v - minV) / (maxV - minV)) * h;
+
+  // Y grid + labels
   ctx.strokeStyle = '#E8E8FF';
   ctx.lineWidth = 1;
+  ctx.fillStyle = '#636E72';
+  ctx.font = '10px sans-serif';
+  ctx.textAlign = 'right';
   for (let i = 0; i <= 4; i++) {
     const y = padding.top + (h / 4) * i;
     ctx.beginPath();
     ctx.moveTo(padding.left, y);
     ctx.lineTo(canvas.width - padding.right, y);
     ctx.stroke();
-    ctx.fillStyle = '#636E72';
-    ctx.font = '11px sans-serif';
-    ctx.textAlign = 'right';
-    const val = maxW - ((maxW - minW) / 4) * i;
-    ctx.fillText(val.toFixed(1), padding.left - 5, y + 4);
+    const val = maxV - ((maxV - minV) / 4) * i;
+    ctx.fillText(val.toFixed(1), padding.left - 4, y + 3);
   }
 
-  // Line
-  ctx.strokeStyle = var_primary();
-  ctx.lineWidth = 3;
-  ctx.lineJoin = 'round';
-  ctx.beginPath();
+  // X-axis: month labels
+  ctx.textAlign = 'center';
+  const xTicks = maxAge <= 6 ? maxAge : (maxAge <= 12 ? 6 : 8);
+  for (let i = 0; i <= xTicks; i++) {
+    const age = minAge + (maxAge - minAge) * (i / xTicks);
+    const x = xScale(age);
+    ctx.fillText(Math.round(age) + 'm', x, canvas.height - 18);
+  }
 
-  data.forEach((d, i) => {
-    const x = padding.left + (w / (data.length - 1)) * i;
-    const y = padding.top + h - ((d.weight - minW) / (maxW - minW)) * h;
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
+  // WHO P3 / P97 lines (orange dashed)
+  ctx.strokeStyle = '#FDCB6E';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  [0, 2].forEach(idx => {
+    ctx.beginPath();
+    whoPoints.forEach((p, i) => {
+      const x = xScale(p.age);
+      const y = yScale(p.vals[idx]);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  });
+
+  // WHO P50 line (green solid)
+  ctx.strokeStyle = '#00B894';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([]);
+  ctx.beginPath();
+  whoPoints.forEach((p, i) => {
+    const x = xScale(p.age);
+    const y = yScale(p.vals[1]);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   });
   ctx.stroke();
 
-  // Points and labels
-  data.forEach((d, i) => {
-    const x = padding.left + (w / (data.length - 1)) * i;
-    const y = padding.top + h - ((d.weight - minW) / (maxW - minW)) * h;
-
+  // Baby's line + points
+  if (data.length >= 2) {
+    ctx.strokeStyle = '#6C63FF';
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+    data.forEach((d, i) => {
+      const x = xScale(d.age);
+      const y = yScale(d.value);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+  data.forEach(d => {
+    const x = xScale(d.age);
+    const y = yScale(d.value);
     ctx.beginPath();
     ctx.arc(x, y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = var_primary();
+    ctx.fillStyle = '#6C63FF';
     ctx.fill();
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 2;
     ctx.stroke();
-
-    // Date label
-    ctx.fillStyle = '#636E72';
-    ctx.font = '10px sans-serif';
-    ctx.textAlign = 'center';
-    const dateLabel = d.date.substring(5);
-    ctx.fillText(dateLabel, x, canvas.height - 5);
   });
 
-  // Y axis label
-  ctx.save();
-  ctx.translate(12, canvas.height / 2);
-  ctx.rotate(-Math.PI / 2);
+  // Axis labels
   ctx.fillStyle = '#636E72';
   ctx.font = '11px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Peso (kg)', 0, 0);
+  ctx.fillText('Edad (meses)', canvas.width / 2, canvas.height - 2);
+  ctx.save();
+  ctx.translate(10, canvas.height / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText(label, 0, 0);
   ctx.restore();
 }
 
-function var_primary() { return '#6C63FF'; }
+// ===== VACUNAS =====
+function vaccineStatus(v, applied, birthStr) {
+  const isApplied = applied.find(a => a.name === v.name);
+  if (isApplied) return { status: 'applied', date: isApplied.date, id: isApplied.id };
+  const targetDate = new Date(birthStr + 'T12:00:00');
+  targetDate.setMonth(targetDate.getMonth() + v.age);
+  const now = new Date();
+  const diffDays = (now - targetDate) / 86400000;
+  if (diffDays > 30) return { status: 'overdue', target: targetDate };
+  return { status: 'upcoming', target: targetDate };
+}
+
+function renderVaccines() {
+  const baby = DB.get('info');
+  const el = document.getElementById('vacList');
+  if (!baby) { el.innerHTML = ''; return; }
+  const applied = DB.get('vaccines') || [];
+
+  const grouped = {};
+  VACCINES.forEach(v => {
+    const key = v.age === 0 ? 'Nacimiento' : (v.age < 12 ? v.age + ' meses' : (v.age === 12 ? '1 año' : (v.age / 12) + ' años'));
+    (grouped[key] = grouped[key] || []).push(v);
+  });
+
+  let html = '';
+  Object.entries(grouped).forEach(([groupName, vacs]) => {
+    html += `<div class="vac-group-title">${groupName}</div>`;
+    vacs.forEach(v => {
+      const st = vaccineStatus(v, applied, baby.birth);
+      const dateLabel = st.status === 'applied'
+        ? '✅ Aplicada: ' + formatDate(st.date)
+        : (st.status === 'overdue' ? '⚠️ Atrasada desde ' + formatDate(st.target.toISOString().split('T')[0])
+           : '📅 Para: ' + formatDate(st.target.toISOString().split('T')[0]));
+      const actionBtn = st.status === 'applied'
+        ? `<button class="vac-action" onclick="unmarkVaccine(${st.id})">Quitar</button>`
+        : `<button class="vac-action" onclick="markVaccine('${v.name.replace(/'/g, "\\'")}')">Marcar</button>`;
+      html += `<div class="vac-row ${st.status}">
+        <div class="vac-info">
+          <div class="vac-name">💉 ${v.name}</div>
+          <div class="vac-meta">${v.desc ? v.desc + ' · ' : ''}${dateLabel}</div>
+        </div>
+        ${actionBtn}
+      </div>`;
+    });
+  });
+  el.innerHTML = html;
+}
+
+function markVaccine(name) {
+  const today = new Date().toISOString().split('T')[0];
+  const date = prompt('Fecha de aplicación (YYYY-MM-DD):', today);
+  if (!date) return;
+  DB.push('vaccines', { name, date });
+  renderVaccines();
+  renderDashboard();
+  showToast('Vacuna registrada');
+}
+
+function unmarkVaccine(id) {
+  if (!confirm('¿Quitar registro de aplicación?')) return;
+  DB.remove('vaccines', id);
+  renderVaccines();
+  renderDashboard();
+  showToast('Registro quitado');
+}
+
+function renderUpcomingVaccines() {
+  const baby = DB.get('info');
+  const el = document.getElementById('upcomingVaccines');
+  if (!baby) { el.innerHTML = ''; return; }
+  const applied = DB.get('vaccines') || [];
+  const pending = VACCINES
+    .map(v => ({ v, st: vaccineStatus(v, applied, baby.birth) }))
+    .filter(x => x.st.status !== 'applied')
+    .sort((a, b) => a.st.target - b.st.target)
+    .slice(0, 3);
+
+  if (!pending.length) {
+    el.innerHTML = '<div class="empty" style="padding:15px"><div style="font-size:2em">🎉</div>Esquema al día</div>';
+    return;
+  }
+  el.innerHTML = pending.map(({v, st}) => `
+    <div class="vac-row ${st.status}">
+      <div class="vac-info">
+        <div class="vac-name">💉 ${v.name}</div>
+        <div class="vac-meta">${st.status === 'overdue' ? '⚠️ Atrasada · ' : ''}📅 ${formatDate(st.target.toISOString().split('T')[0])}</div>
+      </div>
+      <button class="vac-action" onclick="markVaccine('${v.name.replace(/'/g, "\\'")}')">Marcar</button>
+    </div>
+  `).join('');
+}
 
 // ===== HELPERS =====
 function formatDate(dateStr) {
@@ -921,11 +1327,14 @@ function showToast(msg) {
 }
 
 // ===== TABS =====
-function switchTab(name) {
+function switchTab(name, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(name + 'Section').classList.add('active');
-  event.currentTarget.classList.add('active');
+  const target = btn || document.querySelector(`[data-tab="${name}"]`);
+  if (target) target.classList.add('active');
+  if (name === 'vac') renderVaccines();
+  window.scrollTo(0, 0);
 }
 
 // ===== EXPORT / IMPORT =====
@@ -935,6 +1344,7 @@ function exportData() {
     growth: DB.get('growth'),
     medicines: DB.get('medicines'),
     studies: DB.get('studies'),
+    vaccines: DB.get('vaccines'),
     exportDate: new Date().toISOString()
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -958,6 +1368,7 @@ function importData(event) {
       if (data.growth) DB.set('growth', data.growth);
       if (data.medicines) DB.set('medicines', data.medicines);
       if (data.studies) DB.set('studies', data.studies);
+      if (data.vaccines) DB.set('vaccines', data.vaccines);
       initApp();
       showToast('Datos importados');
     } catch { alert('Archivo no válido'); }
@@ -972,6 +1383,7 @@ function resetAll() {
       localStorage.removeItem('baby_growth');
       localStorage.removeItem('baby_medicines');
       localStorage.removeItem('baby_studies');
+      localStorage.removeItem('baby_vaccines');
       location.reload();
     }
   }
@@ -1014,6 +1426,7 @@ function renderAll() {
   renderGrowth();
   renderMedicines();
   renderStudies();
+  renderVaccines();
 }
 
 // Start
@@ -1022,7 +1435,17 @@ initApp();
 // ===== SERVICE WORKER =====
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW:', err));
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        const nw = reg.installing;
+        nw.addEventListener('statechange', () => {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+            nw.postMessage('SKIP_WAITING');
+            location.reload();
+          }
+        });
+      });
+    }).catch(err => console.warn('SW:', err));
   });
 }
 </script>
