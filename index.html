@@ -60,17 +60,18 @@ body {
 }
 .tab {
   flex: 1;
-  padding: 10px 5px;
+  padding: 8px 2px;
   text-align: center;
-  font-size: 0.7em;
+  font-size: 0.65em;
   color: var(--text-light);
   border: none;
   background: none;
   cursor: pointer;
   transition: all 0.3s;
+  min-width: 0;
 }
 .tab.active { color: var(--primary); font-weight: 700; }
-.tab-icon { font-size: 1.8em; display: block; margin-bottom: 2px; }
+.tab-icon { font-size: 1.5em; display: block; margin-bottom: 2px; }
 
 /* Sections */
 .section { display: none; padding: 15px; }
@@ -352,6 +353,50 @@ canvas { max-width: 100%; }
   text-transform: uppercase;
 }
 
+/* Reminders */
+.reminder-card {
+  background: linear-gradient(135deg, #FFF3CD, #FFE7A0);
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-left: 4px solid var(--warning);
+}
+.reminder-card h3 {
+  font-size: 0.95em;
+  color: #856404;
+  margin-bottom: 10px;
+}
+.reminder-item {
+  background: rgba(255,255,255,0.6);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  font-size: 0.85em;
+  color: #5C4A1F;
+}
+.reminder-item:last-child { margin-bottom: 0; }
+.next-appt-box {
+  background: linear-gradient(135deg, #E8F4FF, #D6E9FF);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+.next-appt-box .days {
+  font-size: 1.6em;
+  font-weight: 800;
+  color: var(--primary);
+}
+.next-appt-box .when {
+  font-size: 0.8em;
+  color: var(--text-light);
+  margin-bottom: 6px;
+}
+.next-appt-box .who {
+  font-size: 0.9em;
+  color: var(--text);
+  font-weight: 600;
+}
+
 /* Chart legend */
 .chart-legend {
   display: flex;
@@ -417,6 +462,8 @@ canvas { max-width: 100%; }
 
 <!-- DASHBOARD -->
 <div class="section" id="dashSection">
+  <div id="remindersCard"></div>
+
   <div class="growth-summary">
     <div class="stat-card blue">
       <div class="value" id="currentWeight">--</div>
@@ -453,6 +500,19 @@ canvas { max-width: 100%; }
     <div class="chart-container">
       <canvas id="heightChart" height="220"></canvas>
     </div>
+  </div>
+
+  <div class="card">
+    <h3>🧠 Perímetro cefálico vs. OMS</h3>
+    <div class="chart-container">
+      <canvas id="headChart" height="220"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🏥 Próxima cita con pediatra</h3>
+    <div id="nextAppt"></div>
+    <button class="btn btn-primary btn-small" style="margin-top:10px" onclick="switchTab('appt')">📅 Gestionar citas</button>
   </div>
 
   <div class="card">
@@ -588,6 +648,45 @@ canvas { max-width: 100%; }
   </div>
 </div>
 
+<!-- CITAS -->
+<div class="section" id="apptSection">
+  <div class="card">
+    <h3>🏥 Agendar Cita</h3>
+    <div id="apptEditBanner" class="editing-banner" style="display:none">✏️ Editando cita</div>
+    <div class="form-group">
+      <label>Fecha</label>
+      <input type="date" id="apptDate">
+    </div>
+    <div class="form-group">
+      <label>Hora</label>
+      <input type="time" id="apptTime">
+    </div>
+    <div class="form-group">
+      <label>Doctor / pediatra</label>
+      <input type="text" id="apptDoctor" placeholder="Ej: Dra. López">
+    </div>
+    <div class="form-group">
+      <label>Lugar</label>
+      <input type="text" id="apptPlace" placeholder="Ej: Consultorio piso 3">
+    </div>
+    <div class="form-group">
+      <label>Motivo</label>
+      <input type="text" id="apptReason" placeholder="Ej: Revisión mensual">
+    </div>
+    <div class="form-group">
+      <label>Notas (opcional)</label>
+      <textarea id="apptNotes" placeholder="Preguntas para el doctor, síntomas..."></textarea>
+    </div>
+    <button class="btn btn-primary" id="apptSaveBtn" onclick="saveAppt()">Guardar Cita 📅</button>
+    <button class="btn btn-cancel" id="apptCancelBtn" style="display:none" onclick="cancelEdit('appt')">Cancelar edición</button>
+  </div>
+
+  <div class="card">
+    <h3>📋 Citas</h3>
+    <div id="apptList"></div>
+  </div>
+</div>
+
 <!-- VACUNAS -->
 <div class="section" id="vacSection">
   <div class="card">
@@ -620,6 +719,12 @@ canvas { max-width: 100%; }
   </div>
 
   <div class="card">
+    <h3>🔔 Notificaciones</h3>
+    <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Activa avisos cuando abras la app y para recordarte la próxima cita.</p>
+    <button class="btn btn-primary btn-small" onclick="requestNotificationPermission()">Activar notificaciones</button>
+  </div>
+
+  <div class="card">
     <h3>💾 Respaldo de Datos</h3>
     <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Exporta todos los datos para no perderlos.</p>
     <div class="export-btns">
@@ -641,6 +746,9 @@ canvas { max-width: 100%; }
   </button>
   <button class="tab" data-tab="med" onclick="switchTab('med', this)">
     <span class="tab-icon">💊</span>Medicinas
+  </button>
+  <button class="tab" data-tab="appt" onclick="switchTab('appt', this)">
+    <span class="tab-icon">🏥</span>Citas
   </button>
   <button class="tab" data-tab="vac" onclick="switchTab('vac', this)">
     <span class="tab-icon">💉</span>Vacunas
@@ -688,6 +796,10 @@ const WHO = {
   height: {
     boy: {0:[46.1,49.9,53.7],1:[50.8,54.7,58.6],2:[54.4,58.4,62.4],3:[57.3,61.4,65.5],4:[59.7,63.9,68.0],5:[61.7,65.9,70.1],6:[63.3,67.6,71.9],9:[67.5,72.0,76.5],12:[71.0,75.7,80.5],15:[74.1,79.1,84.2],18:[76.9,82.3,87.7],21:[79.4,85.1,90.9],24:[81.7,87.8,93.9]},
     girl: {0:[45.4,49.1,52.9],1:[49.8,53.7,57.6],2:[53.0,57.1,61.1],3:[55.6,59.8,64.0],4:[57.8,62.1,66.4],5:[59.6,64.0,68.5],6:[61.2,65.7,70.3],9:[65.3,70.1,75.0],12:[68.9,74.0,79.2],15:[72.0,77.5,82.9],18:[74.9,80.7,86.5],21:[77.5,83.7,89.8],24:[80.0,86.4,92.9]}
+  },
+  head: {
+    boy: {0:[32.6,34.5,36.5],1:[35.8,37.6,39.6],2:[37.9,39.7,41.8],3:[39.3,41.2,43.2],4:[40.5,42.3,44.3],5:[41.4,43.2,45.2],6:[42.0,43.9,45.8],9:[43.4,45.2,47.2],12:[44.2,46.1,48.0],15:[45.0,46.8,48.8],18:[45.5,47.4,49.4],21:[46.0,47.8,49.8],24:[46.3,48.3,50.2]},
+    girl: {0:[32.0,33.9,35.8],1:[34.8,36.5,38.3],2:[36.5,38.3,40.2],3:[37.9,39.5,41.4],4:[39.0,40.6,42.5],5:[39.9,41.5,43.4],6:[40.6,42.2,44.1],9:[41.9,43.5,45.5],12:[42.8,44.3,46.4],15:[43.5,45.1,47.1],18:[44.1,45.7,47.6],21:[44.6,46.2,48.2],24:[45.0,46.6,48.5]}
   }
 };
 
@@ -727,13 +839,15 @@ const VACCINES = [
 ];
 
 // ===== EDIT STATE =====
-const editing = { growth: null, med: null, study: null };
+const editing = { growth: null, med: null, study: null, appt: null };
 
 // ===== BABY SETUP =====
 function saveBaby() {
   const name = document.getElementById('babyName').value.trim();
   const birth = document.getElementById('babyBirth').value;
   if (!name || !birth) { alert('Completa nombre y fecha de nacimiento'); return; }
+  const today = new Date().toISOString().split('T')[0];
+  if (birth > today) { alert('La fecha de nacimiento no puede ser futura'); return; }
 
   const baby = {
     name,
@@ -770,11 +884,21 @@ function updateBaby() {
 }
 
 // ===== GROWTH =====
+function validateRecordDate(date) {
+  const baby = DB.get('info');
+  if (!baby) return true;
+  const today = new Date().toISOString().split('T')[0];
+  if (date < baby.birth) { alert('La fecha no puede ser anterior al nacimiento (' + formatDate(baby.birth) + ')'); return false; }
+  if (date > today) { alert('La fecha no puede ser futura'); return false; }
+  return true;
+}
+
 function saveGrowth() {
   const date = document.getElementById('growthDate').value;
   const weight = parseFloat(document.getElementById('growthWeight').value);
   const height = parseFloat(document.getElementById('growthHeight').value);
   if (!date || (!weight && !height)) { alert('Completa fecha y al menos peso o talla'); return; }
+  if (!validateRecordDate(date)) return;
 
   const fields = {
     date,
@@ -836,6 +960,7 @@ function saveMedicine() {
   const date = document.getElementById('medDate').value;
   const name = document.getElementById('medName').value.trim();
   if (!date || !name) { alert('Completa fecha y nombre del medicamento'); return; }
+  if (!validateRecordDate(date)) return;
 
   const fields = {
     date, name,
@@ -898,6 +1023,7 @@ function saveStudy() {
   const date = document.getElementById('studyDate').value;
   const name = document.getElementById('studyName').value.trim();
   if (!date || !name) { alert('Completa fecha y nombre del estudio'); return; }
+  if (!validateRecordDate(date)) return;
 
   const fields = {
     date,
@@ -981,6 +1107,12 @@ function cancelEdit(kind) {
     document.getElementById('studyEditBanner').style.display = 'none';
     document.getElementById('studySaveBtn').textContent = 'Guardar Estudio 🔬';
     document.getElementById('studyCancelBtn').style.display = 'none';
+  } else if (kind === 'appt') {
+    ['apptTime','apptDoctor','apptPlace','apptReason','apptNotes'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('apptDate').value = today;
+    document.getElementById('apptEditBanner').style.display = 'none';
+    document.getElementById('apptSaveBtn').textContent = 'Guardar Cita 📅';
+    document.getElementById('apptCancelBtn').style.display = 'none';
   }
 }
 
@@ -1013,13 +1145,16 @@ function renderDashboard() {
   const total = (DB.get('growth') || []).length + (DB.get('medicines') || []).length + (DB.get('studies') || []).length;
   document.getElementById('totalRecords').textContent = total;
 
-  // Recent records & upcoming vaccines
+  // Recent records, vaccines, appointments, reminders
   renderRecentRecords();
   renderUpcomingVaccines();
+  renderNextAppointment();
+  renderReminders();
 
   // Charts
   renderChart('weightChart', growth, 'weight', 'Peso (kg)', baby.sex);
   renderChart('heightChart', growth, 'height', 'Talla (cm)', baby.sex);
+  renderChart('headChart', growth, 'head', 'P. Cefálico (cm)', baby.sex);
 }
 
 function renderRecentRecords() {
@@ -1192,6 +1327,199 @@ function renderChart(canvasId, growthData, metric, label, sex) {
   ctx.restore();
 }
 
+// ===== CITAS =====
+function saveAppt() {
+  const date = document.getElementById('apptDate').value;
+  const doctor = document.getElementById('apptDoctor').value.trim();
+  if (!date) { alert('Selecciona una fecha'); return; }
+  const baby = DB.get('info');
+  if (baby && date < baby.birth) { alert('La fecha no puede ser anterior al nacimiento'); return; }
+
+  const fields = {
+    date,
+    time: document.getElementById('apptTime').value,
+    doctor,
+    place: document.getElementById('apptPlace').value.trim(),
+    reason: document.getElementById('apptReason').value.trim(),
+    notes: document.getElementById('apptNotes').value.trim()
+  };
+
+  if (editing.appt) {
+    DB.update('appointments', editing.appt, fields);
+    showToast('Cita actualizada');
+  } else {
+    DB.push('appointments', fields);
+    showToast('Cita agendada');
+    scheduleApptNotification(fields);
+  }
+  cancelEdit('appt');
+  renderAppointments();
+  renderDashboard();
+}
+
+function editAppt(id) {
+  const r = (DB.get('appointments') || []).find(i => i.id === id);
+  if (!r) return;
+  editing.appt = id;
+  document.getElementById('apptDate').value = r.date;
+  document.getElementById('apptTime').value = r.time || '';
+  document.getElementById('apptDoctor').value = r.doctor || '';
+  document.getElementById('apptPlace').value = r.place || '';
+  document.getElementById('apptReason').value = r.reason || '';
+  document.getElementById('apptNotes').value = r.notes || '';
+  document.getElementById('apptEditBanner').style.display = 'block';
+  document.getElementById('apptSaveBtn').textContent = 'Actualizar Cita ✏️';
+  document.getElementById('apptCancelBtn').style.display = 'block';
+  switchTab('appt');
+}
+
+function renderAppointments() {
+  const list = (DB.get('appointments') || []).sort((a, b) => a.date.localeCompare(b.date));
+  const el = document.getElementById('apptList');
+  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📅</div>Sin citas agendadas</div>'; return; }
+  const today = new Date().toISOString().split('T')[0];
+  el.innerHTML = list.map(r => {
+    const isPast = r.date < today;
+    return `<div class="record" style="${isPast ? 'opacity:0.6' : ''}">
+      <button class="edit-btn" onclick="editAppt(${r.id})">✏️</button>
+      <button class="delete-btn" onclick="deleteRecord('appointments',${r.id})">🗑️</button>
+      <div class="date">${isPast ? '✓ Pasada · ' : '📅 '}${formatDate(r.date)}${r.time ? ' · ' + r.time : ''}</div>
+      <div class="detail">
+        ${r.doctor ? '👨‍⚕️ <b>' + r.doctor + '</b>' : ''}
+        ${r.place ? '<br>🏥 ' + r.place : ''}
+        ${r.reason ? '<br>📋 ' + r.reason : ''}
+        ${r.notes ? '<br>📝 ' + r.notes : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getNextAppointment() {
+  const today = new Date().toISOString().split('T')[0];
+  return ((DB.get('appointments') || [])
+    .filter(a => a.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date))[0]) || null;
+}
+
+function renderNextAppointment() {
+  const el = document.getElementById('nextAppt');
+  if (!el) return;
+  const next = getNextAppointment();
+  if (!next) {
+    el.innerHTML = '<div class="empty" style="padding:15px"><div style="font-size:2em">📅</div>Sin citas próximas</div>';
+    return;
+  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const apptDate = new Date(next.date + 'T12:00:00');
+  const daysLeft = Math.round((apptDate - today) / 86400000);
+  const whenLabel = daysLeft === 0 ? '¡HOY!' : daysLeft === 1 ? 'Mañana' : 'En ' + daysLeft + ' días';
+  el.innerHTML = `<div class="next-appt-box">
+    <div class="when">${whenLabel}</div>
+    <div class="days">${formatDate(next.date)}${next.time ? ' · ' + next.time : ''}</div>
+    <div class="who">${next.doctor ? '👨‍⚕️ ' + next.doctor : ''}${next.place ? ' · ' + next.place : ''}</div>
+    ${next.reason ? '<div style="font-size:0.8em;margin-top:6px;color:var(--text-light)">📋 ' + next.reason + '</div>' : ''}
+  </div>`;
+}
+
+// ===== RECORDATORIOS =====
+function getReminders() {
+  const baby = DB.get('info');
+  if (!baby) return [];
+  const reminders = [];
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Próxima cita en <=3 días
+  const next = getNextAppointment();
+  if (next) {
+    const d = new Date(next.date + 'T12:00:00');
+    const days = Math.round((d - today) / 86400000);
+    if (days === 0) reminders.push('🏥 ¡Cita con pediatra HOY' + (next.time ? ' a las ' + next.time : '') + '!');
+    else if (days <= 3) reminders.push('🏥 Cita con pediatra en ' + days + ' día' + (days > 1 ? 's' : ''));
+  }
+
+  // Vacunas atrasadas o esta semana
+  const applied = DB.get('vaccines') || [];
+  VACCINES.forEach(v => {
+    const st = vaccineStatus(v, applied, baby.birth);
+    if (st.status === 'overdue') {
+      const days = Math.round((today - st.target) / 86400000);
+      reminders.push('⚠️ ' + v.name + ' atrasada (' + days + ' días)');
+    } else if (st.status === 'upcoming') {
+      const days = Math.round((st.target - today) / 86400000);
+      if (days >= 0 && days <= 7) {
+        reminders.push('💉 ' + v.name + (days === 0 ? ' (hoy)' : ' en ' + days + ' días'));
+      }
+    }
+  });
+
+  return reminders.slice(0, 5);
+}
+
+function renderReminders() {
+  const el = document.getElementById('remindersCard');
+  if (!el) return;
+  const reminders = getReminders();
+  if (!reminders.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="reminder-card">
+    <h3>🔔 Recordatorios</h3>
+    ${reminders.map(r => '<div class="reminder-item">' + r + '</div>').join('')}
+  </div>`;
+}
+
+// ===== NOTIFICACIONES =====
+function requestNotificationPermission() {
+  if (!('Notification' in window)) { alert('Tu navegador no soporta notificaciones'); return; }
+  Notification.requestPermission().then(p => {
+    if (p === 'granted') showToast('Notificaciones activadas');
+    else showToast('Permiso denegado');
+  });
+}
+
+function fireOpeningNotifications() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const reminders = getReminders();
+  if (!reminders.length) return;
+  const lastShown = localStorage.getItem('baby_lastNotify');
+  const todayKey = new Date().toISOString().split('T')[0];
+  if (lastShown === todayKey) return;
+  localStorage.setItem('baby_lastNotify', todayKey);
+  const baby = DB.get('info') || {};
+  new Notification('Mi Bebé · ' + (baby.name || ''), {
+    body: reminders.slice(0, 3).join('\n'),
+    icon: 'icon.svg',
+    badge: 'icon.svg'
+  });
+}
+
+function scheduleApptNotification(appt) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const target = new Date(appt.date + 'T' + (appt.time || '09:00') + ':00');
+  const reminderTime = target.getTime() - 86400000; // 1 día antes
+  const delay = reminderTime - Date.now();
+  if (delay > 0 && delay < 86400000 * 7) {
+    setTimeout(() => {
+      new Notification('Mi Bebé · Recordatorio', {
+        body: 'Mañana: cita con ' + (appt.doctor || 'pediatra') + (appt.time ? ' a las ' + appt.time : ''),
+        icon: 'icon.svg'
+      });
+    }, delay);
+  }
+}
+
+// ===== VALIDACIÓN DE FECHAS =====
+function setDateConstraints() {
+  const baby = DB.get('info');
+  if (!baby) return;
+  const today = new Date().toISOString().split('T')[0];
+  ['growthDate', 'medDate', 'studyDate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.min = baby.birth; el.max = today; }
+  });
+  // Citas: desde nacimiento (pueden ser futuras)
+  const apptEl = document.getElementById('apptDate');
+  if (apptEl) apptEl.min = baby.birth;
+}
+
 // ===== VACUNAS =====
 function vaccineStatus(v, applied, birthStr) {
   const isApplied = applied.find(a => a.name === v.name);
@@ -1345,6 +1673,7 @@ function exportData() {
     medicines: DB.get('medicines'),
     studies: DB.get('studies'),
     vaccines: DB.get('vaccines'),
+    appointments: DB.get('appointments'),
     exportDate: new Date().toISOString()
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1369,6 +1698,7 @@ function importData(event) {
       if (data.medicines) DB.set('medicines', data.medicines);
       if (data.studies) DB.set('studies', data.studies);
       if (data.vaccines) DB.set('vaccines', data.vaccines);
+      if (data.appointments) DB.set('appointments', data.appointments);
       initApp();
       showToast('Datos importados');
     } catch { alert('Archivo no válido'); }
@@ -1384,6 +1714,8 @@ function resetAll() {
       localStorage.removeItem('baby_medicines');
       localStorage.removeItem('baby_studies');
       localStorage.removeItem('baby_vaccines');
+      localStorage.removeItem('baby_appointments');
+      localStorage.removeItem('baby_lastNotify');
       location.reload();
     }
   }
@@ -1409,9 +1741,11 @@ function initApp() {
 
   // Set today as default dates
   const today = new Date().toISOString().split('T')[0];
-  ['growthDate', 'medDate', 'studyDate'].forEach(id => {
-    document.getElementById(id).value = today;
+  ['growthDate', 'medDate', 'studyDate', 'apptDate'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = today;
   });
+  setDateConstraints();
 
   // Settings
   document.getElementById('editName').value = baby.name;
@@ -1419,6 +1753,7 @@ function initApp() {
   document.getElementById('editSex').value = baby.sex;
 
   renderAll();
+  fireOpeningNotifications();
 }
 
 function renderAll() {
@@ -1427,6 +1762,7 @@ function renderAll() {
   renderMedicines();
   renderStudies();
   renderVaccines();
+  renderAppointments();
 }
 
 // Start
