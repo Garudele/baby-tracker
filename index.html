@@ -397,6 +397,35 @@ canvas { max-width: 100%; }
   font-weight: 600;
 }
 
+/* Print / PDF */
+.print-area { display: none; }
+@media print {
+  @page { margin: 14mm; }
+  body { background: white !important; padding: 0 !important; }
+  body > *:not(.print-area) { display: none !important; }
+  .print-area {
+    display: block !important;
+    color: #000;
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11pt;
+  }
+  .print-area h1 { font-size: 18pt; margin-bottom: 4px; color: #6C63FF; }
+  .print-area h2 { font-size: 13pt; margin: 18px 0 8px; border-bottom: 2px solid #6C63FF; padding-bottom: 3px; color: #6C63FF; page-break-after: avoid; }
+  .print-area .meta { font-size: 10pt; color: #555; margin-bottom: 18px; }
+  .print-area table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 9.5pt; page-break-inside: auto; }
+  .print-area thead { display: table-header-group; }
+  .print-area tr { page-break-inside: avoid; }
+  .print-area th, .print-area td { border: 1px solid #ccc; padding: 5px 7px; text-align: left; vertical-align: top; }
+  .print-area th { background: #F0F0FF; font-weight: 700; }
+  .print-area .empty-row { color: #999; font-style: italic; }
+  .print-area .chart-img { max-width: 100%; margin: 8px 0 4px; }
+  .print-area .pgbreak { page-break-before: always; }
+  .print-area .pill { display: inline-block; padding: 2px 7px; border-radius: 10px; font-size: 8.5pt; font-weight: 600; }
+  .print-area .pill.ok { background: #D4F5E0; color: #006A3F; }
+  .print-area .pill.pend { background: #E8E8FF; color: #4B45B0; }
+  .print-area .pill.over { background: #FFD5C7; color: #A03A1A; }
+}
+
 /* Chart legend */
 .chart-legend {
   display: flex;
@@ -725,6 +754,12 @@ canvas { max-width: 100%; }
   </div>
 
   <div class="card">
+    <h3>📄 Reporte para el Pediatra</h3>
+    <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Genera un PDF imprimible con todo el historial: medidas, gráficas OMS, vacunas, medicinas, estudios y citas.</p>
+    <button class="btn btn-primary btn-small" onclick="printReport()">📄 Generar PDF</button>
+  </div>
+
+  <div class="card">
     <h3>💾 Respaldo de Datos</h3>
     <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Exporta todos los datos para no perderlos.</p>
     <div class="export-btns">
@@ -735,6 +770,9 @@ canvas { max-width: 100%; }
     <button class="btn btn-danger" style="margin-top:15px;width:100%" onclick="resetAll()">Borrar Todo ⚠️</button>
   </div>
 </div>
+
+<!-- PRINT AREA (visible only on print) -->
+<div class="print-area" id="printArea"></div>
 
 <!-- TAB BAR -->
 <div class="tab-bar">
@@ -1504,6 +1542,180 @@ function scheduleApptNotification(appt) {
       });
     }, delay);
   }
+}
+
+// ===== REPORTE PDF =====
+function renderChartToImage(metric, label) {
+  const baby = DB.get('info');
+  if (!baby) return '';
+  const growth = (DB.get('growth') || []).sort((a, b) => a.date.localeCompare(b.date));
+  const tmpDiv = document.createElement('div');
+  tmpDiv.style.cssText = 'width:720px;position:absolute;left:-9999px;top:0';
+  const tmpCanvas = document.createElement('canvas');
+  tmpCanvas.id = '__tmpChart_' + metric;
+  tmpDiv.appendChild(tmpCanvas);
+  document.body.appendChild(tmpDiv);
+  renderChart(tmpCanvas.id, growth, metric, label, baby.sex);
+  const dataURL = tmpCanvas.toDataURL('image/png');
+  document.body.removeChild(tmpDiv);
+  return dataURL;
+}
+
+function escapeHTML(s) {
+  return String(s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+function emptyRow(cols, msg) {
+  return `<tr><td colspan="${cols}" class="empty-row">${msg}</td></tr>`;
+}
+
+function printReport() {
+  const baby = DB.get('info');
+  if (!baby) { alert('No hay datos del bebé'); return; }
+
+  const today = new Date();
+  const todayStr = today.toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
+  const sexLabel = baby.sex === 'girl' ? 'Niña' : 'Niño';
+
+  const growth = (DB.get('growth') || []).sort((a, b) => a.date.localeCompare(b.date));
+  const meds = (DB.get('medicines') || []).sort((a, b) => a.date.localeCompare(b.date));
+  const studies = (DB.get('studies') || []).sort((a, b) => a.date.localeCompare(b.date));
+  const vaccinesApplied = DB.get('vaccines') || [];
+  const appointments = (DB.get('appointments') || []).sort((a, b) => a.date.localeCompare(b.date));
+
+  // Pre-render charts as images
+  const weightImg = renderChartToImage('weight', 'Peso (kg)');
+  const heightImg = renderChartToImage('height', 'Talla (cm)');
+  const headImg = growth.some(r => r.head) ? renderChartToImage('head', 'P. Cefálico (cm)') : '';
+
+  // Growth table
+  const growthRows = growth.length
+    ? growth.map(r => `<tr>
+        <td>${formatDate(r.date)}</td>
+        <td>${getAgeAt(r.date)}</td>
+        <td>${r.weight != null ? r.weight + ' kg' : '—'}</td>
+        <td>${r.height != null ? r.height + ' cm' : '—'}</td>
+        <td>${r.head != null ? r.head + ' cm' : '—'}</td>
+        <td>${escapeHTML(r.notes)}</td>
+      </tr>`).join('')
+    : emptyRow(6, 'Sin registros');
+
+  // Vaccines table — full schedule with status
+  const vacRows = VACCINES.map(v => {
+    const st = vaccineStatus(v, vaccinesApplied, baby.birth);
+    let statusHTML;
+    if (st.status === 'applied') {
+      statusHTML = `<span class="pill ok">Aplicada</span> ${formatDate(st.date)}`;
+    } else if (st.status === 'overdue') {
+      statusHTML = `<span class="pill over">Atrasada</span> desde ${formatDate(st.target.toISOString().split('T')[0])}`;
+    } else {
+      statusHTML = `<span class="pill pend">Pendiente</span> para ${formatDate(st.target.toISOString().split('T')[0])}`;
+    }
+    const ageLabel = v.age === 0 ? 'Nacimiento' : (v.age < 12 ? v.age + ' m' : (v.age === 12 ? '1 a' : (v.age/12) + ' a'));
+    return `<tr>
+      <td>${ageLabel}</td>
+      <td>${escapeHTML(v.name)}${v.desc ? '<br><span style="color:#666;font-size:9pt">' + escapeHTML(v.desc) + '</span>' : ''}</td>
+      <td>${statusHTML}</td>
+    </tr>`;
+  }).join('');
+
+  // Medicines table
+  const medRows = meds.length
+    ? meds.map(r => `<tr>
+        <td>${formatDate(r.date)}</td>
+        <td>${escapeHTML(r.name)}</td>
+        <td>${escapeHTML(r.dose)}</td>
+        <td>${escapeHTML(r.reason)}</td>
+        <td>${escapeHTML(r.doctor)}</td>
+        <td>${escapeHTML(r.notes)}</td>
+      </tr>`).join('')
+    : emptyRow(6, 'Sin registros');
+
+  // Studies table
+  const studyRows = studies.length
+    ? studies.map(r => `<tr>
+        <td>${formatDate(r.date)}</td>
+        <td>${escapeHTML(r.type)}</td>
+        <td>${escapeHTML(r.name)}</td>
+        <td>${escapeHTML(r.place)}</td>
+        <td>${escapeHTML(r.result)}</td>
+        <td>${escapeHTML(r.notes)}</td>
+      </tr>`).join('')
+    : emptyRow(6, 'Sin registros');
+
+  // Appointments table
+  const apptRows = appointments.length
+    ? appointments.map(r => {
+        const isPast = r.date < today.toISOString().split('T')[0];
+        return `<tr>
+          <td>${formatDate(r.date)}${r.time ? ' ' + r.time : ''}</td>
+          <td>${isPast ? '<span class="pill ok">Pasada</span>' : '<span class="pill pend">Próxima</span>'}</td>
+          <td>${escapeHTML(r.doctor)}</td>
+          <td>${escapeHTML(r.place)}</td>
+          <td>${escapeHTML(r.reason)}</td>
+          <td>${escapeHTML(r.notes)}</td>
+        </tr>`;
+      }).join('')
+    : emptyRow(6, 'Sin registros');
+
+  // Latest measurements summary
+  const latest = growth.length ? growth[growth.length - 1] : null;
+
+  const html = `
+    <header>
+      <h1>${sexLabel} ${escapeHTML(baby.name)}</h1>
+      <div class="meta">
+        Nacimiento: <b>${formatDate(baby.birth)}</b> · Edad: <b>${getAge(baby.birth)}</b><br>
+        ${baby.birthWeight ? 'Peso al nacer: <b>' + baby.birthWeight + ' kg</b> · ' : ''}
+        ${baby.birthHeight ? 'Talla al nacer: <b>' + baby.birthHeight + ' cm</b>' : ''}
+        ${latest ? '<br>Última medida (' + formatDate(latest.date) + '): ' +
+          (latest.weight ? '<b>' + latest.weight + ' kg</b>' : '') +
+          (latest.height ? ' · <b>' + latest.height + ' cm</b>' : '') +
+          (latest.head ? ' · PC <b>' + latest.head + ' cm</b>' : '') : ''}
+        <br>Reporte generado: ${todayStr}
+      </div>
+    </header>
+
+    <h2>Crecimiento — Curvas OMS</h2>
+    ${weightImg ? '<img class="chart-img" src="' + weightImg + '" alt="Peso">' : ''}
+    ${heightImg ? '<img class="chart-img" src="' + heightImg + '" alt="Talla">' : ''}
+    ${headImg ? '<img class="chart-img" src="' + headImg + '" alt="P. Cefálico">' : ''}
+
+    <h2>Historial de Medidas</h2>
+    <table>
+      <thead><tr><th>Fecha</th><th>Edad</th><th>Peso</th><th>Talla</th><th>P. Cefálico</th><th>Notas</th></tr></thead>
+      <tbody>${growthRows}</tbody>
+    </table>
+
+    <div class="pgbreak"></div>
+    <h2>Esquema de Vacunación</h2>
+    <table>
+      <thead><tr><th>Edad</th><th>Vacuna</th><th>Estado</th></tr></thead>
+      <tbody>${vacRows}</tbody>
+    </table>
+
+    <h2>Medicinas</h2>
+    <table>
+      <thead><tr><th>Fecha</th><th>Medicamento</th><th>Dosis</th><th>Motivo</th><th>Recetado por</th><th>Notas</th></tr></thead>
+      <tbody>${medRows}</tbody>
+    </table>
+
+    <h2>Estudios</h2>
+    <table>
+      <thead><tr><th>Fecha</th><th>Tipo</th><th>Nombre</th><th>Lugar</th><th>Resultado</th><th>Notas</th></tr></thead>
+      <tbody>${studyRows}</tbody>
+    </table>
+
+    <h2>Citas con Pediatra</h2>
+    <table>
+      <thead><tr><th>Fecha</th><th>Estado</th><th>Doctor</th><th>Lugar</th><th>Motivo</th><th>Notas</th></tr></thead>
+      <tbody>${apptRows}</tbody>
+    </table>
+  `;
+
+  document.getElementById('printArea').innerHTML = html;
+  // Wait for images to be ready before printing
+  setTimeout(() => window.print(), 100);
 }
 
 // ===== VALIDACIÓN DE FECHAS =====
