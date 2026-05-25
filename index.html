@@ -8,6 +8,8 @@
 <meta name="theme-color" content="#6C63FF">
 <title>Mi Bebé - Seguimiento</title>
 <link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -1016,6 +1018,13 @@ function renderAll() {
 
 // Start
 initApp();
+
+// ===== SERVICE WORKER =====
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW:', err));
+  });
+}
 </script>
 </body>
 </html>
