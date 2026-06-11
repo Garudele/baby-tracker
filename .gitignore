@@ -1,0 +1,7 @@
+node_modules/
+twa-build/
+*.apk
+*.aab
+*.keystore
+keystore-password.txt
+apk-fingerprint.txt
