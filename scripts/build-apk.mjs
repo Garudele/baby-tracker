@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs/promises';
 import { existsSync } from 'fs';
+import { execFileSync } from 'child_process';
 import core from '@bubblewrap/core';
 
 const { TwaGenerator, TwaManifest, JdkHelper, AndroidSdkTools, GradleWrapper, ConsoleLog } = core;
@@ -38,13 +39,20 @@ const alignedApk = path.join(repoRoot, 'app-release-aligned.apk');
 const signedApk = path.join(repoRoot, 'app-release-signed.apk');
 
 await androidSdkTools.zipalign(unsignedApk, alignedApk);
-await androidSdkTools.apksigner(
-  twaManifest.signingKey.path,
-  twaManifest.signingKey.alias,
-  process.env.BUBBLEWRAP_KEYSTORE_PASSWORD,
-  process.env.BUBBLEWRAP_KEY_PASSWORD,
+
+// Llamamos apksigner directamente para evitar ambigüedad de orden de args en la API
+const buildToolsRoot = path.join(process.env.ANDROID_HOME, 'build-tools');
+const buildToolsVersions = (await fs.readdir(buildToolsRoot)).sort();
+const apksignerPath = path.join(buildToolsRoot, buildToolsVersions[buildToolsVersions.length - 1], 'apksigner');
+
+execFileSync(apksignerPath, [
+  'sign',
+  '--ks', twaManifest.signingKey.path,
+  '--ks-key-alias', twaManifest.signingKey.alias,
+  '--ks-pass', `pass:${process.env.BUBBLEWRAP_KEYSTORE_PASSWORD}`,
+  '--key-pass', `pass:${process.env.BUBBLEWRAP_KEY_PASSWORD}`,
+  '--out', signedApk,
   alignedApk,
-  signedApk,
-);
+], { stdio: 'inherit' });
 
 console.log('✓ APK firmado: ' + signedApk);
