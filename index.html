@@ -378,6 +378,115 @@ canvas { max-width: 100%; }
   text-transform: uppercase;
 }
 
+/* Actividades */
+.age-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+  scrollbar-width: none;
+}
+.age-chips::-webkit-scrollbar { display: none; }
+.age-chip {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: var(--card-alt);
+  color: var(--text-light);
+  border: 2px solid var(--border);
+  font-size: 0.8em;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.age-chip.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.age-chip.current {
+  border-color: var(--success);
+}
+.act-card {
+  background: #FAFBFF;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+  border-left: 4px solid var(--primary);
+  transition: opacity 0.2s;
+}
+.act-card.done { opacity: 0.55; border-left-color: var(--success); background: #E8F8F2; }
+body.dark .act-card { background: var(--card-alt); }
+body.dark .act-card.done { background: #1F3D33; }
+.act-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.act-title {
+  font-weight: 700;
+  font-size: 0.98em;
+  flex: 1;
+}
+.act-cat {
+  display: inline-block;
+  font-size: 0.7em;
+  padding: 3px 8px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.act-cat.motora { background: #E17055; }
+.act-cat.sensorial { background: #FD79A8; }
+.act-cat.lenguaje { background: #00B894; }
+.act-cat.cognitiva { background: #6C63FF; }
+.act-cat.social { background: #74B9FF; }
+.act-desc {
+  font-size: 0.88em;
+  color: var(--text);
+  line-height: 1.45;
+  margin-bottom: 6px;
+}
+.act-mat {
+  font-size: 0.78em;
+  color: var(--text-light);
+  font-style: italic;
+}
+.act-check {
+  background: var(--card);
+  border: 2px solid var(--border);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.1em;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.act-check.done {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+body.dark .act-check { background: var(--card-alt); }
+.act-current-banner {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
 /* Photos */
 .photo-input { display: none; }
 .photo-btn {
@@ -833,6 +942,17 @@ canvas { max-width: 100%; }
   </div>
 </div>
 
+<!-- ACTIVIDADES -->
+<div class="section" id="actSection">
+  <div class="card">
+    <h3>🎯 Actividades para tu bebé</h3>
+    <p style="font-size:0.82em;color:var(--text-light);margin-bottom:12px">Juegos y estímulos por edad. Toca el círculo para marcar como hecho.</p>
+    <div id="actCurrentBanner"></div>
+    <div class="age-chips" id="actChips"></div>
+    <div id="actList"></div>
+  </div>
+</div>
+
 <!-- AJUSTES -->
 <div class="section" id="settingsSection">
   <div class="card">
@@ -912,6 +1032,9 @@ canvas { max-width: 100%; }
   </button>
   <button class="tab" data-tab="study" onclick="switchTab('study', this)">
     <span class="tab-icon">🔬</span>Estudios
+  </button>
+  <button class="tab" data-tab="act" onclick="switchTab('act', this)">
+    <span class="tab-icon">🎯</span>Juegos
   </button>
   <button class="tab" data-tab="settings" onclick="switchTab('settings', this)">
     <span class="tab-icon">⚙️</span>Ajustes
@@ -994,6 +1117,178 @@ const VACCINES = [
   { age: 48, name: 'DPT (refuerzo)', desc: '' },
   { age: 48, name: 'SRP (refuerzo)', desc: '' }
 ];
+
+// ===== ACTIVIDADES =====
+// Rango de edad en meses: [min, max]
+const ACTIVITY_RANGES = [
+  { key: '0-3',   label: '0-3 meses',  min: 0,  max: 3 },
+  { key: '3-6',   label: '3-6 meses',  min: 3,  max: 6 },
+  { key: '6-9',   label: '6-9 meses',  min: 6,  max: 9 },
+  { key: '9-12',  label: '9-12 meses', min: 9,  max: 12 },
+  { key: '12-18', label: '12-18 meses', min: 12, max: 18 },
+  { key: '18-24', label: '18-24 meses', min: 18, max: 24 },
+  { key: '24-36', label: '2-3 años',   min: 24, max: 36 }
+];
+
+const ACTIVITIES = [
+  // 0-3 meses
+  { id: 'a1',  range: '0-3', cat: 'social',    title: 'Contacto piel con piel', desc: 'Coloca a tu bebé sobre tu pecho desnudo por 15-20 min. Regula su temperatura, ritmo cardiaco y fortalece el vínculo.', mat: 'Solo ustedes dos' },
+  { id: 'a2',  range: '0-3', cat: 'sensorial', title: 'Seguimiento visual', desc: 'Mueve un objeto colorido o sonajero lentamente a 25-30 cm de su cara. Observa cómo lo sigue con los ojos.', mat: 'Sonajero o juguete con contraste' },
+  { id: 'a3',  range: '0-3', cat: 'motora',    title: 'Tiempo boca abajo', desc: 'Acuéstalo boca abajo en una superficie firme 3-5 min, varias veces al día. Fortalece cuello y hombros.', mat: 'Manta o tapete' },
+  { id: 'a4',  range: '0-3', cat: 'lenguaje',  title: 'Háblale mirándolo', desc: 'Durante el cambio de pañal o alimentación, descríbele lo que haces con voz suave. Aprende los sonidos del habla.', mat: 'Tu voz' },
+  { id: 'a5',  range: '0-3', cat: 'sensorial', title: 'Masaje suave', desc: 'Después del baño, masajea brazos y piernas con movimientos circulares y aceite. Calma y conecta.', mat: 'Aceite de almendras o coco' },
+  { id: 'a6',  range: '0-3', cat: 'cognitiva', title: 'Caras y muecas', desc: 'Acerca tu cara a 30 cm y haz expresiones lentas: sonríe, abre la boca, saca la lengua. Las imitará.', mat: 'Tu cara' },
+  { id: 'a7',  range: '0-3', cat: 'sensorial', title: 'Música tranquila', desc: 'Pon música suave o clásica durante 15-20 min al día. Estimula el oído y calma.', mat: 'Bocina o celular' },
+
+  // 3-6 meses
+  { id: 'b1',  range: '3-6', cat: 'motora',    title: 'Alcanzar y agarrar', desc: 'Coloca sonajeros a su alcance para que estire los brazos y los tome. Mejora coordinación ojo-mano.', mat: 'Sonajeros ligeros' },
+  { id: 'b2',  range: '3-6', cat: 'cognitiva', title: 'Espejo mágico', desc: 'Siéntate con él frente a un espejo y dile "ese eres tú". Le encantará verse y verte.', mat: 'Espejo seguro' },
+  { id: 'b3',  range: '3-6', cat: 'motora',    title: 'Voltearse solo', desc: 'Boca arriba, coloca un juguete llamativo a un lado para que ruede hacia él. Practica el giro.', mat: 'Juguete favorito' },
+  { id: 'b4',  range: '3-6', cat: 'cognitiva', title: 'Cucú-tras', desc: 'Cúbrete la cara con las manos o una tela y aparece diciendo "¡cucú!". Enseña permanencia del objeto.', mat: 'Tus manos o pañuelo' },
+  { id: 'b5',  range: '3-6', cat: 'sensorial', title: 'Texturas variadas', desc: 'Dale telas de distintas texturas (seda, peluche, algodón) para que las toque. Estimula el tacto.', mat: 'Retazos de tela' },
+  { id: 'b6',  range: '3-6', cat: 'lenguaje',  title: 'Conversación de balbuceos', desc: 'Cuando balbucee ("ba-ba", "gu-gu"), imítalo y espera su respuesta. Aprende el turno de habla.', mat: 'Tu voz' },
+  { id: 'b7',  range: '3-6', cat: 'lenguaje',  title: 'Canciones con palmas', desc: 'Cántale canciones cortas con palmas o gestos: "Los pollitos dicen", "Estrellita". Le encanta el ritmo.', mat: 'Tu voz' },
+
+  // 6-9 meses
+  { id: 'c1',  range: '6-9', cat: 'motora',    title: 'Sentado con apoyo', desc: 'Rodéalo de cojines para que juegue sentado. Fortalece tronco y libera sus manos para explorar.', mat: 'Cojines firmes' },
+  { id: 'c2',  range: '6-9', cat: 'motora',    title: 'Pinza con cereales', desc: 'Trozos blandos de plátano o cereal inflado para que los tome con los dedos. Desarrolla la pinza.', mat: 'Cereal o fruta blanda' },
+  { id: 'c3',  range: '6-9', cat: 'cognitiva', title: 'Causa y efecto', desc: 'Juguetes con botones que hacen sonidos al apretarlos. Aprende que sus acciones tienen resultados.', mat: 'Juguete con botones' },
+  { id: 'c4',  range: '6-9', cat: 'lenguaje',  title: 'Nombrar objetos', desc: 'Cuando le des algo, dile su nombre claramente: "biberón", "patito", "mamá". Construye vocabulario.', mat: 'Objetos del día a día' },
+  { id: 'c5',  range: '6-9', cat: 'cognitiva', title: 'Esconder bajo manta', desc: 'Esconde un juguete bajo una manta y pregúntale "¿dónde está?". Buscar lo oculto.', mat: 'Manta y juguete' },
+  { id: 'c6',  range: '6-9', cat: 'sensorial', title: 'Juego de baño', desc: 'En la tina, dale patitos, vasos y cucharas para trasvasar agua. Explora volumen y flotabilidad.', mat: 'Juguetes de baño' },
+  { id: 'c7',  range: '6-9', cat: 'motora',    title: 'Gatear hacia el juguete', desc: 'Pon un juguete fuera de su alcance para motivar el arrastre o gateo.', mat: 'Juguete llamativo' },
+
+  // 9-12 meses
+  { id: 'd1',  range: '9-12', cat: 'motora',   title: 'Pista de obstáculos', desc: 'Coloca cojines y mantas enrollados para que los rodee o pase por encima. Coordinación.', mat: 'Cojines' },
+  { id: 'd2',  range: '9-12', cat: 'lenguaje', title: 'Libros de cartón', desc: 'Señala imágenes y dile su nombre. Pregúntale "¿dónde está el perrito?". Asociación palabra-imagen.', mat: 'Libro de imágenes' },
+  { id: 'd3',  range: '9-12', cat: 'motora',   title: 'Meter y sacar', desc: 'Dale una cubeta o tupper y pelotas pequeñas. Meterlas y sacarlas le fascina.', mat: 'Recipiente y pelotas' },
+  { id: 'd4',  range: '9-12', cat: 'social',   title: 'Aplaudir y decir adiós', desc: 'Enséñale a aplaudir, tirar besos y decir adiós con la mano. Imita gestos sociales.', mat: 'Tus manos' },
+  { id: 'd5',  range: '9-12', cat: 'social',   title: 'Dar y recibir', desc: 'Pásale un juguete diciendo "toma" y pídeselo de vuelta diciendo "dame". Turnos sociales.', mat: 'Cualquier juguete' },
+  { id: 'd6',  range: '9-12', cat: 'motora',   title: 'Caminar de la mano', desc: 'Sosténle ambas manos y camina con él pasos cortos. Fortalece piernas y equilibrio.', mat: 'Tus manos' },
+  { id: 'd7',  range: '9-12', cat: 'social',   title: 'Bailar juntos', desc: 'Pon música alegre y muévanse: aplaudan, balancéense. Coordinación y emoción.', mat: 'Música' },
+
+  // 12-18 meses
+  { id: 'e1',  range: '12-18', cat: 'sensorial', title: 'Pintar con dedos', desc: 'Pintura comestible no tóxica sobre cartulina grande. Explora colores y texturas.', mat: 'Pintura de dedos, papel' },
+  { id: 'e2',  range: '12-18', cat: 'motora',    title: 'Torre de cubos', desc: 'Apilen 3-4 bloques juntos y déjalo derribarlos. Motora fina y causa-efecto.', mat: 'Bloques de madera' },
+  { id: 'e3',  range: '12-18', cat: 'lenguaje',  title: 'Partes del cuerpo', desc: 'Pregunta "¿dónde está tu nariz?" y guíalo a señalarla. Vocabulario corporal.', mat: 'Su cuerpo' },
+  { id: 'e4',  range: '12-18', cat: 'motora',    title: 'Pelota rodada', desc: 'Sentados frente a frente, rueden una pelota grande. Coordinación y turnos.', mat: 'Pelota grande' },
+  { id: 'e5',  range: '12-18', cat: 'lenguaje',  title: 'Cuentos con solapas', desc: 'Libros donde levante solapas para ver algo. Aumenta atención y vocabulario.', mat: 'Libro interactivo' },
+  { id: 'e6',  range: '12-18', cat: 'cognitiva', title: 'Encajables de formas', desc: 'Tableros con huecos de formas (círculo, cuadrado). Razonamiento espacial.', mat: 'Juguete encajable' },
+  { id: 'e7',  range: '12-18', cat: 'sensorial', title: 'Trasvases con agua', desc: 'En la tina o lavabo, vasos para pasar agua de uno a otro. Coordinación y volumen.', mat: 'Vasos plásticos' },
+
+  // 18-24 meses
+  { id: 'f1',  range: '18-24', cat: 'motora',    title: 'Garabatos con crayolas', desc: 'Crayolas gordas y papel grande. Sostén libre, sin reglas. Motora fina y expresión.', mat: 'Crayolas gruesas, papel' },
+  { id: 'f2',  range: '18-24', cat: 'social',    title: 'Imitar tareas del hogar', desc: 'Dale una escoba pequeña o trapo para "ayudarte" a limpiar. Imitación y autonomía.', mat: 'Utensilios pequeños' },
+  { id: 'f3',  range: '18-24', cat: 'cognitiva', title: 'Rompecabezas simple', desc: 'Encajables o rompecabezas de 2-3 piezas grandes con figuras conocidas.', mat: 'Rompecabezas grueso' },
+  { id: 'f4',  range: '18-24', cat: 'lenguaje',  title: 'Canciones con gestos', desc: '"Soy una taza", "Pin Pon". Cantar y hacer los movimientos. Lenguaje y memoria.', mat: 'Tu voz' },
+  { id: 'f5',  range: '18-24', cat: 'cognitiva', title: 'Buscar el tesoro', desc: 'Esconde un juguete a la vista y pregúntale "¿dónde está el oso?". Atención y búsqueda.', mat: 'Peluche o juguete' },
+  { id: 'f6',  range: '18-24', cat: 'motora',    title: 'Patear pelota', desc: 'Pelota grande en el suelo. Anímalo a patearla. Coordinación piernas.', mat: 'Pelota mediana' },
+  { id: 'f7',  range: '18-24', cat: 'motora',    title: 'Torre alta', desc: 'Apila 5-6 bloques con él. Fina y concentración. Derribarlos es la mejor parte.', mat: 'Bloques' },
+
+  // 24-36 meses
+  { id: 'g1',  range: '24-36', cat: 'motora',    title: 'Saltar con dos pies', desc: 'Salta sobre líneas en el piso o cojines bajitos. Equilibrio y coordinación.', mat: 'Cinta adhesiva o cojines' },
+  { id: 'g2',  range: '24-36', cat: 'lenguaje',  title: 'Frases de 2-3 palabras', desc: 'Habla en oraciones cortas y claras. Repítele y amplía lo que dice: "Sí, perro grande".', mat: 'Tu voz' },
+  { id: 'g3',  range: '24-36', cat: 'cognitiva', title: 'Clasificar por color', desc: 'Tapas de plástico de varios colores en tazones. Agrupar por color.', mat: 'Tapas y tazones' },
+  { id: 'g4',  range: '24-36', cat: 'motora',    title: 'Líneas y círculos', desc: 'Imita tus trazos: línea recta, círculo. Motora fina previa a la escritura.', mat: 'Crayola y papel' },
+  { id: 'g5',  range: '24-36', cat: 'social',    title: 'Juego simbólico', desc: 'Dar de comer al peluche, dormirlo. Representación y empatía.', mat: 'Muñeco o peluche' },
+  { id: 'g6',  range: '24-36', cat: 'lenguaje',  title: 'Cuentos con preguntas', desc: 'Léele un cuento corto y pregunta "¿qué hizo el perrito?". Comprensión.', mat: 'Libro infantil' },
+  { id: 'g7',  range: '24-36', cat: 'motora',    title: 'Correpasillos o triciclo', desc: 'Si ya equilibra, prueba un correpasillos. Piernas y coordinación general.', mat: 'Correpasillos' }
+];
+
+const CAT_LABEL = {
+  motora: '🤸 Motora',
+  sensorial: '👀 Sensorial',
+  lenguaje: '🗣️ Lenguaje',
+  cognitiva: '🧩 Cognitiva',
+  social: '💞 Social'
+};
+
+let currentActFilter = null; // se inicializa al renderizar
+
+function getAgeMonths(birthStr) {
+  if (!birthStr) return 0;
+  const birth = new Date(birthStr);
+  const now = new Date();
+  let months = (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
+  if (now.getDate() < birth.getDate()) months--;
+  return Math.max(0, months);
+}
+
+function currentRangeKey() {
+  const baby = DB.get('info');
+  if (!baby) return ACTIVITY_RANGES[0].key;
+  const m = getAgeMonths(baby.birth);
+  const r = ACTIVITY_RANGES.find(r => m >= r.min && m < r.max) || ACTIVITY_RANGES[ACTIVITY_RANGES.length - 1];
+  return r.key;
+}
+
+function renderActivities() {
+  const baby = DB.get('info');
+  const chipsEl = document.getElementById('actChips');
+  const listEl = document.getElementById('actList');
+  const bannerEl = document.getElementById('actCurrentBanner');
+  if (!baby) { chipsEl.innerHTML = ''; listEl.innerHTML = ''; bannerEl.innerHTML = ''; return; }
+
+  const curKey = currentRangeKey();
+  if (!currentActFilter) currentActFilter = curKey;
+
+  const curRange = ACTIVITY_RANGES.find(r => r.key === curKey);
+  bannerEl.innerHTML = `<div class="act-current-banner">👶 Edad actual: <b>${getAge(baby.birth)}</b> · Recomendado: ${curRange.label}</div>`;
+
+  chipsEl.innerHTML = ACTIVITY_RANGES.map(r => {
+    const cls = (r.key === currentActFilter ? 'active' : '') + (r.key === curKey ? ' current' : '');
+    return `<button class="age-chip ${cls}" onclick="setActFilter('${r.key}')">${r.label}</button>`;
+  }).join('');
+
+  const done = new Set(DB.get('activities') || []);
+  const items = ACTIVITIES.filter(a => a.range === currentActFilter);
+
+  // Agrupar por categoría
+  const byCat = {};
+  items.forEach(a => { (byCat[a.cat] = byCat[a.cat] || []).push(a); });
+
+  let html = '';
+  Object.keys(CAT_LABEL).forEach(cat => {
+    if (!byCat[cat]) return;
+    html += `<div class="vac-group-title">${CAT_LABEL[cat]}</div>`;
+    byCat[cat].forEach(a => {
+      const isDone = done.has(a.id);
+      html += `<div class="act-card ${isDone ? 'done' : ''}">
+        <div class="act-head">
+          <div style="flex:1">
+            <span class="act-cat ${a.cat}">${CAT_LABEL[a.cat]}</span>
+            <div class="act-title">${a.title}</div>
+          </div>
+          <button class="act-check ${isDone ? 'done' : ''}" onclick="toggleActivity('${a.id}')" title="${isDone ? 'Hecho' : 'Marcar como hecho'}">${isDone ? '✓' : ''}</button>
+        </div>
+        <div class="act-desc">${a.desc}</div>
+        <div class="act-mat">📦 ${a.mat}</div>
+      </div>`;
+    });
+  });
+
+  if (!html) html = '<div class="empty" style="padding:20px;text-align:center">Sin actividades para este rango</div>';
+  listEl.innerHTML = html;
+}
+
+function setActFilter(key) {
+  currentActFilter = key;
+  renderActivities();
+}
+
+function toggleActivity(id) {
+  const done = DB.get('activities') || [];
+  const idx = done.indexOf(id);
+  if (idx >= 0) {
+    done.splice(idx, 1);
+    showToast('Desmarcada');
+  } else {
+    done.push(id);
+    showToast('¡Hecho! 🎉');
+  }
+  DB.set('activities', done);
+  renderActivities();
+}
 
 // ===== EDIT STATE =====
 const editing = { growth: null, med: null, study: null, appt: null };
@@ -2228,6 +2523,7 @@ function switchTab(name, btn) {
   const target = btn || document.querySelector(`[data-tab="${name}"]`);
   if (target) target.classList.add('active');
   if (name === 'vac') renderVaccines();
+  if (name === 'act') renderActivities();
   window.scrollTo(0, 0);
 }
 
@@ -2240,6 +2536,7 @@ function exportData() {
     studies: DB.get('studies'),
     vaccines: DB.get('vaccines'),
     appointments: DB.get('appointments'),
+    activities: DB.get('activities'),
     exportDate: new Date().toISOString()
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -2265,6 +2562,7 @@ function importData(event) {
       if (data.studies) DB.set('studies', data.studies);
       if (data.vaccines) DB.set('vaccines', data.vaccines);
       if (data.appointments) DB.set('appointments', data.appointments);
+      if (data.activities) DB.set('activities', data.activities);
       initApp();
       showToast('Datos importados');
     } catch { alert('Archivo no válido'); }
@@ -2281,6 +2579,7 @@ function resetAll() {
       localStorage.removeItem('baby_studies');
       localStorage.removeItem('baby_vaccines');
       localStorage.removeItem('baby_appointments');
+      localStorage.removeItem('baby_activities');
       localStorage.removeItem('baby_lastNotify');
       PhotoDB.clear().finally(() => location.reload());
       return;
@@ -2330,6 +2629,7 @@ function renderAll() {
   renderStudies();
   renderVaccines();
   renderAppointments();
+  renderActivities();
 }
 
 // Start
