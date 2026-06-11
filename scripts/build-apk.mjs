@@ -39,7 +39,8 @@ const signedApk = path.join(repoRoot, 'app-release-signed.apk');
 
 await androidSdkTools.zipalign(unsignedApk, alignedApk);
 await androidSdkTools.apksigner(
-  twaManifest.signingKey,
+  twaManifest.signingKey.path,
+  twaManifest.signingKey.alias,
   process.env.BUBBLEWRAP_KEYSTORE_PASSWORD,
   process.env.BUBBLEWRAP_KEY_PASSWORD,
   alignedApk,
