@@ -1,0 +1,6 @@
+RewriteEngine On
+
+# Todo lo que empiece con /api/ va al router
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ router.php [QSA,L]

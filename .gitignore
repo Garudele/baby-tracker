@@ -5,3 +5,4 @@ twa-build/
 *.keystore
 keystore-password.txt
 apk-fingerprint.txt
+config.php

@@ -85,8 +85,7 @@ try {
             "Argon2i:  " . (in_array(PASSWORD_ARGON2I,  $algos, true) ? "SI" : "NO"),
             "sodium ext: " . (extension_loaded('sodium') ? "SI" : "NO"),
             "openssl ext: " . (extension_loaded('openssl') ? "SI" : "NO"),
-            "vendor/autoload en server/: " . (file_exists(__DIR__ . '/vendor/autoload.php') ? "SI" : "NO"),
-            "vendor/autoload en padre:   " . (file_exists(__DIR__ . '/../vendor/autoload.php') ? "SI" : "NO"),
+            "vendor/autoload: " . (file_exists(__DIR__ . '/vendor/autoload.php') ? "SI" : "NO"),
             "composer en PATH: " . (trim((string)shell_exec('command -v composer 2>&1')) ?: "NO"),
             "session.cookie_samesite: " . ini_get('session.cookie_samesite'),
             "extensiones: pdo_mysql=" . (extension_loaded('pdo_mysql')?'SI':'NO')

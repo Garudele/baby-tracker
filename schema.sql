@@ -1,0 +1,21 @@
+CREATE TABLE IF NOT EXISTS entries (
+  user_id INT NOT NULL DEFAULT 1,
+  data_key VARCHAR(50) NOT NULL,
+  data_json LONGTEXT NOT NULL,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, data_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS photos (
+  id VARCHAR(64) NOT NULL,
+  user_id INT NOT NULL DEFAULT 1,
+  record_type VARCHAR(30) NULL,
+  record_id BIGINT NULL,
+  mime VARCHAR(50) NOT NULL,
+  name VARCHAR(200) NULL,
+  data LONGBLOB NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  INDEX user_idx (user_id),
+  INDEX record_idx (user_id, record_type, record_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
