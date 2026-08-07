@@ -26,10 +26,11 @@ if (($_GET['t'] ?? '') === 'baby-diag-2026'
 // ---------- Cargar config ---------------------------------------------------
 // Preferimos private/config.php (fuera de public_html). Fallback a ./config.php
 // solo para dev local. El de public_html NO debería existir en producción.
+// __DIR__ = /home/uXXX/domains/site/public_html
 $configPaths = [
-    dirname(dirname(__DIR__)) . '/private/config.php',   // /home/uXXX/private/
-    dirname(__DIR__) . '/private/config.php',            // /home/uXXX/domains/site/private/
-    __DIR__ . '/config.php',                             // dev local (NO usar en prod)
+    dirname(__DIR__, 3) . '/private/config.php',   // /home/uXXX/private/          ← recomendado
+    dirname(__DIR__, 1) . '/private/config.php',   // /home/uXXX/domains/site/private/
+    __DIR__ . '/config.php',                       // dev local (NO usar en prod)
 ];
 $config = null;
 $configPath = null;

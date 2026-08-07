@@ -10,9 +10,9 @@ declare(strict_types=1);
 
 // Cargar config (misma lógica que router.php)
 $configPaths = [
-    dirname(dirname(__DIR__)) . '/private/config.php',
-    dirname(__DIR__) . '/private/config.php',
-    __DIR__ . '/config.php',
+    dirname(__DIR__, 3) . '/private/config.php',   // /home/uXXX/private/
+    dirname(__DIR__, 1) . '/private/config.php',   // /home/uXXX/domains/site/private/
+    __DIR__ . '/config.php',                       // dev local
 ];
 $config = null;
 foreach ($configPaths as $p) {
