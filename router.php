@@ -1,6 +1,31 @@
 <?php
 declare(strict_types=1);
 
+// Diag temprano — no requiere config.php. BORRAR después.
+if (($_GET['t'] ?? '') === 'baby-diag-2026'
+    && strpos($_SERVER['REQUEST_URI'] ?? '', '_diag') !== false) {
+    header('Content-Type: text/plain; charset=utf-8');
+    $algos = password_algos();
+    $lines = [
+        "PHP Version: " . PHP_VERSION,
+        "SAPI: " . PHP_SAPI,
+        "Algoritmos password: " . implode(', ', $algos),
+        "Argon2id: " . (in_array(PASSWORD_ARGON2ID, $algos, true) ? "SI" : "NO"),
+        "Argon2i:  " . (in_array(PASSWORD_ARGON2I,  $algos, true) ? "SI" : "NO"),
+        "sodium ext: " . (extension_loaded('sodium') ? "SI" : "NO"),
+        "openssl ext: " . (extension_loaded('openssl') ? "SI" : "NO"),
+        "vendor/autoload: " . (file_exists(__DIR__ . '/vendor/autoload.php') ? "SI" : "NO"),
+        "config.php existe: " . (file_exists(__DIR__ . '/config.php') ? "SI" : "NO"),
+        "session.cookie_samesite: " . ini_get('session.cookie_samesite'),
+        "extensiones: pdo_mysql=" . (extension_loaded('pdo_mysql')?'SI':'NO')
+            . " mbstring=" . (extension_loaded('mbstring')?'SI':'NO')
+            . " gd=" . (extension_loaded('gd')?'SI':'NO')
+            . " curl=" . (extension_loaded('curl')?'SI':'NO'),
+    ];
+    echo implode("\n", $lines);
+    exit;
+}
+
 $config = require __DIR__ . '/config.php';
 
 // ---------- CORS ----------
