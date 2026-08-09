@@ -1,4 +1,4 @@
-const CACHE = 'baby-tracker-v8';
+const CACHE = 'baby-tracker-v10';
 const ASSETS = [
   './',
   './index.html',
@@ -28,6 +28,8 @@ self.addEventListener('message', e => {
 // Network-first for HTML (always get fresh app), cache-first for assets
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  // Nunca tocar el API — siempre a la red, sin caché
+  if (new URL(e.request.url).pathname.includes('/api/')) return;
   const isHTML = e.request.mode === 'navigate' ||
                  e.request.destination === 'document' ||
                  e.request.url.endsWith('.html') ||

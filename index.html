@@ -654,9 +654,96 @@ body.dark .act-check { background: var(--card-alt); }
   border-radius: 2px;
   display: inline-block;
 }
+
+/* ===== Auth Modal ===== */
+.auth-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center; padding: 1rem;
+}
+.auth-overlay.show { display: flex; }
+.auth-modal {
+  background: var(--card-bg, #fff);
+  color: var(--text, #222);
+  border-radius: 18px;
+  max-width: 400px; width: 100%;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  padding: 1.5rem;
+  animation: authIn 0.25s ease-out;
+}
+@keyframes authIn { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+.auth-modal h2 { margin: 0 0 0.3rem; font-size: 1.4rem; text-align: center; }
+.auth-modal .subtitle { color: var(--text-light, #666); text-align: center; margin-bottom: 1rem; font-size: 0.9rem; }
+.auth-tabs {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+  background: rgba(0,0,0,0.05); border-radius: 10px; padding: 4px; margin-bottom: 1rem;
+}
+.auth-tab {
+  padding: 0.6rem; border: none; background: transparent; border-radius: 8px;
+  font-size: 0.95rem; font-weight: 600; cursor: pointer; color: var(--text, #222);
+  transition: background 0.15s;
+}
+.auth-tab.active { background: var(--card-bg, #fff); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.auth-form label { display: block; margin: 0.6rem 0 0.25rem; font-size: 0.85rem; font-weight: 600; }
+.auth-form input {
+  width: 100%; padding: 0.7rem 0.9rem; border: 1px solid #ddd; border-radius: 10px;
+  font-size: 1rem; box-sizing: border-box; background: var(--input-bg, #fafafa); color: var(--text, #222);
+}
+.auth-form input:focus { outline: none; border-color: var(--baby-blue, #74B9FF); }
+.auth-hint { font-size: 0.75rem; color: var(--text-light, #666); margin-top: 0.2rem; }
+.auth-error {
+  background: #ffe6e6; color: #a00; padding: 0.6rem 0.8rem; border-radius: 8px;
+  font-size: 0.85rem; margin-top: 0.8rem; display: none;
+}
+.auth-error.show { display: block; }
+.auth-submit {
+  width: 100%; padding: 0.8rem; margin-top: 1rem; border: none; border-radius: 10px;
+  background: linear-gradient(135deg, #74B9FF, #A29BFE); color: #fff;
+  font-size: 1rem; font-weight: 600; cursor: pointer;
+  transition: transform 0.1s, opacity 0.2s;
+}
+.auth-submit:hover { transform: translateY(-1px); }
+.auth-submit:disabled { opacity: 0.6; cursor: wait; }
+.auth-offline {
+  margin-top: 0.8rem; text-align: center;
+  font-size: 0.85rem; color: var(--text-light, #666);
+}
+.auth-offline button {
+  background: none; border: none; color: var(--baby-blue, #74B9FF);
+  text-decoration: underline; cursor: pointer; font-size: inherit;
+}
+body.dark .auth-modal { background: #2b2b3a; color: #eee; }
+body.dark .auth-form input { background: #1e1e2a; color: #eee; border-color: #444; }
+body.dark .auth-tabs { background: rgba(255,255,255,0.05); }
+body.dark .auth-tab.active { background: #2b2b3a; }
+body.dark .auth-error { background: #4a1e1e; color: #ff9090; }
 </style>
 </head>
 <body>
+
+<!-- ===== AUTH MODAL ===== -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-modal">
+    <h2>👶 Baby Tracker</h2>
+    <p class="subtitle">Registra el crecimiento de tu bebé</p>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="tabLogin">Entrar</button>
+      <button type="button" class="auth-tab" id="tabSignup">Crear cuenta</button>
+    </div>
+    <form class="auth-form" id="authForm" autocomplete="on">
+      <label for="authEmail">Email</label>
+      <input type="email" id="authEmail" name="email" required autocomplete="email" inputmode="email">
+      <label for="authPassword">Contraseña</label>
+      <input type="password" id="authPassword" name="password" required minlength="12" autocomplete="current-password">
+      <div class="auth-hint" id="authHint" style="display:none;">Mínimo 12 caracteres.</div>
+      <div class="auth-error" id="authError"></div>
+      <button type="submit" class="auth-submit" id="authSubmit">Entrar</button>
+    </form>
+    <div class="auth-offline">
+      <button type="button" id="authOffline">Continuar sin conexión (datos locales)</button>
+    </div>
+  </div>
+</div>
 
 <div class="header">
   <span class="baby-emoji">👶</span>
@@ -1300,10 +1387,11 @@ const PhotoDB = (() => {
   function open() {
     if (dbPromise) return dbPromise;
     dbPromise = new Promise((resolve, reject) => {
-      const req = indexedDB.open('baby-photos', 1);
+      const req = indexedDB.open('baby-photos', 2);
       req.onupgradeneeded = () => {
         const db = req.result;
-        const store = db.createObjectStore('photos', { keyPath: 'id', autoIncrement: true });
+        if (db.objectStoreNames.contains('photos')) db.deleteObjectStore('photos');
+        const store = db.createObjectStore('photos', { keyPath: 'id' });
         store.createIndex('ref', ['recordType', 'recordId']);
       };
       req.onsuccess = () => resolve(req.result);
@@ -1314,14 +1402,27 @@ const PhotoDB = (() => {
   function tx(mode = 'readonly') {
     return open().then(db => db.transaction('photos', mode).objectStore('photos'));
   }
+  function genId() {
+    if (crypto.randomUUID) return crypto.randomUUID();
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  }
+  async function _localPut(record) {
+    const store = await tx('readwrite');
+    return new Promise((resolve, reject) => {
+      const r = store.put(record);
+      r.onsuccess = () => resolve(record.id);
+      r.onerror = () => reject(r.error);
+    });
+  }
   return {
     async add(recordType, recordId, blob, name) {
-      const store = await tx('readwrite');
-      return new Promise((resolve, reject) => {
-        const r = store.add({ recordType, recordId, blob, name: name || '', ts: Date.now() });
-        r.onsuccess = () => resolve(r.result);
-        r.onerror = () => reject(r.error);
-      });
+      const id = genId();
+      const record = { id, recordType, recordId, blob, name: name || '', ts: Date.now() };
+      await _localPut(record);
+      if (typeof SYNC !== 'undefined') {
+        SYNC.pushPhoto(id, recordType, recordId, blob, name || '').catch(e => console.warn('photo push:', e));
+      }
+      return id;
     },
     async getByRecord(recordType, recordId) {
       const store = await tx('readonly');
@@ -1341,11 +1442,14 @@ const PhotoDB = (() => {
     },
     async delete(id) {
       const store = await tx('readwrite');
-      return new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         const r = store.delete(id);
         r.onsuccess = () => resolve();
         r.onerror = () => reject(r.error);
       });
+      if (typeof SYNC !== 'undefined') {
+        SYNC.deletePhoto(id).catch(e => console.warn('photo delete:', e));
+      }
     },
     async deleteByRecord(recordType, recordId) {
       const photos = await this.getByRecord(recordType, recordId);
@@ -1358,7 +1462,242 @@ const PhotoDB = (() => {
         r.onsuccess = () => resolve();
         r.onerror = () => reject(r.error);
       });
+    },
+    _localPut,
+  };
+})();
+
+// ===== SERVER SYNC =====
+const SYNC = (() => {
+  const API = new URL('api/', location.href).href;
+  const SYNCED_KEYS = ['info', 'growth', 'medicines', 'studies', 'vaccines', 'appointments', 'activities'];
+
+  async function api(path, opts = {}) {
+    return fetch(API + path.replace(/^\//, ''), {
+      credentials: 'include',
+      ...opts,
+      headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+    });
+  }
+
+  async function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(String(fr.result).split(',')[1] || '');
+      fr.onerror = () => reject(fr.error);
+      fr.readAsDataURL(blob);
+    });
+  }
+
+  async function isAuthed() {
+    try {
+      const r = await api('me');
+      if (!r.ok) return false;
+      const j = await r.json();
+      return !!j.auth;
+    } catch { return false; }
+  }
+
+  async function login(email, password) {
+    try {
+      const r = await api('login', { method: 'POST', body: JSON.stringify({ email, password }) });
+      const j = await r.json().catch(() => ({}));
+      return { ok: r.ok, status: r.status, body: j };
+    } catch { return { ok: false, status: 0, body: {} }; }
+  }
+
+  async function signup(email, password) {
+    try {
+      const r = await api('signup', { method: 'POST', body: JSON.stringify({ email, password }) });
+      const j = await r.json().catch(() => ({}));
+      return { ok: r.ok, status: r.status, body: j };
+    } catch { return { ok: false, status: 0, body: {} }; }
+  }
+
+  async function logout() {
+    try { await api('logout', { method: 'POST' }); } catch {}
+  }
+
+  async function ensureAuth() {
+    // Check network / auth. If server unreachable, run in offline-local mode.
+    try {
+      const r = await fetch(API + 'me', { credentials: 'include' });
+      if (!r.ok) return false;
+      const j = await r.json();
+      if (j.auth) return true;
+    } catch {
+      return false; // offline
     }
+    // No autenticado: mostrar modal y esperar
+    return AuthUI.show();
+  }
+
+  const _origSet = localStorage.setItem.bind(localStorage);
+  let pushTimer = null;
+  function schedulePush() {
+    clearTimeout(pushTimer);
+    pushTimer = setTimeout(async () => {
+      const payload = {};
+      for (const k of SYNCED_KEYS) {
+        const raw = localStorage.getItem('baby_' + k);
+        if (raw !== null) {
+          try { payload[k] = JSON.parse(raw); } catch {}
+        }
+      }
+      try { await api('data', { method: 'PUT', body: JSON.stringify(payload) }); }
+      catch (e) { console.warn('sync push failed', e); }
+    }, 1500);
+  }
+
+  // Hook every set on baby_* keys to trigger a debounced push
+  localStorage.setItem = function(key, value) {
+    _origSet(key, value);
+    if (typeof key === 'string' && SYNCED_KEYS.some(k => key === 'baby_' + k)) {
+      schedulePush();
+    }
+  };
+
+  async function pullData() {
+    try {
+      const r = await api('data');
+      if (!r.ok) return;
+      const data = await r.json();
+      for (const [k, v] of Object.entries(data)) {
+        _origSet('baby_' + k, JSON.stringify(v));
+      }
+    } catch (e) { console.warn('sync pull data failed', e); }
+  }
+
+  async function pullPhotos() {
+    try {
+      const r = await api('photos');
+      if (!r.ok) return;
+      const list = await r.json();
+      for (const meta of list) {
+        const existing = await PhotoDB.get(meta.id).catch(() => null);
+        if (existing) continue;
+        const rp = await fetch(API + 'photo/' + encodeURIComponent(meta.id), { credentials: 'include' });
+        if (!rp.ok) continue;
+        const blob = await rp.blob();
+        await PhotoDB._localPut({
+          id: meta.id,
+          recordType: meta.record_type,
+          recordId: meta.record_id,
+          blob,
+          name: meta.name || '',
+          ts: Date.now(),
+        });
+      }
+    } catch (e) { console.warn('sync pull photos failed', e); }
+  }
+
+  async function pushPhoto(id, recordType, recordId, blob, name) {
+    const b64 = await blobToBase64(blob);
+    const r = await api('photo', {
+      method: 'POST',
+      body: JSON.stringify({
+        id,
+        record_type: recordType,
+        record_id: recordId,
+        mime: blob.type || 'image/jpeg',
+        name: name || '',
+        data: b64,
+      }),
+    });
+    if (!r.ok) throw new Error('photo push http ' + r.status);
+  }
+
+  async function deletePhoto(id) {
+    const r = await api('photo/' + encodeURIComponent(id), { method: 'DELETE' });
+    if (!r.ok) throw new Error('photo delete http ' + r.status);
+  }
+
+  return { ensureAuth, isAuthed, login, signup, logout, pullData, pullPhotos, pushPhoto, deletePhoto };
+})();
+
+// ===== AUTH UI (modal login/signup) =====
+const AuthUI = (() => {
+  const overlay  = document.getElementById('authOverlay');
+  const tabLogin = document.getElementById('tabLogin');
+  const tabSignup= document.getElementById('tabSignup');
+  const form     = document.getElementById('authForm');
+  const email    = document.getElementById('authEmail');
+  const pw       = document.getElementById('authPassword');
+  const hint     = document.getElementById('authHint');
+  const errBox   = document.getElementById('authError');
+  const submit   = document.getElementById('authSubmit');
+  const offline  = document.getElementById('authOffline');
+
+  let mode = 'login';           // 'login' | 'signup'
+  let resolver = null;          // Promise resolver
+
+  const ERROR_MSGS = {
+    bad_credentials: 'Email o contraseña incorrectos.',
+    bad_email: 'Email inválido.',
+    weak_password: 'La contraseña debe tener al menos 12 caracteres.',
+    email_taken: 'Ese email ya está registrado. Intenta iniciar sesión.',
+    locked_out: 'Demasiados intentos. Espera unos minutos.',
+    signup_rate_limited: 'Demasiados registros desde tu IP. Intenta mañana.',
+    server_error: 'Error del servidor. Inténtalo más tarde.',
+    not_installed: 'El servidor no está listo. Contacta al administrador.',
+  };
+
+  function setMode(m) {
+    mode = m;
+    tabLogin.classList.toggle('active', m === 'login');
+    tabSignup.classList.toggle('active', m === 'signup');
+    submit.textContent = m === 'login' ? 'Entrar' : 'Crear cuenta';
+    pw.setAttribute('autocomplete', m === 'login' ? 'current-password' : 'new-password');
+    hint.style.display = m === 'signup' ? 'block' : 'none';
+    errBox.classList.remove('show');
+  }
+  function showError(code) {
+    errBox.textContent = ERROR_MSGS[code] || ('Error: ' + code);
+    errBox.classList.add('show');
+  }
+
+  tabLogin.addEventListener('click', () => setMode('login'));
+  tabSignup.addEventListener('click', () => setMode('signup'));
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errBox.classList.remove('show');
+    submit.disabled = true;
+    const em = email.value.trim().toLowerCase();
+    const pass = pw.value;
+    try {
+      const res = mode === 'login'
+        ? await SYNC.login(em, pass)
+        : await SYNC.signup(em, pass);
+      if (res.ok) {
+        overlay.classList.remove('show');
+        if (resolver) { resolver(true); resolver = null; }
+      } else {
+        showError(res.body?.error || 'server_error');
+      }
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  offline.addEventListener('click', () => {
+    overlay.classList.remove('show');
+    if (resolver) { resolver(false); resolver = null; }
+  });
+
+  return {
+    show() {
+      setMode('login');
+      email.value = '';
+      pw.value = '';
+      overlay.classList.add('show');
+      setTimeout(() => email.focus(), 100);
+      return new Promise(res => { resolver = res; });
+    },
+    hide() {
+      overlay.classList.remove('show');
+      if (resolver) { resolver(false); resolver = null; }
+    },
   };
 })();
 
@@ -1433,7 +1772,7 @@ async function renderRecordPhotos(recordType, recordId, containerId) {
     const url = URL.createObjectURL(p.blob);
     return `<div class="thumb-wrap">
       <img src="${url}" onclick="openPhotoModal('${url}')">
-      <button class="x" onclick="deleteRecordPhoto(${p.id}, '${recordType}', ${recordId}, '${containerId}')">×</button>
+      <button class="x" onclick="deleteRecordPhoto('${p.id}', '${recordType}', ${recordId}, '${containerId}')">×</button>
     </div>`;
   }).join('') + '</div>';
 }
@@ -2634,7 +2973,18 @@ function renderAll() {
 
 // Start
 applyDarkMode();
-initApp();
+(async () => {
+  try {
+    const authed = await SYNC.ensureAuth();
+    if (authed) {
+      await SYNC.pullData();
+      await SYNC.pullPhotos();
+    }
+  } catch (e) {
+    console.warn('sync init failed', e);
+  }
+  initApp();
+})();
 
 // ===== SERVICE WORKER =====
 if ('serviceWorker' in navigator) {
