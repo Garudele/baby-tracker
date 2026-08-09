@@ -1,14 +1,17 @@
 -- Baby Tracker schema
--- Idempotente: CREATE TABLE IF NOT EXISTS + índices con IF NOT EXISTS (MySQL 8)
+-- Idempotente: CREATE TABLE IF NOT EXISTS. ALTERs se manejan en install.php.
 
 CREATE TABLE IF NOT EXISTS users (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  email VARCHAR(255) NOT NULL,
+  email_verified TINYINT(1) NOT NULL DEFAULT 0,
   password_hash VARCHAR(255) NOT NULL,
   totp_secret_encrypted VARBINARY(255) NULL,
   totp_enabled TINYINT(1) NOT NULL DEFAULT 0,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id)
+  PRIMARY KEY (id),
+  UNIQUE KEY unique_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS webauthn_credentials (
@@ -29,11 +32,14 @@ CREATE TABLE IF NOT EXISTS webauthn_credentials (
 CREATE TABLE IF NOT EXISTS auth_attempts (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   ip VARCHAR(45) NOT NULL,
+  email VARCHAR(255) NULL,
   success TINYINT(1) NOT NULL DEFAULT 0,
   reason VARCHAR(50) NULL,
+  action VARCHAR(20) NOT NULL DEFAULT 'login',
   attempted_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  INDEX ip_time_idx (ip, attempted_at)
+  INDEX ip_time_idx (ip, attempted_at),
+  INDEX email_time_idx (email, attempted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS entries (

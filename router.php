@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 // ============================================================================
-// Baby Tracker — router.php
+// Baby Tracker — router.php  (multi-tenant)
 // ============================================================================
 
 // ---------- Diag temprano (no requiere config). BORRAR después de setup. ----
@@ -16,7 +16,7 @@ if (($_GET['t'] ?? '') === 'baby-diag-2026'
         "Argon2id: " . (in_array(PASSWORD_ARGON2ID, $algos, true) ? "SI" : "NO"),
         "openssl: " . (extension_loaded('openssl') ? "SI" : "NO"),
         "pdo_mysql: " . (extension_loaded('pdo_mysql') ? "SI" : "NO"),
-        "config.php en private/: " . (file_exists(dirname(dirname(__DIR__)) . '/private/config.php') ? "SI" : "NO"),
+        "config.php en /home/uXXX/private/: " . (file_exists(dirname(__DIR__, 3) . '/private/config.php') ? "SI" : "NO"),
         "config.php en public_html/: " . (file_exists(__DIR__ . '/config.php') ? "SI" : "NO"),
     ];
     echo implode("\n", $lines);
@@ -24,8 +24,6 @@ if (($_GET['t'] ?? '') === 'baby-diag-2026'
 }
 
 // ---------- Cargar config ---------------------------------------------------
-// Preferimos private/config.php (fuera de public_html). Fallback a ./config.php
-// solo para dev local. El de public_html NO debería existir en producción.
 // __DIR__ = /home/uXXX/domains/site/public_html
 $configPaths = [
     dirname(__DIR__, 3) . '/private/config.php',   // /home/uXXX/private/          ← recomendado
@@ -33,9 +31,8 @@ $configPaths = [
     __DIR__ . '/config.php',                       // dev local (NO usar en prod)
 ];
 $config = null;
-$configPath = null;
 foreach ($configPaths as $p) {
-    if (file_exists($p)) { $config = require $p; $configPath = $p; break; }
+    if (file_exists($p)) { $config = require $p; break; }
 }
 if (!$config) {
     http_response_code(500);
@@ -105,24 +102,45 @@ function client_ip(): string {
         ?? $_SERVER['REMOTE_ADDR']
         ?? '0.0.0.0';
 }
+function normalize_email(string $e): string {
+    return strtolower(trim($e));
+}
+function is_valid_email(string $e): bool {
+    return (bool)filter_var($e, FILTER_VALIDATE_EMAIL) && strlen($e) <= 255;
+}
 
 // ---------- Rate limiting ---------------------------------------------------
-function record_attempt(bool $success, ?string $reason = null): void {
+function record_attempt(string $action, bool $success, ?string $reason = null, ?string $email = null): void {
     $stmt = db()->prepare(
-        "INSERT INTO auth_attempts (ip, success, reason) VALUES (:ip, :ok, :r)"
+        "INSERT INTO auth_attempts (ip, email, success, reason, action)
+         VALUES (:ip, :em, :ok, :r, :a)"
     );
-    $stmt->execute([':ip' => client_ip(), ':ok' => $success ? 1 : 0, ':r' => $reason]);
+    $stmt->execute([
+        ':ip' => client_ip(),
+        ':em' => $email,
+        ':ok' => $success ? 1 : 0,
+        ':r' => $reason,
+        ':a' => $action,
+    ]);
 }
-function is_locked_out(): bool {
-    global $config;
+function is_ip_locked_out(string $action, int $max, int $window): bool {
     $stmt = db()->prepare(
         "SELECT COUNT(*) AS n FROM auth_attempts
-         WHERE ip = :ip AND success = 0
+         WHERE ip = :ip AND success = 0 AND action = :a
            AND attempted_at > (NOW() - INTERVAL :w SECOND)"
     );
-    $stmt->execute([':ip' => client_ip(), ':w' => $config['auth_lockout_window']]);
-    $n = (int)$stmt->fetch()['n'];
-    return $n >= (int)$config['auth_max_attempts'];
+    $stmt->execute([':ip' => client_ip(), ':a' => $action, ':w' => $window]);
+    return (int)$stmt->fetch()['n'] >= $max;
+}
+function is_email_locked_out(string $email, int $max, int $window): bool {
+    if ($email === '') return false;
+    $stmt = db()->prepare(
+        "SELECT COUNT(*) AS n FROM auth_attempts
+         WHERE email = :em AND success = 0 AND action = 'login'
+           AND attempted_at > (NOW() - INTERVAL :w SECOND)"
+    );
+    $stmt->execute([':em' => $email, ':w' => $window]);
+    return (int)$stmt->fetch()['n'] >= $max;
 }
 
 // ---------- Crypto (AES-256-GCM para secretos en DB) ------------------------
@@ -157,55 +175,109 @@ $path = trim($path, '/');
 $parts = $path === '' ? [] : explode('/', $path);
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Config de rate limiting con defaults
+$loginMax    = (int)($config['auth_max_attempts'] ?? 5);
+$loginWindow = (int)($config['auth_lockout_window'] ?? 900);
+$signupMax   = (int)($config['signup_max_per_day'] ?? 3);
+$signupWindow= 86400; // 24h
+
 try {
     // ---- Estado de sesión (sin auth) --------------------------------------
     if (($parts[0] ?? '') === 'me' && $method === 'GET') {
-        json_out([
+        $out = [
             'auth' => !empty($_SESSION['uid']),
-            'features' => ['argon2id' => true, 'totp' => true, 'webauthn' => true],
-        ]);
+            'features' => ['argon2id' => true, 'totp' => true, 'webauthn' => true, 'multi_tenant' => true],
+        ];
+        if (!empty($_SESSION['uid'])) {
+            $s = db()->prepare("SELECT email, email_verified FROM users WHERE id = :u");
+            $s->execute([':u' => $_SESSION['uid']]);
+            if ($u = $s->fetch()) {
+                $out['user'] = ['id' => (int)$_SESSION['uid'], 'email' => $u['email'], 'email_verified' => (bool)$u['email_verified']];
+            }
+        }
+        json_out($out);
     }
 
-    // ---- Login (password) -------------------------------------------------
-    if (($parts[0] ?? '') === 'login' && $method === 'POST') {
-        if (is_locked_out()) {
-            json_out(['error' => 'locked_out', 'retry_after' => $config['auth_lockout_window']], 429);
+    // ---- Signup (público) -------------------------------------------------
+    if (($parts[0] ?? '') === 'signup' && $method === 'POST') {
+        if (is_ip_locked_out('signup', $signupMax, $signupWindow)) {
+            json_out(['error' => 'signup_rate_limited', 'retry_after' => $signupWindow], 429);
         }
         $body = json_body();
-        $pw = (string)($body['password'] ?? '');
-        if ($pw === '') {
-            record_attempt(false, 'empty_password');
-            json_out(['error' => 'bad_password'], 401);
+        $email = normalize_email((string)($body['email'] ?? ''));
+        $pw    = (string)($body['password'] ?? '');
+        if (!is_valid_email($email)) {
+            record_attempt('signup', false, 'bad_email', $email);
+            json_out(['error' => 'bad_email'], 400);
         }
-        // Solo hay un usuario en esta app (id=1)
-        $stmt = db()->prepare("SELECT id, password_hash, totp_enabled FROM users WHERE id = 1");
-        $stmt->execute();
+        if (strlen($pw) < 12) {
+            record_attempt('signup', false, 'weak_password', $email);
+            json_out(['error' => 'weak_password', 'min_length' => 12], 400);
+        }
+        try {
+            $hash = password_hash($pw, PASSWORD_ARGON2ID);
+            $stmt = db()->prepare(
+                "INSERT INTO users (email, password_hash, email_verified) VALUES (:em, :h, 0)"
+            );
+            $stmt->execute([':em' => $email, ':h' => $hash]);
+            $uid = (int)db()->lastInsertId();
+        } catch (PDOException $e) {
+            if ((int)$e->errorInfo[1] === 1062) { // duplicate key
+                record_attempt('signup', false, 'email_taken', $email);
+                json_out(['error' => 'email_taken'], 409);
+            }
+            throw $e;
+        }
+        record_attempt('signup', true, null, $email);
+        // Auto-login tras signup
+        session_regenerate_id(true);
+        $_SESSION['uid'] = $uid;
+        json_out(['ok' => true, 'user' => ['id' => $uid, 'email' => $email]]);
+    }
+
+    // ---- Login (email + password) ----------------------------------------
+    if (($parts[0] ?? '') === 'login' && $method === 'POST') {
+        if (is_ip_locked_out('login', $loginMax, $loginWindow)) {
+            json_out(['error' => 'locked_out', 'retry_after' => $loginWindow], 429);
+        }
+        $body = json_body();
+        $email = normalize_email((string)($body['email'] ?? ''));
+        $pw    = (string)($body['password'] ?? '');
+
+        if ($email !== '' && is_email_locked_out($email, $loginMax, $loginWindow)) {
+            json_out(['error' => 'locked_out', 'retry_after' => $loginWindow], 429);
+        }
+        if (!is_valid_email($email) || $pw === '') {
+            record_attempt('login', false, 'bad_input', $email);
+            usleep(500000);
+            json_out(['error' => 'bad_credentials'], 401);
+        }
+        $stmt = db()->prepare("SELECT id, password_hash, totp_enabled FROM users WHERE email = :em");
+        $stmt->execute([':em' => $email]);
         $user = $stmt->fetch();
         if (!$user) {
-            record_attempt(false, 'no_user');
+            record_attempt('login', false, 'no_user', $email);
             usleep(500000);
-            json_out(['error' => 'not_installed'], 500);
+            json_out(['error' => 'bad_credentials'], 401);
         }
         if (!password_verify($pw, $user['password_hash'])) {
-            record_attempt(false, 'bad_password');
+            record_attempt('login', false, 'bad_password', $email);
             usleep(500000);
-            json_out(['error' => 'bad_password'], 401);
+            json_out(['error' => 'bad_credentials'], 401);
         }
-        // Re-hash si el algoritmo/params cambiaron
         if (password_needs_rehash($user['password_hash'], PASSWORD_ARGON2ID)) {
             $newHash = password_hash($pw, PASSWORD_ARGON2ID);
             $up = db()->prepare("UPDATE users SET password_hash = :h WHERE id = :id");
             $up->execute([':h' => $newHash, ':id' => $user['id']]);
         }
         if ((int)$user['totp_enabled'] === 1) {
-            // Password OK pero falta 2FA. Marcamos step 1 y pedimos código.
             $_SESSION['pending_totp_uid'] = (int)$user['id'];
+            record_attempt('login', true, 'need_totp', $email);
             json_out(['ok' => true, 'need_totp' => true]);
         }
-        // Sin 2FA: login completo
         session_regenerate_id(true);
         $_SESSION['uid'] = (int)$user['id'];
-        record_attempt(true);
+        record_attempt('login', true, null, $email);
         json_out(['ok' => true]);
     }
 

@@ -38,6 +38,7 @@ return [
     ],
 
     // ---------- Rate limiting ----------
-    'auth_max_attempts'   => 5,          // intentos fallidos antes de bloquear
+    'auth_max_attempts'   => 5,          // intentos fallidos de login antes de bloquear
     'auth_lockout_window' => 900,        // ventana en segundos (15 min)
+    'signup_max_per_day'  => 3,          // signups fallidos por IP por día
 ];
