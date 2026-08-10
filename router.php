@@ -5,24 +5,6 @@ declare(strict_types=1);
 // Baby Tracker — router.php  (multi-tenant)
 // ============================================================================
 
-// ---------- Diag temprano (no requiere config). BORRAR después de setup. ----
-if (($_GET['t'] ?? '') === 'baby-diag-2026'
-    && strpos($_SERVER['REQUEST_URI'] ?? '', '_diag') !== false) {
-    header('Content-Type: text/plain; charset=utf-8');
-    $algos = password_algos();
-    $lines = [
-        "PHP Version: " . PHP_VERSION,
-        "SAPI: " . PHP_SAPI,
-        "Argon2id: " . (in_array(PASSWORD_ARGON2ID, $algos, true) ? "SI" : "NO"),
-        "openssl: " . (extension_loaded('openssl') ? "SI" : "NO"),
-        "pdo_mysql: " . (extension_loaded('pdo_mysql') ? "SI" : "NO"),
-        "config.php en /home/uXXX/private/: " . (file_exists(dirname(__DIR__, 3) . '/private/config.php') ? "SI" : "NO"),
-        "config.php en public_html/: " . (file_exists(__DIR__ . '/config.php') ? "SI" : "NO"),
-    ];
-    echo implode("\n", $lines);
-    exit;
-}
-
 // ---------- Cargar config ---------------------------------------------------
 // __DIR__ = /home/uXXX/domains/site/public_html
 $configPaths = [
