@@ -717,6 +717,114 @@ body.dark .auth-form input { background: #1e1e2a; color: #eee; border-color: #44
 body.dark .auth-tabs { background: rgba(255,255,255,0.05); }
 body.dark .auth-tab.active { background: #2b2b3a; }
 body.dark .auth-error { background: #4a1e1e; color: #ff9090; }
+
+/* ===== Recetas ===== */
+.rec-filters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.rec-input {
+  width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 12px;
+  font-size: 0.95rem; box-sizing: border-box; background: var(--input-bg, #fafafa); color: var(--text, #222);
+}
+.rec-input:focus { outline: none; border-color: var(--baby-blue, #74B9FF); }
+.rec-chips {
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.rec-chip {
+  padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd;
+  background: transparent; font-size: 0.82rem; cursor: pointer;
+  color: var(--text, #222); transition: all 0.15s;
+}
+.rec-chip.active {
+  background: var(--baby-blue, #74B9FF); color: #fff; border-color: transparent;
+}
+.rec-toggle {
+  display: flex; align-items: center; gap: 8px; font-size: 0.85rem;
+  color: var(--text-light, #666); cursor: pointer;
+}
+.rec-toggle input { width: 18px; height: 18px; cursor: pointer; }
+.rec-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (min-width: 600px) { .rec-list { grid-template-columns: repeat(3, 1fr); } }
+.rec-card {
+  background: var(--card-bg, #fff); border-radius: 14px; padding: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer;
+  transition: transform 0.1s;
+  display: flex; flex-direction: column; gap: 4px;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+.rec-card:hover, .rec-card:active { transform: translateY(-2px); }
+.rec-card .rec-emoji { font-size: 2rem; text-align: center; }
+.rec-card .rec-name { font-weight: 600; font-size: 0.9rem; line-height: 1.2; text-align: center; }
+.rec-card .rec-meta {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.72rem; color: var(--text-light, #666); margin-top: 4px;
+}
+.rec-count { text-align: center; margin-top: 14px; color: var(--text-light, #666); font-size: 0.85rem; }
+.rec-empty { text-align: center; padding: 2rem 1rem; color: var(--text-light, #666); }
+
+/* Modal detalle */
+.rec-modal-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(3px);
+  display: none; align-items: flex-end; justify-content: center;
+  animation: fadeIn 0.2s;
+}
+.rec-modal-overlay.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.rec-modal {
+  background: var(--card-bg, #fff); color: var(--text, #222);
+  border-radius: 18px 18px 0 0; padding: 1.2rem;
+  max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto;
+  animation: slideUp 0.25s ease-out;
+}
+@media (min-width: 600px) {
+  .rec-modal-overlay { align-items: center; }
+  .rec-modal { border-radius: 18px; max-height: 85vh; }
+}
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+.rec-modal h2 {
+  margin: 0.3rem 0 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px;
+}
+.rec-modal .rec-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.rec-badge {
+  padding: 3px 10px; border-radius: 12px; font-size: 0.72rem;
+  background: rgba(116,185,255,0.15); color: var(--baby-blue, #4B90D8);
+}
+.rec-badge.warn { background: rgba(255,180,80,0.2); color: #b57200; }
+.rec-modal h3 { font-size: 0.95rem; margin: 1rem 0 0.4rem; color: var(--text, #222); }
+.rec-portions {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px;
+}
+.rec-portion-item {
+  background: rgba(0,0,0,0.03); padding: 8px 4px; border-radius: 8px;
+  text-align: center;
+}
+.rec-portion-item .p-val { font-weight: 700; font-size: 0.95rem; color: var(--baby-blue, #4B90D8); }
+.rec-portion-item .p-label { font-size: 0.7rem; color: var(--text-light, #666); margin-top: 2px; }
+.rec-modal ol, .rec-modal ul { padding-left: 1.4rem; margin: 6px 0; }
+.rec-modal ol li, .rec-modal ul li { margin-bottom: 4px; font-size: 0.9rem; line-height: 1.4; }
+.rec-instructions { white-space: pre-line; font-size: 0.9rem; line-height: 1.5; }
+.rec-tips {
+  background: #fff8e1; padding: 10px 12px; border-radius: 10px;
+  font-size: 0.85rem; margin-top: 10px; border-left: 3px solid #ffc107;
+}
+body.dark .rec-tips { background: #3a3020; color: #fff3b0; }
+.rec-actions {
+  display: flex; gap: 8px; margin-top: 1.2rem;
+}
+.rec-btn {
+  flex: 1; padding: 12px; border: none; border-radius: 12px;
+  font-size: 0.95rem; font-weight: 600; cursor: pointer;
+}
+.rec-btn.primary {
+  background: linear-gradient(135deg, #74B9FF, #A29BFE); color: #fff;
+}
+.rec-btn.secondary {
+  background: rgba(0,0,0,0.06); color: var(--text, #222);
+}
+body.dark .rec-portion-item { background: rgba(255,255,255,0.05); }
+body.dark .rec-btn.secondary { background: rgba(255,255,255,0.08); color: #eee; }
+body.dark .rec-input { background: #1e1e2a; color: #eee; border-color: #444; }
+body.dark .rec-chip { color: #eee; border-color: #444; }
+body.dark .rec-card { background: #2b2b3a; border-color: rgba(255,255,255,0.06); }
 </style>
 </head>
 <body>
@@ -1040,6 +1148,30 @@ body.dark .auth-error { background: #4a1e1e; color: #ff9090; }
   </div>
 </div>
 
+<!-- RECETAS -->
+<div class="section" id="recSection">
+  <div class="card">
+    <h3>🍽️ Recetas para tu bebé</h3>
+    <p style="font-size:0.82em;color:var(--text-light);margin-bottom:12px" id="recAgeHint">Recetas apropiadas para la edad de tu bebé. Consulta a tu pediatra ante alergias.</p>
+
+    <div class="rec-filters">
+      <input type="search" id="recSearch" placeholder="Buscar receta..." class="rec-input">
+      <div class="rec-chips" id="recCategoryChips"></div>
+      <label class="rec-toggle">
+        <input type="checkbox" id="recOnlyAgeMatch" checked>
+        <span>Solo apropiadas para la edad actual</span>
+      </label>
+    </div>
+    <div id="recList" class="rec-list"></div>
+    <div id="recCount" class="rec-count"></div>
+  </div>
+</div>
+
+<!-- Modal Detalle Receta -->
+<div class="rec-modal-overlay" id="recDetailOverlay" onclick="if(event.target===this)closeRecDetail()">
+  <div class="rec-modal" id="recDetailBody"></div>
+</div>
+
 <!-- AJUSTES -->
 <div class="section" id="settingsSection">
   <div class="card">
@@ -1122,6 +1254,9 @@ body.dark .auth-error { background: #4a1e1e; color: #ff9090; }
   </button>
   <button class="tab" data-tab="act" onclick="switchTab('act', this)">
     <span class="tab-icon">🎯</span>Juegos
+  </button>
+  <button class="tab" data-tab="rec" onclick="switchTab('rec', this)">
+    <span class="tab-icon">🍽️</span>Recetas
   </button>
   <button class="tab" data-tab="settings" onclick="switchTab('settings', this)">
     <span class="tab-icon">⚙️</span>Ajustes
@@ -1470,7 +1605,7 @@ const PhotoDB = (() => {
 // ===== SERVER SYNC =====
 const SYNC = (() => {
   const API = new URL('api/', location.href).href;
-  const SYNCED_KEYS = ['info', 'growth', 'medicines', 'studies', 'vaccines', 'appointments', 'activities'];
+  const SYNCED_KEYS = ['info', 'growth', 'medicines', 'studies', 'vaccines', 'appointments', 'activities', 'feedings'];
 
   async function api(path, opts = {}) {
     return fetch(API + path.replace(/^\//, ''), {
@@ -2863,7 +2998,212 @@ function switchTab(name, btn) {
   if (target) target.classList.add('active');
   if (name === 'vac') renderVaccines();
   if (name === 'act') renderActivities();
+  if (name === 'rec') Recipes.render();
   window.scrollTo(0, 0);
+}
+
+// ===== RECIPES =====
+const Recipes = (() => {
+  let all = null;      // cache
+  let filtered = [];
+  let categoryFilter = 'todas';
+  let searchQuery = '';
+  let onlyAgeMatch = true;
+
+  const CATEGORY_LABELS = {
+    todas: 'Todas',
+    papilla: '🥣 Papillas',
+    pure: '🥄 Purés',
+    picado: '🍽️ Picados',
+    sopa: '🍲 Sopas',
+    guiso: '🍛 Guisos',
+    solido: '🍞 Sólidos',
+    cereal: '🌾 Cereales',
+    merienda: '🍪 Meriendas',
+    bebida: '🥤 Bebidas',
+  };
+
+  function babyAgeMonths() {
+    const info = DB.get('info');
+    if (!info?.birth) return null;
+    const b = new Date(info.birth);
+    const now = new Date();
+    return (now.getFullYear() - b.getFullYear()) * 12 + (now.getMonth() - b.getMonth());
+  }
+
+  async function load() {
+    if (all) return all;
+    try {
+      const r = await fetch('recipes.json', { cache: 'default' });
+      const j = await r.json();
+      all = j.recipes || [];
+      return all;
+    } catch (e) {
+      console.warn('recipes load failed', e);
+      all = [];
+      return all;
+    }
+  }
+
+  function apply() {
+    const q = searchQuery.trim().toLowerCase();
+    const ageM = babyAgeMonths();
+    filtered = (all || []).filter(r => {
+      if (categoryFilter !== 'todas' && r.category !== categoryFilter) return false;
+      if (onlyAgeMatch && ageM !== null) {
+        if (r.age_min_months > ageM || r.age_max_months < ageM) return false;
+      }
+      if (q) {
+        const hay = (r.name + ' ' + (r.ingredients||[]).map(i => i.name).join(' ')).toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+    renderList();
+  }
+
+  function renderChips() {
+    const box = document.getElementById('recCategoryChips');
+    if (!box) return;
+    const cats = ['todas', ...new Set((all || []).map(r => r.category))];
+    box.innerHTML = cats.map(c =>
+      `<button type="button" class="rec-chip${c === categoryFilter ? ' active' : ''}" onclick="Recipes.setCategory('${c}')">${CATEGORY_LABELS[c] || c}</button>`
+    ).join('');
+  }
+
+  function renderList() {
+    const list = document.getElementById('recList');
+    const count = document.getElementById('recCount');
+    if (!list) return;
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="rec-empty">No hay recetas que coincidan.<br><small>Prueba desactivar el filtro por edad o cambiar categoría.</small></div>';
+      count.textContent = '';
+      return;
+    }
+    list.innerHTML = filtered.map(r => `
+      <div class="rec-card" onclick="Recipes.show('${r.id}')">
+        <div class="rec-emoji">${r.emoji || '🍽️'}</div>
+        <div class="rec-name">${escapeHTML(r.name)}</div>
+        <div class="rec-meta">
+          <span>${r.age_min_months}-${r.age_max_months}m</span>
+          <span>${r.prep_time_min || '?'}min</span>
+        </div>
+      </div>
+    `).join('');
+    count.textContent = `${filtered.length} receta${filtered.length === 1 ? '' : 's'}`;
+  }
+
+  function renderAgeHint() {
+    const el = document.getElementById('recAgeHint');
+    if (!el) return;
+    const ageM = babyAgeMonths();
+    if (ageM === null) {
+      el.textContent = 'Configura la fecha de nacimiento en Ajustes para filtrar por edad.';
+    } else {
+      el.textContent = `Filtradas para ${ageM} mes${ageM===1?'':'es'} de edad. Consulta a tu pediatra ante alergias.`;
+    }
+  }
+
+  async function render() {
+    await load();
+    renderChips();
+    renderAgeHint();
+    apply();
+    // Wire inputs (idempotente)
+    const search = document.getElementById('recSearch');
+    const ageCheck = document.getElementById('recOnlyAgeMatch');
+    if (search && !search._wired) {
+      search._wired = true;
+      search.addEventListener('input', (e) => { searchQuery = e.target.value; apply(); });
+    }
+    if (ageCheck && !ageCheck._wired) {
+      ageCheck._wired = true;
+      ageCheck.addEventListener('change', (e) => { onlyAgeMatch = e.target.checked; apply(); });
+    }
+  }
+
+  function setCategory(c) {
+    categoryFilter = c;
+    renderChips();
+    apply();
+  }
+
+  function show(id) {
+    const r = (all || []).find(x => x.id === id);
+    if (!r) return;
+    const p = r.portions || {};
+    const portionItems = [
+      ['Fruta', p.fruta_g, 'g'],
+      ['Verdura', p.verdura_g, 'g'],
+      ['Proteína', p.proteina_g, 'g'],
+      ['Cereal', p.cereal_g, 'g'],
+      ['Grasa', p.grasa_g, 'g'],
+      ['Calorías', p.calorias_kcal, 'kcal'],
+    ].filter(([_, v]) => v && v > 0);
+
+    const body = document.getElementById('recDetailBody');
+    body.innerHTML = `
+      <h2>${r.emoji || '🍽️'} ${escapeHTML(r.name)}</h2>
+      <div class="rec-badges">
+        <span class="rec-badge">${r.age_min_months}-${r.age_max_months} meses</span>
+        <span class="rec-badge">${CATEGORY_LABELS[r.category] || r.category}</span>
+        <span class="rec-badge">${r.prep_time_min || '?'} min</span>
+        <span class="rec-badge">${r.difficulty || 'facil'}</span>
+        ${(r.allergens || []).map(a => `<span class="rec-badge warn">⚠️ ${a}</span>`).join('')}
+      </div>
+
+      ${portionItems.length ? `
+        <h3>Porciones estimadas</h3>
+        <div class="rec-portions">
+          ${portionItems.map(([label, val, unit]) => `
+            <div class="rec-portion-item">
+              <div class="p-val">${val}${unit === 'kcal' ? '' : unit}</div>
+              <div class="p-label">${label}${unit === 'kcal' ? ' (kcal)' : ''}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+
+      <h3>Ingredientes</h3>
+      <ul>
+        ${(r.ingredients || []).map(i => `<li>${escapeHTML(i.name)} — ${i.amount}${i.unit}</li>`).join('')}
+      </ul>
+
+      <h3>Preparación</h3>
+      <div class="rec-instructions">${escapeHTML(r.instructions || '')}</div>
+
+      ${r.tips ? `<div class="rec-tips">💡 ${escapeHTML(r.tips)}</div>` : ''}
+
+      <div class="rec-actions">
+        <button class="rec-btn secondary" onclick="closeRecDetail()">Cerrar</button>
+        <button class="rec-btn primary" onclick="Recipes.logFeeding('${r.id}')">Registrar comida ✓</button>
+      </div>
+    `;
+    document.getElementById('recDetailOverlay').classList.add('show');
+  }
+
+  function logFeeding(id) {
+    const r = (all || []).find(x => x.id === id);
+    if (!r) return;
+    const feedings = DB.get('feedings') || [];
+    feedings.push({
+      id: Date.now(),
+      recipe_id: r.id,
+      name: r.name,
+      emoji: r.emoji,
+      portions: r.portions,
+      ts: new Date().toISOString(),
+    });
+    DB.set('feedings', feedings);
+    showToast('Comida registrada ✓');
+    closeRecDetail();
+  }
+
+  return { render, setCategory, show, logFeeding };
+})();
+
+function closeRecDetail() {
+  document.getElementById('recDetailOverlay')?.classList.remove('show');
 }
 
 // ===== EXPORT / IMPORT =====

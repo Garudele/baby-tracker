@@ -1,0 +1,2157 @@
+{
+  "version": 1,
+  "generated_at": "2026-08-09",
+  "disclaimer": "Guía informativa, no reemplaza consulta pediátrica. Ante alergias o dudas, consulta a tu pediatra.",
+  "recipes": [
+    {
+      "id": "papilla-manzana-01",
+      "name": "Papilla de manzana",
+      "emoji": "🍎",
+      "age_min_months": 4,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 80, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 42 },
+      "ingredients": [
+        { "name": "Manzana pelada y sin semillas", "amount": 80, "unit": "g" },
+        { "name": "Agua o leche materna", "amount": 30, "unit": "ml" }
+      ],
+      "instructions": "1. Pela la manzana y retira las semillas. 2. Corta en trozos pequeños. 3. Cocina al vapor 10 minutos hasta que esté suave. 4. Tritura con tenedor o licua con un poco de agua o leche materna hasta lograr consistencia suave. 5. Sirve tibia.",
+      "tips": "Puedes agregar una pizca de canela para bebés mayores a 8 meses.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-pera-02",
+      "name": "Papilla de pera",
+      "emoji": "🍐",
+      "age_min_months": 4,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 12,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 80, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 46 },
+      "ingredients": [
+        { "name": "Pera madura pelada", "amount": 80, "unit": "g" },
+        { "name": "Agua", "amount": 20, "unit": "ml" }
+      ],
+      "instructions": "1. Pela la pera y retira el corazón. 2. Córtala en cubos pequeños. 3. Cocina al vapor 8 minutos. 4. Tritura hasta obtener textura suave. 5. Sirve inmediatamente.",
+      "tips": "La pera ayuda a mejorar el tránsito intestinal del bebé.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-platano-03",
+      "name": "Papilla de plátano",
+      "emoji": "🍌",
+      "age_min_months": 4,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 70, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 62 },
+      "ingredients": [
+        { "name": "Plátano Tabasco maduro", "amount": 70, "unit": "g" },
+        { "name": "Leche materna o fórmula", "amount": 20, "unit": "ml" }
+      ],
+      "instructions": "1. Pela el plátano bien maduro. 2. Machácalo con un tenedor. 3. Agrega leche materna o fórmula poco a poco hasta lograr la consistencia deseada. 4. Sirve al momento para evitar oxidación.",
+      "tips": "Elige plátanos con manchitas cafés en la cáscara: son más dulces y digestibles.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-papaya-04",
+      "name": "Papilla de papaya",
+      "emoji": "🍈",
+      "age_min_months": 4,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 80, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 34 },
+      "ingredients": [
+        { "name": "Papaya maradol madura sin semillas", "amount": 80, "unit": "g" }
+      ],
+      "instructions": "1. Retira la cáscara y semillas de la papaya. 2. Corta en cubos. 3. Machaca con tenedor o licua brevemente. 4. Sirve fresca.",
+      "tips": "La papaya es excelente para la digestión y muy fácil de digerir.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-mango-05",
+      "name": "Papilla de mango",
+      "emoji": "🥭",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 70, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 42 },
+      "ingredients": [
+        { "name": "Mango Ataulfo maduro sin cáscara ni hueso", "amount": 70, "unit": "g" }
+      ],
+      "instructions": "1. Pela el mango bien maduro. 2. Retira toda la pulpa alrededor del hueso. 3. Licua o machaca hasta obtener textura suave. 4. Sirve al momento.",
+      "tips": "El mango Ataulfo es ideal por su textura cremosa y poca fibra.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-aguacate-06",
+      "name": "Papilla de aguacate",
+      "emoji": "🥑",
+      "age_min_months": 4,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 50, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 8, "calorias_kcal": 120 },
+      "ingredients": [
+        { "name": "Aguacate Hass maduro", "amount": 50, "unit": "g" },
+        { "name": "Leche materna o agua", "amount": 20, "unit": "ml" }
+      ],
+      "instructions": "1. Corta el aguacate a la mitad y retira el hueso. 2. Extrae la pulpa con una cuchara. 3. Machácalo bien con un tenedor. 4. Agrega leche materna o agua para suavizar. 5. Sirve inmediatamente.",
+      "tips": "El aguacate aporta grasas saludables para el desarrollo cerebral del bebé.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-zanahoria-07",
+      "name": "Papilla de zanahoria",
+      "emoji": "🥕",
+      "age_min_months": 4,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 25 },
+      "ingredients": [
+        { "name": "Zanahoria pelada", "amount": 60, "unit": "g" },
+        { "name": "Agua", "amount": 40, "unit": "ml" }
+      ],
+      "instructions": "1. Pela y corta la zanahoria en rodajas delgadas. 2. Cocina al vapor por 15 minutos hasta que esté muy suave. 3. Licua con un poco de agua de cocción hasta obtener textura sedosa. 4. Cuela si es necesario para bebés de 4-5 meses.",
+      "tips": "La zanahoria es rica en betacarotenos, ideal para la vista.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-calabaza-08",
+      "name": "Papilla de calabaza de castilla",
+      "emoji": "🎃",
+      "age_min_months": 4,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 70, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 22 },
+      "ingredients": [
+        { "name": "Calabaza de castilla sin cáscara ni semillas", "amount": 70, "unit": "g" },
+        { "name": "Agua", "amount": 30, "unit": "ml" }
+      ],
+      "instructions": "1. Retira cáscara y semillas de la calabaza. 2. Corta en cubos medianos. 3. Cocina al vapor u hornea 20 minutos. 4. Licua o tritura hasta textura suave. 5. Sirve tibia.",
+      "tips": "Dulce natural que suele encantar a los bebés.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-camote-09",
+      "name": "Papilla de camote",
+      "emoji": "🍠",
+      "age_min_months": 4,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 30,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 70, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 60 },
+      "ingredients": [
+        { "name": "Camote pelado", "amount": 70, "unit": "g" },
+        { "name": "Agua", "amount": 30, "unit": "ml" }
+      ],
+      "instructions": "1. Lava, pela y corta el camote en cubos. 2. Cocina al vapor por 20 minutos o hornea envuelto en aluminio. 3. Machaca o licua con un poco de agua tibia. 4. Sirve tibia.",
+      "tips": "Rico en vitamina A y fibra. Puedes hornearlo para intensificar el sabor dulce.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-chayote-10",
+      "name": "Papilla de chayote",
+      "emoji": "🥒",
+      "age_min_months": 5,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 70, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 17 },
+      "ingredients": [
+        { "name": "Chayote pelado sin semilla", "amount": 70, "unit": "g" },
+        { "name": "Agua", "amount": 40, "unit": "ml" }
+      ],
+      "instructions": "1. Pela el chayote con cuidado (usa guantes si te irrita la piel). 2. Retira la semilla y corta en cubos. 3. Cocina al vapor 15 minutos. 4. Licua hasta obtener textura suave.",
+      "tips": "Suave y muy digestivo, ideal como primera verdura.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-calabacita-11",
+      "name": "Papilla de calabacita",
+      "emoji": "🥒",
+      "age_min_months": 5,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 10 },
+      "ingredients": [
+        { "name": "Calabacita italiana sin cáscara", "amount": 60, "unit": "g" },
+        { "name": "Agua", "amount": 30, "unit": "ml" }
+      ],
+      "instructions": "1. Pela y corta la calabacita en rodajas. 2. Cocina al vapor 10 minutos. 3. Licua o tritura hasta obtener textura suave. 4. Sirve tibia.",
+      "tips": "Sabor muy suave, perfecta para primeras papillas de verdura.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-brocoli-12",
+      "name": "Papilla de brócoli",
+      "emoji": "🥦",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 17 },
+      "ingredients": [
+        { "name": "Floretes de brócoli", "amount": 50, "unit": "g" },
+        { "name": "Agua", "amount": 40, "unit": "ml" }
+      ],
+      "instructions": "1. Lava bien los floretes de brócoli. 2. Cocina al vapor 10 minutos hasta que estén tiernos. 3. Licua con agua de cocción hasta lograr textura suave. 4. Sirve tibia.",
+      "tips": "Rico en vitamina C y hierro vegetal.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-coliflor-13",
+      "name": "Papilla de coliflor",
+      "emoji": "🥦",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 18,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 55, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 14 },
+      "ingredients": [
+        { "name": "Floretes de coliflor", "amount": 55, "unit": "g" },
+        { "name": "Agua", "amount": 40, "unit": "ml" }
+      ],
+      "instructions": "1. Separa los floretes y lávalos. 2. Cocina al vapor 12 minutos. 3. Licua con agua de cocción hasta textura sedosa.",
+      "tips": "Introduce las crucíferas en pequeñas cantidades al inicio.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-durazno-14",
+      "name": "Papilla de durazno",
+      "emoji": "🍑",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 12,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 70, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 27 },
+      "ingredients": [
+        { "name": "Durazno maduro pelado sin hueso", "amount": 70, "unit": "g" }
+      ],
+      "instructions": "1. Sumerge el durazno 30 segundos en agua caliente para pelarlo fácilmente. 2. Retira el hueso. 3. Licua o machaca la pulpa. 4. Sirve fresca.",
+      "tips": "Si el durazno no está muy maduro, cuécelo al vapor 5 minutos.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-ciruela-15",
+      "name": "Papilla de ciruela",
+      "emoji": "🍑",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 10,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 60, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 27 },
+      "ingredients": [
+        { "name": "Ciruela madura pelada sin hueso", "amount": 60, "unit": "g" },
+        { "name": "Agua", "amount": 20, "unit": "ml" }
+      ],
+      "instructions": "1. Pela la ciruela y retira el hueso. 2. Cocina al vapor 5 minutos. 3. Licua con un poco de agua.",
+      "tips": "Ayuda al tránsito intestinal cuando el bebé tiene estreñimiento leve.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-melon-16",
+      "name": "Papilla de melón",
+      "emoji": "🍈",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 80, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 27 },
+      "ingredients": [
+        { "name": "Melón chino maduro sin cáscara ni semillas", "amount": 80, "unit": "g" }
+      ],
+      "instructions": "1. Retira cáscara y semillas. 2. Corta en cubos. 3. Licua brevemente hasta lograr textura suave. 4. Sirve fresca.",
+      "tips": "Muy hidratante, ideal en épocas de calor.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-sandia-17",
+      "name": "Papilla de sandía",
+      "emoji": "🍉",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 80, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 24 },
+      "ingredients": [
+        { "name": "Sandía sin semillas", "amount": 80, "unit": "g" }
+      ],
+      "instructions": "1. Retira todas las semillas. 2. Corta la pulpa en cubos. 3. Machaca o licua brevemente. 4. Cuela si quedan hilos. 5. Sirve al momento.",
+      "tips": "Refrescante y con alto contenido de agua.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-guayaba-18",
+      "name": "Papilla colada de guayaba",
+      "emoji": "🍐",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 60, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 41 },
+      "ingredients": [
+        { "name": "Guayaba madura", "amount": 60, "unit": "g" },
+        { "name": "Agua", "amount": 40, "unit": "ml" }
+      ],
+      "instructions": "1. Lava las guayabas y córtalas en cuartos. 2. Cocínalas 8 minutos en agua. 3. Licua y cuela muy bien para retirar todas las semillas. 4. Sirve tibia.",
+      "tips": "Excelente fuente de vitamina C.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-elote-19",
+      "name": "Papilla colada de elote tierno",
+      "emoji": "🌽",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 52 },
+      "ingredients": [
+        { "name": "Granos de elote tierno", "amount": 60, "unit": "g" },
+        { "name": "Agua", "amount": 60, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina los granos de elote en agua 15 minutos. 2. Licua muy bien. 3. Cuela cuidadosamente para retirar el hollejo. 4. Sirve tibia.",
+      "tips": "Colar bien es esencial para evitar atragantamiento.",
+      "allergens": []
+    },
+    {
+      "id": "papilla-betabel-20",
+      "name": "Papilla de betabel",
+      "emoji": "🥕",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "papilla",
+      "prep_time_min": 40,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 22 },
+      "ingredients": [
+        { "name": "Betabel pequeño pelado", "amount": 50, "unit": "g" },
+        { "name": "Agua", "amount": 40, "unit": "ml" }
+      ],
+      "instructions": "1. Lava y pela el betabel. 2. Cocina al vapor u hornea 30 minutos hasta que esté suave. 3. Licua con agua hasta textura sedosa. 4. Sirve tibia.",
+      "tips": "Puede teñir el pañal de color rojizo, es normal.",
+      "allergens": []
+    },
+    {
+      "id": "pure-manzana-avena-21",
+      "name": "Puré de manzana con avena",
+      "emoji": "🍎",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 60, "verdura_g": 0, "proteina_g": 0, "cereal_g": 30, "grasa_g": 0, "calorias_kcal": 140 },
+      "ingredients": [
+        { "name": "Manzana pelada", "amount": 60, "unit": "g" },
+        { "name": "Avena en hojuelas", "amount": 15, "unit": "g" },
+        { "name": "Agua o leche materna", "amount": 100, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina la manzana al vapor 10 minutos. 2. Aparte, cocina la avena con el agua o leche materna hasta que espese (5-7 min). 3. Combina manzana y avena y licua. 4. Sirve tibia.",
+      "tips": "La avena aporta fibra y energía sostenida.",
+      "allergens": ["gluten"]
+    },
+    {
+      "id": "pure-platano-avena-22",
+      "name": "Puré de plátano con avena",
+      "emoji": "🍌",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 10,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 60, "verdura_g": 0, "proteina_g": 0, "cereal_g": 30, "grasa_g": 0, "calorias_kcal": 160 },
+      "ingredients": [
+        { "name": "Plátano maduro", "amount": 60, "unit": "g" },
+        { "name": "Avena en hojuelas", "amount": 15, "unit": "g" },
+        { "name": "Leche materna o fórmula", "amount": 80, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina la avena con la leche materna o fórmula 5 minutos. 2. Machaca el plátano y agrégalo a la avena caliente. 3. Mezcla bien. 4. Sirve tibia.",
+      "tips": "Ideal como desayuno energético.",
+      "allergens": ["gluten"]
+    },
+    {
+      "id": "pure-zanahoria-papa-23",
+      "name": "Puré de zanahoria con papa",
+      "emoji": "🥔",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 80, "proteina_g": 0, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 100 },
+      "ingredients": [
+        { "name": "Zanahoria pelada", "amount": 40, "unit": "g" },
+        { "name": "Papa pelada", "amount": 40, "unit": "g" },
+        { "name": "Aceite de oliva extra virgen", "amount": 5, "unit": "ml" },
+        { "name": "Agua", "amount": 60, "unit": "ml" }
+      ],
+      "instructions": "1. Corta zanahoria y papa en cubos pequeños. 2. Cocina al vapor 15-18 minutos. 3. Licua con agua de cocción hasta textura suave. 4. Agrega el aceite de oliva y mezcla. 5. Sirve tibia.",
+      "tips": "El aceite de oliva ayuda a absorber vitaminas liposolubles.",
+      "allergens": []
+    },
+    {
+      "id": "pure-calabaza-camote-24",
+      "name": "Puré de calabaza con camote",
+      "emoji": "🍠",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 80, "proteina_g": 0, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 90 },
+      "ingredients": [
+        { "name": "Calabaza de castilla", "amount": 40, "unit": "g" },
+        { "name": "Camote", "amount": 40, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" },
+        { "name": "Agua", "amount": 50, "unit": "ml" }
+      ],
+      "instructions": "1. Pela y corta ambos ingredientes en cubos. 2. Cocina al vapor 20 minutos. 3. Licua o tritura con agua tibia. 4. Añade el aceite de oliva. 5. Sirve tibia.",
+      "tips": "Dulce natural que gusta mucho a los bebés.",
+      "allergens": []
+    },
+    {
+      "id": "pure-brocoli-papa-25",
+      "name": "Puré de brócoli con papa",
+      "emoji": "🥦",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 80, "proteina_g": 0, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 85 },
+      "ingredients": [
+        { "name": "Floretes de brócoli", "amount": 40, "unit": "g" },
+        { "name": "Papa pelada", "amount": 40, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina brócoli y papa al vapor 15 minutos. 2. Licua con un poco de agua de cocción. 3. Añade aceite de oliva y mezcla. 4. Sirve tibia.",
+      "tips": "Combina hierro y almidón para una comida completa.",
+      "allergens": []
+    },
+    {
+      "id": "pure-chayote-pollo-26",
+      "name": "Puré de chayote con pollo",
+      "emoji": "🍗",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 20, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 115 },
+      "ingredients": [
+        { "name": "Chayote pelado sin semilla", "amount": 60, "unit": "g" },
+        { "name": "Pechuga de pollo sin piel", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" },
+        { "name": "Agua", "amount": 80, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina la pechuga de pollo en agua sin sal 15 minutos. 2. Cocina el chayote al vapor 12 minutos. 3. Licua ambos con un poco del caldo. 4. Añade aceite de oliva. 5. Sirve tibia.",
+      "tips": "Primera proteína animal recomendada para bebés.",
+      "allergens": []
+    },
+    {
+      "id": "pure-calabaza-pollo-27",
+      "name": "Puré de calabaza con pollo",
+      "emoji": "🎃",
+      "age_min_months": 7,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 25, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 130 },
+      "ingredients": [
+        { "name": "Calabaza de castilla", "amount": 60, "unit": "g" },
+        { "name": "Pechuga de pollo cocida", "amount": 25, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" },
+        { "name": "Caldo de pollo casero sin sal", "amount": 80, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina la calabaza al vapor 15 minutos. 2. Desmenuza el pollo cocido. 3. Licua todo con caldo de pollo hasta obtener textura suave. 4. Añade aceite de oliva. 5. Sirve tibia.",
+      "tips": "El caldo casero aporta más nutrientes que agua sola.",
+      "allergens": []
+    },
+    {
+      "id": "pure-lentejas-zanahoria-28",
+      "name": "Puré de lentejas con zanahoria",
+      "emoji": "🥕",
+      "age_min_months": 7,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 45,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 25, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 130 },
+      "ingredients": [
+        { "name": "Lentejas cocidas", "amount": 25, "unit": "g" },
+        { "name": "Zanahoria pelada", "amount": 40, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" },
+        { "name": "Agua", "amount": 80, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina las lentejas hasta que estén muy suaves (30-40 min). 2. Cocina la zanahoria al vapor 15 min. 3. Licua todo con agua. 4. Cuela para retirar cáscaras. 5. Añade aceite y sirve tibia.",
+      "tips": "Excelente fuente de hierro vegetal, combina con vitamina C para mejor absorción.",
+      "allergens": []
+    },
+    {
+      "id": "pure-frijol-arroz-29",
+      "name": "Puré de frijol con arroz",
+      "emoji": "🍚",
+      "age_min_months": 7,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 0, "proteina_g": 20, "cereal_g": 30, "grasa_g": 3, "calorias_kcal": 150 },
+      "ingredients": [
+        { "name": "Frijol bayo cocido sin sal", "amount": 20, "unit": "g" },
+        { "name": "Arroz blanco cocido", "amount": 30, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" },
+        { "name": "Caldo de frijol o agua", "amount": 60, "unit": "ml" }
+      ],
+      "instructions": "1. Licua frijoles y arroz con el caldo hasta textura suave. 2. Cuela para retirar cáscaras del frijol. 3. Añade aceite de oliva. 4. Sirve tibio.",
+      "tips": "Frijol + arroz forman una proteína completa vegetariana.",
+      "allergens": []
+    },
+    {
+      "id": "pure-espinaca-papa-30",
+      "name": "Puré de espinaca con papa",
+      "emoji": "🥬",
+      "age_min_months": 8,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 70, "proteina_g": 0, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 75 },
+      "ingredients": [
+        { "name": "Espinacas frescas", "amount": 30, "unit": "g" },
+        { "name": "Papa pelada", "amount": 40, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Lava muy bien las espinacas. 2. Cocina la papa al vapor 15 min. 3. Añade espinaca los últimos 3 minutos. 4. Licua todo con un poco de agua. 5. Añade aceite y sirve tibia.",
+      "tips": "Introduce hojas verdes en cantidades moderadas al inicio.",
+      "allergens": []
+    },
+    {
+      "id": "pure-pollo-verduras-31",
+      "name": "Puré de pollo con tres verduras",
+      "emoji": "🍗",
+      "age_min_months": 7,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 35,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 25, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 135 },
+      "ingredients": [
+        { "name": "Pechuga de pollo cocida", "amount": 25, "unit": "g" },
+        { "name": "Zanahoria", "amount": 20, "unit": "g" },
+        { "name": "Calabacita", "amount": 20, "unit": "g" },
+        { "name": "Papa", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" },
+        { "name": "Caldo de pollo sin sal", "amount": 80, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina las tres verduras al vapor 15 min. 2. Desmenuza el pollo cocido. 3. Licua todo con caldo. 4. Añade aceite. 5. Sirve tibia.",
+      "tips": "Comida completa y balanceada para el bebé.",
+      "allergens": []
+    },
+    {
+      "id": "pure-res-camote-32",
+      "name": "Puré de res con camote",
+      "emoji": "🥩",
+      "age_min_months": 7,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 45,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 20, "cereal_g": 0, "grasa_g": 4, "calorias_kcal": 155 },
+      "ingredients": [
+        { "name": "Filete de res magro", "amount": 20, "unit": "g" },
+        { "name": "Camote pelado", "amount": 60, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" },
+        { "name": "Agua o caldo sin sal", "amount": 80, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina la carne en agua 25-30 min hasta que esté muy suave. 2. Cocina camote al vapor 15 min. 3. Licua todo con caldo. 4. Añade aceite. 5. Sirve tibio.",
+      "tips": "Excelente fuente de hierro hem, muy bien absorbido.",
+      "allergens": []
+    },
+    {
+      "id": "pure-pescado-calabacita-33",
+      "name": "Puré de pescado blanco con calabacita",
+      "emoji": "🐟",
+      "age_min_months": 9,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 25,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 25, "cereal_g": 0, "grasa_g": 4, "calorias_kcal": 115 },
+      "ingredients": [
+        { "name": "Filete de pescado blanco (basa o mero)", "amount": 25, "unit": "g" },
+        { "name": "Calabacita", "amount": 50, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" },
+        { "name": "Agua", "amount": 60, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina el pescado al vapor 8 minutos revisando que no queden espinas. 2. Cocina la calabacita al vapor 10 min. 3. Licua todo con agua. 4. Añade aceite y sirve tibio.",
+      "tips": "Revisa MUY bien que no queden espinas. Prefiere pescados bajos en mercurio.",
+      "allergens": ["pescado"]
+    },
+    {
+      "id": "pure-yema-camote-34",
+      "name": "Puré de yema de huevo con camote",
+      "emoji": "🥚",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 15, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 120 },
+      "ingredients": [
+        { "name": "Yema de huevo cocida", "amount": 15, "unit": "g" },
+        { "name": "Camote cocido", "amount": 50, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" },
+        { "name": "Leche materna o agua", "amount": 40, "unit": "ml" }
+      ],
+      "instructions": "1. Cuece el huevo 10 minutos. 2. Separa la yema. 3. Machaca yema y camote con tenedor. 4. Añade leche materna hasta la consistencia deseada. 5. Añade aceite y sirve.",
+      "tips": "La yema aporta hierro y colina. Introducir la clara después de los 12 meses.",
+      "allergens": ["huevo"]
+    },
+    {
+      "id": "pure-pera-manzana-35",
+      "name": "Puré de pera con manzana",
+      "emoji": "🍐",
+      "age_min_months": 5,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 80, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 42 },
+      "ingredients": [
+        { "name": "Pera pelada", "amount": 40, "unit": "g" },
+        { "name": "Manzana pelada", "amount": 40, "unit": "g" }
+      ],
+      "instructions": "1. Pela y corta ambas frutas. 2. Cocina al vapor 10 minutos. 3. Machaca o licua hasta lograr textura suave. 4. Sirve tibia.",
+      "tips": "Combinación clásica y muy bien tolerada.",
+      "allergens": []
+    },
+    {
+      "id": "pure-mango-platano-36",
+      "name": "Puré de mango con plátano",
+      "emoji": "🥭",
+      "age_min_months": 6,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 80, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 62 },
+      "ingredients": [
+        { "name": "Mango Ataulfo", "amount": 40, "unit": "g" },
+        { "name": "Plátano maduro", "amount": 40, "unit": "g" }
+      ],
+      "instructions": "1. Machaca el plátano con tenedor. 2. Licua o machaca el mango. 3. Combina y mezcla bien. 4. Sirve inmediatamente.",
+      "tips": "Dulzura natural sin azúcar añadida.",
+      "allergens": []
+    },
+    {
+      "id": "pure-nopal-cocido-37",
+      "name": "Puré de nopal con calabacita",
+      "emoji": "🌵",
+      "age_min_months": 9,
+      "age_max_months": 15,
+      "category": "pure",
+      "prep_time_min": 25,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 0, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 40 },
+      "ingredients": [
+        { "name": "Nopal cocido sin espinas", "amount": 30, "unit": "g" },
+        { "name": "Calabacita cocida", "amount": 30, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina el nopal en cubos con agua hasta que suelte la baba y se ablande (15 min). 2. Enjuaga bien. 3. Cocina la calabacita. 4. Licua todo con un poco de agua. 5. Añade aceite.",
+      "tips": "Aporta fibra y minerales, muy típico mexicano.",
+      "allergens": []
+    },
+    {
+      "id": "pure-jitomate-arroz-38",
+      "name": "Puré de arroz con jitomate",
+      "emoji": "🍅",
+      "age_min_months": 8,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 30, "proteina_g": 0, "cereal_g": 40, "grasa_g": 3, "calorias_kcal": 155 },
+      "ingredients": [
+        { "name": "Arroz blanco cocido", "amount": 40, "unit": "g" },
+        { "name": "Jitomate maduro pelado sin semillas", "amount": 30, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Sumerge el jitomate en agua caliente 30 seg para pelarlo. 2. Retira semillas. 3. Cocina jitomate 5 min con un poco de agua. 4. Licua con arroz cocido. 5. Añade aceite. 6. Sirve tibio.",
+      "tips": "Introduce el jitomate en pequeñas cantidades por su ligera acidez.",
+      "allergens": []
+    },
+    {
+      "id": "pure-quinoa-verduras-39",
+      "name": "Puré de quinoa con verduras",
+      "emoji": "🥣",
+      "age_min_months": 8,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 15, "cereal_g": 30, "grasa_g": 3, "calorias_kcal": 175 },
+      "ingredients": [
+        { "name": "Quinoa cocida", "amount": 30, "unit": "g" },
+        { "name": "Zanahoria cocida", "amount": 20, "unit": "g" },
+        { "name": "Calabacita cocida", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Enjuaga bien la quinoa antes de cocinarla. 2. Cocínala 15 min en agua. 3. Cocina las verduras al vapor. 4. Licua todo con caldo o agua. 5. Añade aceite. 6. Sirve tibio.",
+      "tips": "La quinoa es proteína vegetal completa y sin gluten.",
+      "allergens": []
+    },
+    {
+      "id": "pure-atun-fresco-40",
+      "name": "Puré de atún fresco con calabacita",
+      "emoji": "🐟",
+      "age_min_months": 10,
+      "age_max_months": 15,
+      "category": "pure",
+      "prep_time_min": 25,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 25, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 130 },
+      "ingredients": [
+        { "name": "Atún fresco (no enlatado)", "amount": 25, "unit": "g" },
+        { "name": "Calabacita", "amount": 40, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina el atún al vapor 8 min. 2. Cocina la calabacita al vapor 10 min. 3. Verifica que no queden espinas. 4. Licua todo con un poco de agua. 5. Añade aceite. 6. Sirve tibio.",
+      "tips": "Elige atún fresco pequeño para menor exposición a mercurio.",
+      "allergens": ["pescado"]
+    },
+    {
+      "id": "pure-hígado-manzana-41",
+      "name": "Puré de hígado de pollo con manzana",
+      "emoji": "🥩",
+      "age_min_months": 7,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 20,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 30, "verdura_g": 0, "proteina_g": 20, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 105 },
+      "ingredients": [
+        { "name": "Hígado de pollo fresco", "amount": 20, "unit": "g" },
+        { "name": "Manzana pelada", "amount": 30, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina el hígado en agua 10 min. 2. Cocina la manzana al vapor 8 min. 3. Licua ambos con un poco de agua. 4. Añade aceite. 5. Sirve tibio.",
+      "tips": "El hígado es riquísimo en hierro y vitamina A. Ofrécelo 1 vez por semana.",
+      "allergens": []
+    },
+    {
+      "id": "pure-manzana-canela-42",
+      "name": "Puré de manzana con canela",
+      "emoji": "🍎",
+      "age_min_months": 8,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 80, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 45 },
+      "ingredients": [
+        { "name": "Manzana pelada", "amount": 80, "unit": "g" },
+        { "name": "Canela en polvo", "amount": 1, "unit": "pizca" }
+      ],
+      "instructions": "1. Cocina la manzana con la canela al vapor 10 minutos. 2. Machaca o licua. 3. Sirve tibia.",
+      "tips": "La canela aporta un sabor agradable sin necesidad de azúcar.",
+      "allergens": []
+    },
+    {
+      "id": "pure-frijol-negro-43",
+      "name": "Puré de frijol negro con calabacita",
+      "emoji": "🫘",
+      "age_min_months": 8,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 25, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 130 },
+      "ingredients": [
+        { "name": "Frijol negro cocido sin sal", "amount": 25, "unit": "g" },
+        { "name": "Calabacita cocida", "amount": 40, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Licua frijoles y calabacita con caldo de frijol. 2. Cuela para textura fina. 3. Añade aceite. 4. Sirve tibio.",
+      "tips": "Puedes ofrecerlo con tortilla suave para bebés mayores a 9 meses.",
+      "allergens": []
+    },
+    {
+      "id": "pure-mole-suave-44",
+      "name": "Puré tipo mole rosa con verduras",
+      "emoji": "🍅",
+      "age_min_months": 10,
+      "age_max_months": 15,
+      "category": "pure",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 20, "cereal_g": 0, "grasa_g": 4, "calorias_kcal": 140 },
+      "ingredients": [
+        { "name": "Jitomate pelado", "amount": 40, "unit": "g" },
+        { "name": "Betabel cocido", "amount": 20, "unit": "g" },
+        { "name": "Pollo cocido desmenuzado", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" }
+      ],
+      "instructions": "1. Licua jitomate y betabel. 2. Cocina la salsa 8 min con el aceite. 3. Añade el pollo. 4. Cocina 5 min más. 5. Vuelve a licuar para textura muy suave. 6. Sirve tibio.",
+      "tips": "Sabor y color atractivos, sin picante, apto para bebés.",
+      "allergens": []
+    },
+    {
+      "id": "pure-pollo-arroz-45",
+      "name": "Puré de arroz con pollo",
+      "emoji": "🍚",
+      "age_min_months": 8,
+      "age_max_months": 12,
+      "category": "pure",
+      "prep_time_min": 30,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 20, "proteina_g": 20, "cereal_g": 40, "grasa_g": 3, "calorias_kcal": 195 },
+      "ingredients": [
+        { "name": "Arroz blanco cocido", "amount": 40, "unit": "g" },
+        { "name": "Pollo cocido desmenuzado", "amount": 20, "unit": "g" },
+        { "name": "Zanahoria cocida", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" },
+        { "name": "Caldo de pollo sin sal", "amount": 60, "unit": "ml" }
+      ],
+      "instructions": "1. Licua todos los ingredientes con caldo hasta obtener textura de puré. 2. Añade aceite. 3. Sirve tibio.",
+      "tips": "Plato completo, energético y muy digerible.",
+      "allergens": []
+    },
+    {
+      "id": "picado-verduras-suaves-46",
+      "name": "Verduras picadas al vapor",
+      "emoji": "🥕",
+      "age_min_months": 9,
+      "age_max_months": 15,
+      "category": "picado",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 70, "proteina_g": 0, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 55 },
+      "ingredients": [
+        { "name": "Zanahoria en cubitos pequeños", "amount": 25, "unit": "g" },
+        { "name": "Calabacita en cubitos", "amount": 25, "unit": "g" },
+        { "name": "Papa en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Corta las verduras en cubos muy pequeños (5 mm). 2. Cocina al vapor 15 min hasta que se aplasten fácilmente con el dedo. 3. Escurre y agrega aceite. 4. Sirve tibia.",
+      "tips": "Textura ideal para desarrollo de masticación.",
+      "allergens": []
+    },
+    {
+      "id": "picado-pollo-verduras-47",
+      "name": "Pollo desmenuzado con verduras picadas",
+      "emoji": "🍗",
+      "age_min_months": 9,
+      "age_max_months": 15,
+      "category": "picado",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 25, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 130 },
+      "ingredients": [
+        { "name": "Pechuga de pollo cocida y desmenuzada finamente", "amount": 25, "unit": "g" },
+        { "name": "Chayote cocido en cubitos", "amount": 25, "unit": "g" },
+        { "name": "Zanahoria cocida en cubitos", "amount": 25, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina el pollo en agua sin sal 15 min. 2. Desmenúzalo en hebras finas. 3. Corta y cocina las verduras al vapor 12 min. 4. Combina todo con aceite. 5. Sirve tibio.",
+      "tips": "Introduce texturas variadas para promover la masticación.",
+      "allergens": []
+    },
+    {
+      "id": "picado-huevo-aguacate-48",
+      "name": "Huevo revuelto con aguacate",
+      "emoji": "🥚",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 10,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 30, "verdura_g": 0, "proteina_g": 25, "cereal_g": 0, "grasa_g": 6, "calorias_kcal": 175 },
+      "ingredients": [
+        { "name": "Huevo entero", "amount": 1, "unit": "pieza" },
+        { "name": "Aguacate maduro", "amount": 30, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Bate el huevo. 2. Cocínalo en sartén con el aceite a fuego bajo, revolviendo hasta que esté firme. 3. Sirve con aguacate machacado a un lado. 4. Puedes acompañar con tortilla suave.",
+      "tips": "A partir de los 12 meses ya se puede incluir la clara de huevo.",
+      "allergens": ["huevo"]
+    },
+    {
+      "id": "picado-tortitas-calabacita-49",
+      "name": "Tortitas de calabacita al horno",
+      "emoji": "🥒",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 15, "cereal_g": 20, "grasa_g": 5, "calorias_kcal": 175 },
+      "ingredients": [
+        { "name": "Calabacita rallada", "amount": 50, "unit": "g" },
+        { "name": "Huevo", "amount": 1, "unit": "pieza" },
+        { "name": "Avena en hojuelas molida", "amount": 20, "unit": "g" },
+        { "name": "Queso panela rallado", "amount": 15, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Ralla la calabacita y escurre bien. 2. Mezcla con huevo, avena y queso. 3. Forma tortitas pequeñas. 4. Hornea a 180°C 15 min o dora en sartén con aceite. 5. Sirve tibia.",
+      "tips": "Excelente finger food para bebés que ya toman con las manos.",
+      "allergens": ["huevo", "gluten", "lacteos"]
+    },
+    {
+      "id": "picado-pollo-camote-50",
+      "name": "Pollo con camote y espinaca",
+      "emoji": "🍠",
+      "age_min_months": 10,
+      "age_max_months": 18,
+      "category": "picado",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 25, "cereal_g": 0, "grasa_g": 4, "calorias_kcal": 170 },
+      "ingredients": [
+        { "name": "Pollo cocido en trocitos", "amount": 25, "unit": "g" },
+        { "name": "Camote cocido en cubitos", "amount": 40, "unit": "g" },
+        { "name": "Espinaca cocida picada", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina el camote y córtalo en cubitos pequeños. 2. Cocina la espinaca 3 min y pícala fino. 3. Combina todo con el pollo desmenuzado. 4. Añade aceite. 5. Sirve tibio.",
+      "tips": "Combina hierro, vitamina A y C en un mismo platillo.",
+      "allergens": []
+    },
+    {
+      "id": "picado-frijoles-tortilla-51",
+      "name": "Frijoles refritos suaves con tortilla",
+      "emoji": "🫘",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 0, "proteina_g": 25, "cereal_g": 30, "grasa_g": 5, "calorias_kcal": 195 },
+      "ingredients": [
+        { "name": "Frijoles cocidos sin sal", "amount": 30, "unit": "g" },
+        { "name": "Tortilla de maíz", "amount": 25, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Machaca los frijoles con un poco de su caldo. 2. Calienta en sartén con aceite hasta que espesen. 3. Corta la tortilla en cuadros pequeños o tiras suaves. 4. Sirve juntos.",
+      "tips": "Combinación clásica mexicana. Sin sal para menores de 12 meses.",
+      "allergens": []
+    },
+    {
+      "id": "picado-pescado-camote-52",
+      "name": "Pescado con puré de camote",
+      "emoji": "🐟",
+      "age_min_months": 10,
+      "age_max_months": 18,
+      "category": "picado",
+      "prep_time_min": 25,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 25, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 155 },
+      "ingredients": [
+        { "name": "Filete de pescado blanco", "amount": 25, "unit": "g" },
+        { "name": "Camote cocido", "amount": 50, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina el pescado al vapor 8 min revisando espinas. 2. Machaca el camote. 3. Desmenuza el pescado y colócalo sobre el camote. 4. Rocía con aceite. 5. Sirve tibio.",
+      "tips": "Prefiere pescados de bajo mercurio como basa, sierra o merluza.",
+      "allergens": ["pescado"]
+    },
+    {
+      "id": "picado-arroz-verduras-53",
+      "name": "Arroz blanco con verduras picadas",
+      "emoji": "🍚",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 30,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 0, "cereal_g": 40, "grasa_g": 3, "calorias_kcal": 180 },
+      "ingredients": [
+        { "name": "Arroz blanco cocido", "amount": 40, "unit": "g" },
+        { "name": "Chícharos cocidos", "amount": 20, "unit": "g" },
+        { "name": "Zanahoria cocida en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina el arroz normalmente sin sal. 2. Añade zanahoria y chícharos cocidos. 3. Mezcla con aceite. 4. Sirve tibia.",
+      "tips": "Base perfecta que puedes combinar con cualquier proteína.",
+      "allergens": []
+    },
+    {
+      "id": "picado-plátano-avena-54",
+      "name": "Plátano con avena y chía",
+      "emoji": "🍌",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 10,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 60, "verdura_g": 0, "proteina_g": 0, "cereal_g": 30, "grasa_g": 3, "calorias_kcal": 175 },
+      "ingredients": [
+        { "name": "Plátano en rodajas", "amount": 60, "unit": "g" },
+        { "name": "Avena cocida", "amount": 30, "unit": "g" },
+        { "name": "Semillas de chía remojadas", "amount": 3, "unit": "g" }
+      ],
+      "instructions": "1. Cocina la avena en agua o leche materna. 2. Añade las semillas de chía previamente remojadas 15 min. 3. Coloca el plátano en rodajitas encima. 4. Sirve tibia.",
+      "tips": "La chía debe estar bien remojada para evitar atragantamiento.",
+      "allergens": ["gluten"]
+    },
+    {
+      "id": "picado-carne-molida-55",
+      "name": "Carne molida con verduras",
+      "emoji": "🥩",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 25,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 25, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 180 },
+      "ingredients": [
+        { "name": "Carne molida magra de res", "amount": 25, "unit": "g" },
+        { "name": "Jitomate picado sin cáscara ni semillas", "amount": 20, "unit": "g" },
+        { "name": "Zanahoria rallada fina", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe la carne con aceite hasta dorar. 2. Añade zanahoria rallada y jitomate. 3. Cocina 10 min tapado. 4. Verifica que la textura sea suave. 5. Sirve tibia.",
+      "tips": "Excelente para inicio de comidas familiares adaptadas.",
+      "allergens": []
+    },
+    {
+      "id": "picado-arroz-caldoso-pollo-56",
+      "name": "Arroz caldoso con pollo",
+      "emoji": "🍚",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 30,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 30, "proteina_g": 25, "cereal_g": 40, "grasa_g": 3, "calorias_kcal": 210 },
+      "ingredients": [
+        { "name": "Arroz cocido", "amount": 40, "unit": "g" },
+        { "name": "Pollo desmenuzado", "amount": 25, "unit": "g" },
+        { "name": "Zanahoria cocida en cubitos", "amount": 15, "unit": "g" },
+        { "name": "Chícharos cocidos", "amount": 15, "unit": "g" },
+        { "name": "Caldo de pollo sin sal", "amount": 100, "unit": "ml" }
+      ],
+      "instructions": "1. Combina arroz cocido con caldo caliente. 2. Añade pollo, zanahoria y chícharos. 3. Deja que se hidrate 5 min. 4. Sirve tibio con cuchara.",
+      "tips": "Textura suave y jugosa, fácil de comer con cuchara.",
+      "allergens": []
+    },
+    {
+      "id": "picado-nopal-huevo-57",
+      "name": "Nopalitos con huevo revuelto",
+      "emoji": "🌵",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 25, "cereal_g": 0, "grasa_g": 6, "calorias_kcal": 150 },
+      "ingredients": [
+        { "name": "Nopal cocido en cubitos", "amount": 40, "unit": "g" },
+        { "name": "Huevo", "amount": 1, "unit": "pieza" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe el nopal cocido en aceite 3 min. 2. Bate el huevo y añádelo. 3. Revuelve suavemente hasta cocer. 4. Sirve tibio.",
+      "tips": "Desayuno mexicano nutritivo. Sin picante para bebés.",
+      "allergens": ["huevo"]
+    },
+    {
+      "id": "picado-lenteja-arroz-58",
+      "name": "Lentejas con arroz",
+      "emoji": "🫘",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 45,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 20, "proteina_g": 25, "cereal_g": 40, "grasa_g": 3, "calorias_kcal": 200 },
+      "ingredients": [
+        { "name": "Lentejas cocidas suaves", "amount": 25, "unit": "g" },
+        { "name": "Arroz cocido", "amount": 40, "unit": "g" },
+        { "name": "Zanahoria cocida en cubos", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Combina lentejas, arroz y zanahoria. 2. Añade un poco de caldo si está muy seco. 3. Añade aceite. 4. Sirve tibio.",
+      "tips": "Proteína completa combinando legumbre + cereal.",
+      "allergens": []
+    },
+    {
+      "id": "picado-atole-arroz-59",
+      "name": "Atole suave de arroz con canela",
+      "emoji": "🥣",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 0, "proteina_g": 0, "cereal_g": 30, "grasa_g": 0, "calorias_kcal": 120 },
+      "ingredients": [
+        { "name": "Arroz cocido", "amount": 30, "unit": "g" },
+        { "name": "Leche materna, fórmula o entera (>12m)", "amount": 150, "unit": "ml" },
+        { "name": "Canela en rama", "amount": 1, "unit": "trocito" }
+      ],
+      "instructions": "1. Licua el arroz con la leche. 2. Cocina a fuego bajo con la canela 8 min removiendo. 3. Retira la canela. 4. Sirve tibio, no caliente.",
+      "tips": "Bebida-alimento tradicional mexicana, sin azúcar añadida.",
+      "allergens": ["lacteos"]
+    },
+    {
+      "id": "picado-quesadilla-suave-60",
+      "name": "Quesadilla suave de queso panela",
+      "emoji": "🧀",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 10,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 0, "proteina_g": 20, "cereal_g": 30, "grasa_g": 5, "calorias_kcal": 210 },
+      "ingredients": [
+        { "name": "Tortilla de maíz pequeña", "amount": 30, "unit": "g" },
+        { "name": "Queso panela rallado", "amount": 20, "unit": "g" }
+      ],
+      "instructions": "1. Calienta la tortilla en comal. 2. Coloca el queso encima. 3. Dobla y calienta hasta que el queso se derrita. 4. Corta en tiras del tamaño de un dedo. 5. Sirve tibia.",
+      "tips": "El queso panela es bajo en sodio, ideal para bebés.",
+      "allergens": ["lacteos"]
+    },
+    {
+      "id": "picado-albondigas-arroz-61",
+      "name": "Mini albóndigas de pollo con arroz",
+      "emoji": "🍚",
+      "age_min_months": 11,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 35,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 20, "proteina_g": 25, "cereal_g": 40, "grasa_g": 4, "calorias_kcal": 210 },
+      "ingredients": [
+        { "name": "Pollo molido", "amount": 25, "unit": "g" },
+        { "name": "Arroz cocido", "amount": 40, "unit": "g" },
+        { "name": "Zanahoria rallada", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" }
+      ],
+      "instructions": "1. Mezcla pollo molido con zanahoria rallada. 2. Forma mini albóndigas. 3. Cocínalas en caldo o sartén 10 min. 4. Sirve sobre el arroz. 5. Añade aceite.",
+      "tips": "Fácil de tomar con las manos para bebés en Baby Led Weaning.",
+      "allergens": []
+    },
+    {
+      "id": "picado-frijol-charro-suave-62",
+      "name": "Frijoles charros suaves (sin chile)",
+      "emoji": "🫘",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 30, "proteina_g": 25, "cereal_g": 0, "grasa_g": 4, "calorias_kcal": 145 },
+      "ingredients": [
+        { "name": "Frijoles bayos cocidos", "amount": 30, "unit": "g" },
+        { "name": "Jitomate picado", "amount": 20, "unit": "g" },
+        { "name": "Cebolla finamente picada", "amount": 5, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe cebolla y jitomate 5 min. 2. Añade los frijoles con su caldo. 3. Cocina 10 min. 4. Sirve tibia. Puedes machacar ligeramente los frijoles.",
+      "tips": "Versión suave sin picante ni tocino, apta para bebés.",
+      "allergens": []
+    },
+    {
+      "id": "picado-pasta-verduras-63",
+      "name": "Pasta corta con verduras y aceite",
+      "emoji": "🍝",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 0, "cereal_g": 40, "grasa_g": 4, "calorias_kcal": 190 },
+      "ingredients": [
+        { "name": "Pasta corta cocida (coditos o estrellitas)", "amount": 40, "unit": "g" },
+        { "name": "Calabacita en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Zanahoria en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina la pasta sin sal hasta que esté muy suave. 2. Cocina las verduras al vapor 12 min. 3. Combina todo con aceite. 4. Sirve tibia.",
+      "tips": "La pasta pequeña es ideal para practicar la cuchara.",
+      "allergens": ["gluten", "huevo"]
+    },
+    {
+      "id": "picado-guisado-pollo-verdura-64",
+      "name": "Guisado suave de pollo con verduras",
+      "emoji": "🍲",
+      "age_min_months": 11,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 35,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 25, "cereal_g": 0, "grasa_g": 4, "calorias_kcal": 160 },
+      "ingredients": [
+        { "name": "Pechuga de pollo en trocitos", "amount": 25, "unit": "g" },
+        { "name": "Papa en cubitos", "amount": 30, "unit": "g" },
+        { "name": "Zanahoria en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Chícharos", "amount": 10, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe el pollo en aceite 5 min. 2. Añade verduras y agua a cubrir. 3. Cocina 20 min hasta que todo esté suave. 4. Sirve tibio con su caldo.",
+      "tips": "Comida balanceada y fácil de preparar en grandes cantidades.",
+      "allergens": []
+    },
+    {
+      "id": "picado-elote-desgranado-65",
+      "name": "Elote desgranado con calabacita",
+      "emoji": "🌽",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 0, "cereal_g": 20, "grasa_g": 3, "calorias_kcal": 130 },
+      "ingredients": [
+        { "name": "Granos de elote cocidos", "amount": 40, "unit": "g" },
+        { "name": "Calabacita en cubitos", "amount": 40, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina los granos de elote hasta que estén muy suaves. 2. Sofríe calabacita con aceite 8 min. 3. Añade el elote. 4. Cocina 3 min más. 5. Sirve tibia.",
+      "tips": "Vigila la textura del elote, machaca ligeramente si es necesario.",
+      "allergens": []
+    },
+    {
+      "id": "picado-tortitas-espinaca-66",
+      "name": "Tortitas de espinaca con queso",
+      "emoji": "🥬",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 25,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 20, "cereal_g": 20, "grasa_g": 6, "calorias_kcal": 195 },
+      "ingredients": [
+        { "name": "Espinaca cocida y picada", "amount": 40, "unit": "g" },
+        { "name": "Queso panela rallado", "amount": 20, "unit": "g" },
+        { "name": "Huevo", "amount": 1, "unit": "pieza" },
+        { "name": "Avena molida", "amount": 15, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Mezcla espinaca, queso, huevo y avena. 2. Forma tortitas pequeñas. 3. Cocina en sartén con aceite 4 min por lado. 4. Sirve tibia.",
+      "tips": "Ideal para introducir verduras verdes de forma divertida.",
+      "allergens": ["huevo", "lacteos", "gluten"]
+    },
+    {
+      "id": "picado-avena-manzana-67",
+      "name": "Avena con manzana y canela",
+      "emoji": "🍎",
+      "age_min_months": 8,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 12,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 50, "verdura_g": 0, "proteina_g": 0, "cereal_g": 30, "grasa_g": 2, "calorias_kcal": 165 },
+      "ingredients": [
+        { "name": "Avena en hojuelas", "amount": 30, "unit": "g" },
+        { "name": "Manzana rallada", "amount": 50, "unit": "g" },
+        { "name": "Canela", "amount": 1, "unit": "pizca" },
+        { "name": "Leche materna, fórmula o entera (>12m)", "amount": 150, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina la avena con la leche 6 min. 2. Agrega manzana rallada y canela. 3. Cocina 3 min más. 4. Sirve tibia.",
+      "tips": "Desayuno completo y reconfortante.",
+      "allergens": ["gluten", "lacteos"]
+    },
+    {
+      "id": "picado-crepa-fruta-68",
+      "name": "Mini crepas de plátano",
+      "emoji": "🥞",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 60, "verdura_g": 0, "proteina_g": 15, "cereal_g": 20, "grasa_g": 5, "calorias_kcal": 210 },
+      "ingredients": [
+        { "name": "Plátano maduro", "amount": 60, "unit": "g" },
+        { "name": "Huevo", "amount": 1, "unit": "pieza" },
+        { "name": "Avena molida", "amount": 20, "unit": "g" },
+        { "name": "Aceite para engrasar", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Licua plátano, huevo y avena. 2. Engrasa un sartén. 3. Vierte pequeñas porciones y cocina 2 min por lado. 4. Sirve tibia. Se pueden congelar.",
+      "tips": "Sin azúcar, dulce natural del plátano. Excelente finger food.",
+      "allergens": ["huevo", "gluten"]
+    },
+    {
+      "id": "picado-camote-horneado-69",
+      "name": "Bastones de camote horneado",
+      "emoji": "🍠",
+      "age_min_months": 9,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 30,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 80, "proteina_g": 0, "cereal_g": 0, "grasa_g": 4, "calorias_kcal": 100 },
+      "ingredients": [
+        { "name": "Camote pelado", "amount": 80, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" }
+      ],
+      "instructions": "1. Corta el camote en bastones del tamaño de un dedo. 2. Baña con aceite. 3. Hornea a 180°C por 20 min hasta que estén suaves. 4. Deja enfriar antes de servir.",
+      "tips": "Perfectos para Baby Led Weaning, fáciles de agarrar.",
+      "allergens": []
+    },
+    {
+      "id": "picado-brocoli-arboles-70",
+      "name": "Arbolitos de brócoli al vapor",
+      "emoji": "🥦",
+      "age_min_months": 9,
+      "age_max_months": 24,
+      "category": "picado",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 0, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 30 },
+      "ingredients": [
+        { "name": "Floretes de brócoli", "amount": 60, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Separa el brócoli en floretes con tallo (forma de árbol). 2. Cocina al vapor 10 min hasta que esté tierno pero firme para poder agarrarlo. 3. Rocía con aceite.",
+      "tips": "El tallito funciona como agarradera natural para el bebé.",
+      "allergens": []
+    },
+    {
+      "id": "solido-sopa-fideo-71",
+      "name": "Sopa de fideo aguada suave",
+      "emoji": "🍜",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "sopa",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 30, "proteina_g": 0, "cereal_g": 40, "grasa_g": 4, "calorias_kcal": 195 },
+      "ingredients": [
+        { "name": "Fideo delgado", "amount": 40, "unit": "g" },
+        { "name": "Jitomate maduro pelado", "amount": 30, "unit": "g" },
+        { "name": "Cebolla pequeña", "amount": 10, "unit": "g" },
+        { "name": "Ajo", "amount": 1, "unit": "diente" },
+        { "name": "Caldo de pollo casero", "amount": 200, "unit": "ml" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" }
+      ],
+      "instructions": "1. Licua jitomate, cebolla y ajo con un poco de caldo. 2. Dora el fideo en aceite hasta que esté doradito. 3. Añade la salsa y cocina 3 min. 4. Añade el caldo. 5. Cocina 8 min más hasta que el fideo esté muy suave. 6. Sirve tibia.",
+      "tips": "Un clásico mexicano. Corta el fideo con la mano antes de dorarlo si el bebé es pequeño.",
+      "allergens": ["gluten"]
+    },
+    {
+      "id": "solido-arroz-blanco-mex-72",
+      "name": "Arroz blanco mexicano con verduras",
+      "emoji": "🍚",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 0, "cereal_g": 50, "grasa_g": 4, "calorias_kcal": 230 },
+      "ingredients": [
+        { "name": "Arroz blanco", "amount": 40, "unit": "g" },
+        { "name": "Zanahoria en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Chícharos", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" },
+        { "name": "Agua caliente", "amount": 100, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe el arroz seco en aceite hasta que huela a tostado. 2. Añade zanahoria y chícharos. 3. Añade agua caliente. 4. Tapa y cocina a fuego bajo 18 min. 5. Deja reposar 5 min. 6. Sirve tibio.",
+      "tips": "Base perfecta para acompañar cualquier proteína.",
+      "allergens": []
+    },
+    {
+      "id": "solido-arroz-rojo-73",
+      "name": "Arroz rojo mexicano suave",
+      "emoji": "🍅",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 0, "cereal_g": 50, "grasa_g": 5, "calorias_kcal": 245 },
+      "ingredients": [
+        { "name": "Arroz blanco", "amount": 40, "unit": "g" },
+        { "name": "Jitomate", "amount": 30, "unit": "g" },
+        { "name": "Cebolla", "amount": 10, "unit": "g" },
+        { "name": "Zanahoria en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Chícharos", "amount": 10, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Licua jitomate y cebolla. 2. Dora el arroz en aceite. 3. Añade el licuado y cuela sobre el arroz. 4. Añade agua caliente hasta cubrir 2 cm. 5. Añade verduras. 6. Tapa y cocina 20 min. 7. Reposa 5 min.",
+      "tips": "Clásico mexicano. Adaptado sin sal ni consomé para bebés.",
+      "allergens": []
+    },
+    {
+      "id": "solido-mole-suave-pollo-74",
+      "name": "Pollo en mole suave rosita",
+      "emoji": "🍗",
+      "age_min_months": 18,
+      "age_max_months": 36,
+      "category": "guiso",
+      "prep_time_min": 40,
+      "difficulty": "avanzado",
+      "portions": { "fruta_g": 0, "verdura_g": 30, "proteina_g": 30, "cereal_g": 0, "grasa_g": 6, "calorias_kcal": 205 },
+      "ingredients": [
+        { "name": "Pechuga de pollo cocida", "amount": 30, "unit": "g" },
+        { "name": "Jitomate pelado", "amount": 20, "unit": "g" },
+        { "name": "Betabel cocido", "amount": 10, "unit": "g" },
+        { "name": "Almendras molidas", "amount": 5, "unit": "g" },
+        { "name": "Chocolate amargo (mínimo 70%)", "amount": 3, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 6, "unit": "ml" },
+        { "name": "Caldo de pollo", "amount": 100, "unit": "ml" }
+      ],
+      "instructions": "1. Licua jitomate, betabel, almendras y chocolate con caldo. 2. Fríe la salsa en aceite 5 min. 3. Añade el pollo desmenuzado. 4. Cocina 10 min. 5. Sirve tibio con arroz o tortilla.",
+      "tips": "Versión sin picante del mole, apta para paladar infantil. Verifica alergia a frutos secos antes.",
+      "allergens": ["frutos_secos"]
+    },
+    {
+      "id": "solido-pasta-jitomate-75",
+      "name": "Pasta con salsa suave de jitomate",
+      "emoji": "🍝",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 0, "cereal_g": 50, "grasa_g": 4, "calorias_kcal": 235 },
+      "ingredients": [
+        { "name": "Pasta corta cocida", "amount": 50, "unit": "g" },
+        { "name": "Jitomate maduro", "amount": 40, "unit": "g" },
+        { "name": "Ajo", "amount": 1, "unit": "diente" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" },
+        { "name": "Albahaca fresca (opcional)", "amount": 2, "unit": "hojas" }
+      ],
+      "instructions": "1. Licua jitomate con ajo y cuela. 2. Cocina la salsa con aceite 10 min a fuego bajo. 3. Añade la pasta cocida. 4. Mezcla bien. 5. Añade albahaca picada. 6. Sirve tibia.",
+      "tips": "Puedes espolvorear queso panela rallado por encima.",
+      "allergens": ["gluten", "huevo"]
+    },
+    {
+      "id": "solido-tortitas-atun-76",
+      "name": "Tortitas de atún con papa",
+      "emoji": "🐟",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 25, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 195 },
+      "ingredients": [
+        { "name": "Atún en agua escurrido (bajo sodio)", "amount": 25, "unit": "g" },
+        { "name": "Papa cocida y machacada", "amount": 40, "unit": "g" },
+        { "name": "Huevo", "amount": 1, "unit": "pieza" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Mezcla atún, papa y huevo. 2. Forma tortitas pequeñas. 3. Cocina en sartén con aceite 3 min por lado. 4. Sirve tibia.",
+      "tips": "Elige atún bajo en sodio para primeras experiencias.",
+      "allergens": ["pescado", "huevo"]
+    },
+    {
+      "id": "solido-guiso-res-verduras-77",
+      "name": "Deshebrada de res con verduras",
+      "emoji": "🥩",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 60,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 30, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 195 },
+      "ingredients": [
+        { "name": "Falda de res", "amount": 30, "unit": "g" },
+        { "name": "Papa en cubos", "amount": 20, "unit": "g" },
+        { "name": "Zanahoria en cubos", "amount": 20, "unit": "g" },
+        { "name": "Jitomate", "amount": 20, "unit": "g" },
+        { "name": "Cebolla", "amount": 5, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina la carne en agua 45 min hasta que se deshebre. 2. Deshébrala. 3. Sofríe cebolla y jitomate. 4. Añade verduras y caldo. 5. Cocina 15 min. 6. Incorpora la carne. 7. Sirve tibia.",
+      "tips": "Excelente fuente de hierro. Puedes hacer en olla exprés para ahorrar tiempo.",
+      "allergens": []
+    },
+    {
+      "id": "solido-calabacita-pollo-78",
+      "name": "Calabacitas con pollo y elote",
+      "emoji": "🥒",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 25, "cereal_g": 20, "grasa_g": 5, "calorias_kcal": 220 },
+      "ingredients": [
+        { "name": "Pollo en trocitos", "amount": 25, "unit": "g" },
+        { "name": "Calabacita en cubitos", "amount": 40, "unit": "g" },
+        { "name": "Granos de elote", "amount": 20, "unit": "g" },
+        { "name": "Jitomate picado", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe el pollo con jitomate 5 min. 2. Añade calabacita y elote. 3. Cocina tapado 15 min. 4. Sirve tibia.",
+      "tips": "Plato completo y muy mexicano. Sin picante para bebés.",
+      "allergens": []
+    },
+    {
+      "id": "solido-frijoles-de-la-olla-79",
+      "name": "Frijoles de la olla con cilantro",
+      "emoji": "🫘",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 90,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 10, "proteina_g": 30, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 140 },
+      "ingredients": [
+        { "name": "Frijoles bayos secos", "amount": 30, "unit": "g" },
+        { "name": "Cebolla", "amount": 5, "unit": "g" },
+        { "name": "Ajo", "amount": 1, "unit": "diente" },
+        { "name": "Cilantro fresco", "amount": 3, "unit": "hojas" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Remoja los frijoles la noche anterior. 2. Cocina en olla exprés 40 min con cebolla y ajo. 3. Añade cilantro los últimos 5 min. 4. Sirve con su caldo. 5. Añade aceite.",
+      "tips": "Sin sal para menores de 12 meses. Puedes agregar sal muy ligera después del año.",
+      "allergens": []
+    },
+    {
+      "id": "solido-huevo-jitomate-80",
+      "name": "Huevo revuelto con jitomate",
+      "emoji": "🍳",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 10,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 30, "proteina_g": 25, "cereal_g": 0, "grasa_g": 6, "calorias_kcal": 155 },
+      "ingredients": [
+        { "name": "Huevo", "amount": 1, "unit": "pieza" },
+        { "name": "Jitomate picado", "amount": 30, "unit": "g" },
+        { "name": "Cebolla finamente picada", "amount": 5, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe cebolla y jitomate 5 min. 2. Bate el huevo y añade. 3. Cocina revolviendo hasta cuajar. 4. Sirve tibio con tortilla suave.",
+      "tips": "Desayuno tradicional mexicano adaptado.",
+      "allergens": ["huevo"]
+    },
+    {
+      "id": "solido-sopa-verduras-81",
+      "name": "Sopa aguada de verduras",
+      "emoji": "🍲",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "sopa",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 70, "proteina_g": 0, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 60 },
+      "ingredients": [
+        { "name": "Zanahoria en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Chayote en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Calabacita en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Papa en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Caldo de pollo sin sal", "amount": 200, "unit": "ml" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Cocina las verduras en caldo 20 min hasta que estén muy suaves. 2. Añade aceite. 3. Sirve tibia.",
+      "tips": "Reconfortante y muy digestiva. Añade pollo desmenuzado si quieres proteína.",
+      "allergens": []
+    },
+    {
+      "id": "solido-sopa-lentejas-82",
+      "name": "Sopa de lentejas suave",
+      "emoji": "🥣",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "sopa",
+      "prep_time_min": 45,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 25, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 145 },
+      "ingredients": [
+        { "name": "Lentejas", "amount": 25, "unit": "g" },
+        { "name": "Zanahoria en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Papa en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Cebolla", "amount": 5, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe cebolla en aceite. 2. Añade lentejas y agua a cubrir. 3. Cocina 25 min. 4. Añade verduras. 5. Cocina 15 min más hasta que todo esté suave. 6. Sirve tibia.",
+      "tips": "Rica en hierro y fibra. Ideal en cena.",
+      "allergens": []
+    },
+    {
+      "id": "solido-caldo-pollo-83",
+      "name": "Caldito de pollo con verduras",
+      "emoji": "🍜",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "sopa",
+      "prep_time_min": 45,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 25, "cereal_g": 20, "grasa_g": 3, "calorias_kcal": 175 },
+      "ingredients": [
+        { "name": "Pechuga de pollo con hueso", "amount": 30, "unit": "g" },
+        { "name": "Zanahoria", "amount": 20, "unit": "g" },
+        { "name": "Papa", "amount": 20, "unit": "g" },
+        { "name": "Chayote", "amount": 10, "unit": "g" },
+        { "name": "Arroz cocido", "amount": 20, "unit": "g" },
+        { "name": "Cilantro", "amount": 2, "unit": "hojas" }
+      ],
+      "instructions": "1. Cocina el pollo en agua 30 min. 2. Retira el hueso y desmenuza. 3. Añade verduras al caldo. 4. Cocina 15 min. 5. Añade el arroz y el cilantro picado. 6. Sirve tibia.",
+      "tips": "Reconfortante clásico mexicano. Sin sal ni consomé.",
+      "allergens": []
+    },
+    {
+      "id": "solido-sopa-jitomate-84",
+      "name": "Sopa cremosa de jitomate",
+      "emoji": "🍅",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "sopa",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 0, "cereal_g": 0, "grasa_g": 4, "calorias_kcal": 60 },
+      "ingredients": [
+        { "name": "Jitomates maduros", "amount": 60, "unit": "g" },
+        { "name": "Cebolla", "amount": 10, "unit": "g" },
+        { "name": "Ajo", "amount": 1, "unit": "diente" },
+        { "name": "Caldo de pollo", "amount": 150, "unit": "ml" },
+        { "name": "Aceite de oliva", "amount": 4, "unit": "ml" }
+      ],
+      "instructions": "1. Asa el jitomate 5 min hasta que se ampolle. 2. Pélalo. 3. Licua con cebolla, ajo y caldo. 4. Cuela y cocina 10 min. 5. Añade aceite. 6. Sirve tibia.",
+      "tips": "Puedes agregar crocantes de tortilla horneada para dar textura.",
+      "allergens": []
+    },
+    {
+      "id": "solido-arroz-caldoso-marisco-85",
+      "name": "Arroz caldoso de pescado suave",
+      "emoji": "🐟",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "sopa",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 30, "proteina_g": 25, "cereal_g": 40, "grasa_g": 5, "calorias_kcal": 220 },
+      "ingredients": [
+        { "name": "Filete de pescado blanco", "amount": 25, "unit": "g" },
+        { "name": "Arroz", "amount": 40, "unit": "g" },
+        { "name": "Zanahoria", "amount": 15, "unit": "g" },
+        { "name": "Chícharos", "amount": 15, "unit": "g" },
+        { "name": "Caldo de pescado o pollo", "amount": 200, "unit": "ml" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe el arroz en aceite. 2. Añade verduras y caldo. 3. Cocina 18 min. 4. Añade el pescado en trozos los últimos 5 min. 5. Verifica espinas. 6. Sirve tibio.",
+      "tips": "Introducción a mariscos y pescados de forma suave.",
+      "allergens": ["pescado"]
+    },
+    {
+      "id": "solido-picadillo-suave-86",
+      "name": "Picadillo suave de res con papa",
+      "emoji": "🥩",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 30, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 205 },
+      "ingredients": [
+        { "name": "Carne molida magra", "amount": 30, "unit": "g" },
+        { "name": "Papa en cubitos", "amount": 30, "unit": "g" },
+        { "name": "Zanahoria en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Jitomate picado", "amount": 20, "unit": "g" },
+        { "name": "Cebolla picada", "amount": 5, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe cebolla y jitomate 5 min. 2. Añade carne y dora 8 min. 3. Añade papa y zanahoria. 4. Añade un poco de agua. 5. Cocina tapado 15 min. 6. Sirve tibia con tortilla.",
+      "tips": "Guiso tradicional mexicano. Sin sal para menores de 12 meses.",
+      "allergens": []
+    },
+    {
+      "id": "solido-tinga-suave-87",
+      "name": "Tinga suave de pollo (sin chile)",
+      "emoji": "🍗",
+      "age_min_months": 15,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 40,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 30, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 195 },
+      "ingredients": [
+        { "name": "Pollo cocido y deshebrado", "amount": 30, "unit": "g" },
+        { "name": "Jitomate", "amount": 30, "unit": "g" },
+        { "name": "Cebolla en rebanadas", "amount": 10, "unit": "g" },
+        { "name": "Ajo", "amount": 1, "unit": "diente" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe cebolla en aceite. 2. Añade jitomate y ajo licuados y colados. 3. Cocina 8 min. 4. Añade el pollo deshebrado. 5. Cocina 5 min más. 6. Sirve con tortilla o tostada suave.",
+      "tips": "Versión sin picante para el paladar del bebé.",
+      "allergens": []
+    },
+    {
+      "id": "solido-chilaquiles-suaves-88",
+      "name": "Chilaquiles suaves rojos (sin picante)",
+      "emoji": "🌮",
+      "age_min_months": 18,
+      "age_max_months": 36,
+      "category": "guiso",
+      "prep_time_min": 20,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 30, "proteina_g": 15, "cereal_g": 40, "grasa_g": 6, "calorias_kcal": 240 },
+      "ingredients": [
+        { "name": "Tortillas de maíz cortadas y horneadas", "amount": 40, "unit": "g" },
+        { "name": "Jitomate", "amount": 30, "unit": "g" },
+        { "name": "Ajo", "amount": 1, "unit": "diente" },
+        { "name": "Queso panela desmenuzado", "amount": 15, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 6, "unit": "ml" }
+      ],
+      "instructions": "1. Corta tortillas en triángulos y hornea 8 min a 180°C. 2. Licua jitomate y ajo. 3. Cocina la salsa con aceite 8 min. 4. Añade los totopos y baña. 5. Espolvorea queso. 6. Sirve tibia.",
+      "tips": "Sin chile ni crema. Puedes agregar aguacate a un lado.",
+      "allergens": ["lacteos"]
+    },
+    {
+      "id": "solido-mole-verduras-89",
+      "name": "Verduras al horno con aceite y hierbas",
+      "emoji": "🥕",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 35,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 80, "proteina_g": 0, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 90 },
+      "ingredients": [
+        { "name": "Camote en cubos", "amount": 30, "unit": "g" },
+        { "name": "Calabacita en cubos", "amount": 30, "unit": "g" },
+        { "name": "Zanahoria en cubos", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" },
+        { "name": "Orégano seco", "amount": 1, "unit": "pizca" }
+      ],
+      "instructions": "1. Precalienta horno a 200°C. 2. Mezcla verduras con aceite y orégano. 3. Hornea 25 min removiendo a mitad. 4. Sirve tibia.",
+      "tips": "Textura ideal para bebés que ya toman con las manos.",
+      "allergens": []
+    },
+    {
+      "id": "solido-tortitas-camote-90",
+      "name": "Tortitas de camote y avena",
+      "emoji": "🍠",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 25,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 60, "proteina_g": 10, "cereal_g": 30, "grasa_g": 5, "calorias_kcal": 210 },
+      "ingredients": [
+        { "name": "Camote cocido y machacado", "amount": 60, "unit": "g" },
+        { "name": "Avena molida", "amount": 20, "unit": "g" },
+        { "name": "Huevo", "amount": 1, "unit": "pieza" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Mezcla camote, avena y huevo. 2. Forma tortitas pequeñas. 3. Cocina en sartén con aceite 3 min por lado. 4. Sirve tibia.",
+      "tips": "Dulces naturalmente, perfectas para cena o merienda.",
+      "allergens": ["huevo", "gluten"]
+    },
+    {
+      "id": "solido-pollo-almendra-91",
+      "name": "Pollo con salsa suave de almendra",
+      "emoji": "🍗",
+      "age_min_months": 18,
+      "age_max_months": 36,
+      "category": "guiso",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 20, "proteina_g": 30, "cereal_g": 0, "grasa_g": 8, "calorias_kcal": 235 },
+      "ingredients": [
+        { "name": "Pollo cocido en trocitos", "amount": 30, "unit": "g" },
+        { "name": "Almendras peladas", "amount": 8, "unit": "g" },
+        { "name": "Jitomate", "amount": 20, "unit": "g" },
+        { "name": "Cebolla", "amount": 5, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" },
+        { "name": "Caldo de pollo", "amount": 100, "unit": "ml" }
+      ],
+      "instructions": "1. Remoja las almendras en agua caliente 15 min. 2. Licua con jitomate, cebolla y caldo. 3. Cocina la salsa en aceite 8 min. 4. Añade el pollo. 5. Cocina 5 min más.",
+      "tips": "Verifica alergia a frutos secos antes de dar esta receta.",
+      "allergens": ["frutos_secos"]
+    },
+    {
+      "id": "solido-frijoles-refritos-92",
+      "name": "Frijoles refritos con aguacate",
+      "emoji": "🫘",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 30, "verdura_g": 0, "proteina_g": 25, "cereal_g": 0, "grasa_g": 8, "calorias_kcal": 200 },
+      "ingredients": [
+        { "name": "Frijoles cocidos", "amount": 25, "unit": "g" },
+        { "name": "Aguacate maduro", "amount": 30, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" },
+        { "name": "Cebolla", "amount": 5, "unit": "g" }
+      ],
+      "instructions": "1. Sofríe la cebolla en aceite. 2. Añade los frijoles con un poco de caldo y machaca. 3. Cocina hasta que espesen. 4. Sirve con aguacate machacado a un lado.",
+      "tips": "Excelente fuente de fibra, hierro y grasas saludables.",
+      "allergens": []
+    },
+    {
+      "id": "solido-guiso-hígado-93",
+      "name": "Hígado encebollado suave",
+      "emoji": "🥩",
+      "age_min_months": 10,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 20,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 20, "proteina_g": 30, "cereal_g": 0, "grasa_g": 6, "calorias_kcal": 195 },
+      "ingredients": [
+        { "name": "Hígado de pollo picado fino", "amount": 30, "unit": "g" },
+        { "name": "Cebolla en rebanadas", "amount": 20, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 6, "unit": "ml" },
+        { "name": "Caldo de pollo", "amount": 30, "unit": "ml" }
+      ],
+      "instructions": "1. Sofríe la cebolla en aceite 5 min. 2. Añade el hígado y cocina 5 min hasta dorar. 3. Añade caldo y cocina 3 min más. 4. Machaca si es necesario. 5. Sirve tibia.",
+      "tips": "Máximo aporte de hierro. Ofrécelo 1-2 veces por semana.",
+      "allergens": []
+    },
+    {
+      "id": "solido-fideo-seco-94",
+      "name": "Fideo seco con salsa suave",
+      "emoji": "🍝",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 30, "proteina_g": 0, "cereal_g": 50, "grasa_g": 5, "calorias_kcal": 245 },
+      "ingredients": [
+        { "name": "Fideo mediano", "amount": 50, "unit": "g" },
+        { "name": "Jitomate", "amount": 30, "unit": "g" },
+        { "name": "Ajo", "amount": 1, "unit": "diente" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" },
+        { "name": "Caldo de pollo", "amount": 100, "unit": "ml" }
+      ],
+      "instructions": "1. Dora el fideo en aceite. 2. Añade jitomate y ajo licuados y colados. 3. Cocina 3 min. 4. Añade caldo. 5. Tapa y cocina 8 min hasta que absorba el líquido. 6. Sirve tibio.",
+      "tips": "Puedes agregar queso panela rallado y aguacate.",
+      "allergens": ["gluten"]
+    },
+    {
+      "id": "solido-huevo-omelette-95",
+      "name": "Omelette de verduras",
+      "emoji": "🥚",
+      "age_min_months": 12,
+      "age_max_months": 24,
+      "category": "guiso",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 40, "proteina_g": 25, "cereal_g": 0, "grasa_g": 6, "calorias_kcal": 165 },
+      "ingredients": [
+        { "name": "Huevo", "amount": 1, "unit": "pieza" },
+        { "name": "Espinaca picada", "amount": 20, "unit": "g" },
+        { "name": "Jitomate en cubitos", "amount": 20, "unit": "g" },
+        { "name": "Queso panela", "amount": 10, "unit": "g" },
+        { "name": "Aceite de oliva", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Bate el huevo. 2. Vierte en sartén con aceite. 3. Añade verduras y queso en un lado. 4. Cocina 3 min y dobla. 5. Sirve tibia cortada en tiras.",
+      "tips": "Perfecta para introducir múltiples verduras.",
+      "allergens": ["huevo", "lacteos"]
+    },
+    {
+      "id": "merienda-galletas-avena-96",
+      "name": "Galletas de avena y plátano",
+      "emoji": "🍪",
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "category": "merienda",
+      "prep_time_min": 25,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 40, "verdura_g": 0, "proteina_g": 0, "cereal_g": 30, "grasa_g": 3, "calorias_kcal": 175 },
+      "ingredients": [
+        { "name": "Plátano maduro machacado", "amount": 40, "unit": "g" },
+        { "name": "Avena en hojuelas", "amount": 30, "unit": "g" },
+        { "name": "Canela", "amount": 1, "unit": "pizca" }
+      ],
+      "instructions": "1. Machaca el plátano bien maduro. 2. Mezcla con avena y canela. 3. Forma bolitas y aplasta ligeramente. 4. Hornea a 180°C 12 min. 5. Deja enfriar antes de servir.",
+      "tips": "Sin azúcar, sin huevo, sin lácteos. Ideal para merienda.",
+      "allergens": ["gluten"]
+    },
+    {
+      "id": "merienda-yogur-fruta-97",
+      "name": "Yogur natural con fruta",
+      "emoji": "🥛",
+      "age_min_months": 10,
+      "age_max_months": 36,
+      "category": "merienda",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 50, "verdura_g": 0, "proteina_g": 15, "cereal_g": 0, "grasa_g": 5, "calorias_kcal": 145 },
+      "ingredients": [
+        { "name": "Yogur natural entero sin azúcar", "amount": 80, "unit": "g" },
+        { "name": "Frutas picadas (mango, plátano, papaya)", "amount": 50, "unit": "g" }
+      ],
+      "instructions": "1. Coloca el yogur en un tazón. 2. Añade las frutas cortadas en cubitos muy pequeños. 3. Sirve fresca.",
+      "tips": "Elige yogur natural entero sin azúcar añadida.",
+      "allergens": ["lacteos"]
+    },
+    {
+      "id": "merienda-smoothie-plátano-98",
+      "name": "Smoothie de plátano y fresa",
+      "emoji": "🍓",
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "category": "bebida",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 70, "verdura_g": 0, "proteina_g": 10, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 130 },
+      "ingredients": [
+        { "name": "Plátano", "amount": 40, "unit": "g" },
+        { "name": "Fresas", "amount": 30, "unit": "g" },
+        { "name": "Yogur natural o leche entera", "amount": 100, "unit": "ml" }
+      ],
+      "instructions": "1. Licua todos los ingredientes hasta obtener consistencia cremosa. 2. Sirve inmediatamente en vaso o taza entrenadora.",
+      "tips": "Sin azúcar añadida. Fresa se recomienda después de los 12 meses.",
+      "allergens": ["lacteos"]
+    },
+    {
+      "id": "merienda-mini-hotcakes-99",
+      "name": "Mini hotcakes de plátano y avena",
+      "emoji": "🥞",
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "category": "merienda",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 50, "verdura_g": 0, "proteina_g": 15, "cereal_g": 30, "grasa_g": 5, "calorias_kcal": 225 },
+      "ingredients": [
+        { "name": "Plátano maduro", "amount": 50, "unit": "g" },
+        { "name": "Huevo", "amount": 1, "unit": "pieza" },
+        { "name": "Avena molida", "amount": 30, "unit": "g" },
+        { "name": "Aceite para engrasar", "amount": 3, "unit": "ml" }
+      ],
+      "instructions": "1. Licua plátano, huevo y avena. 2. Engrasa un sartén ligeramente. 3. Vierte pequeñas cucharadas. 4. Cocina 2 min por lado. 5. Sirve tibias.",
+      "tips": "Sin azúcar, sin harina refinada, ricos en fibra.",
+      "allergens": ["huevo", "gluten"]
+    },
+    {
+      "id": "merienda-guacamole-100",
+      "name": "Guacamole suave con tostadas",
+      "emoji": "🥑",
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "category": "merienda",
+      "prep_time_min": 10,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 60, "verdura_g": 20, "proteina_g": 0, "cereal_g": 20, "grasa_g": 12, "calorias_kcal": 245 },
+      "ingredients": [
+        { "name": "Aguacate maduro", "amount": 60, "unit": "g" },
+        { "name": "Jitomate picado sin cáscara ni semillas", "amount": 20, "unit": "g" },
+        { "name": "Limón (unas gotas)", "amount": 1, "unit": "ml" },
+        { "name": "Tostadas de maíz horneadas", "amount": 20, "unit": "g" }
+      ],
+      "instructions": "1. Machaca el aguacate. 2. Mezcla con jitomate y limón. 3. Corta las tostadas en triángulos suaves. 4. Sirve al momento.",
+      "tips": "Sin sal ni chile. Guacamole apto para bebés.",
+      "allergens": []
+    },
+    {
+      "id": "merienda-fruta-picada-101",
+      "name": "Plato de fruta picada del día",
+      "emoji": "🍉",
+      "age_min_months": 10,
+      "age_max_months": 36,
+      "category": "merienda",
+      "prep_time_min": 8,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 100, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 55 },
+      "ingredients": [
+        { "name": "Sandía", "amount": 30, "unit": "g" },
+        { "name": "Mango", "amount": 30, "unit": "g" },
+        { "name": "Papaya", "amount": 20, "unit": "g" },
+        { "name": "Plátano", "amount": 20, "unit": "g" }
+      ],
+      "instructions": "1. Corta todas las frutas en cubos pequeños del tamaño de un chícharo. 2. Combínalos en un plato. 3. Sirve fresca inmediatamente.",
+      "tips": "Enseña colores y sabores. Nunca ofrezcas uvas enteras a menores de 4 años.",
+      "allergens": []
+    },
+    {
+      "id": "merienda-galletas-camote-102",
+      "name": "Galletas de camote y coco",
+      "emoji": "🍪",
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "category": "merienda",
+      "prep_time_min": 30,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 0, "cereal_g": 25, "grasa_g": 5, "calorias_kcal": 200 },
+      "ingredients": [
+        { "name": "Camote cocido y machacado", "amount": 50, "unit": "g" },
+        { "name": "Harina de avena", "amount": 25, "unit": "g" },
+        { "name": "Coco rallado sin azúcar", "amount": 8, "unit": "g" },
+        { "name": "Aceite de coco", "amount": 5, "unit": "ml" }
+      ],
+      "instructions": "1. Mezcla todos los ingredientes hasta formar una masa. 2. Forma galletas pequeñas. 3. Hornea a 180°C 15 min. 4. Deja enfriar completamente antes de servir.",
+      "tips": "Sin azúcar añadida, dulces por el camote.",
+      "allergens": ["gluten"]
+    },
+    {
+      "id": "merienda-plátano-cacao-103",
+      "name": "Plátano bañado en cacao",
+      "emoji": "🍌",
+      "age_min_months": 18,
+      "age_max_months": 36,
+      "category": "merienda",
+      "prep_time_min": 10,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 70, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 3, "calorias_kcal": 90 },
+      "ingredients": [
+        { "name": "Plátano", "amount": 70, "unit": "g" },
+        { "name": "Cacao amargo en polvo sin azúcar", "amount": 3, "unit": "g" }
+      ],
+      "instructions": "1. Corta el plátano en rodajas. 2. Espolvorea con cacao amargo. 3. Sirve inmediatamente. Puedes congelarlas 30 min para una versión helada.",
+      "tips": "Sin azúcar. El cacao aporta antioxidantes y magnesio.",
+      "allergens": []
+    },
+    {
+      "id": "merienda-bolitas-avena-104",
+      "name": "Bolitas de avena y cacahuate",
+      "emoji": "🥜",
+      "age_min_months": 18,
+      "age_max_months": 36,
+      "category": "merienda",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 30, "verdura_g": 0, "proteina_g": 8, "cereal_g": 20, "grasa_g": 7, "calorias_kcal": 195 },
+      "ingredients": [
+        { "name": "Avena en hojuelas", "amount": 20, "unit": "g" },
+        { "name": "Crema de cacahuate natural sin azúcar", "amount": 10, "unit": "g" },
+        { "name": "Plátano machacado", "amount": 30, "unit": "g" }
+      ],
+      "instructions": "1. Mezcla todos los ingredientes. 2. Forma bolitas pequeñas del tamaño de una uva sin hueso. 3. Refrigera 30 min antes de servir.",
+      "tips": "Verifica antes que el bebé no tenga alergia al cacahuate. Comienza con muy poca cantidad.",
+      "allergens": ["gluten", "frutos_secos"]
+    },
+    {
+      "id": "bebida-agua-jamaica-105",
+      "name": "Agua de jamaica sin azúcar",
+      "emoji": "🌺",
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "category": "bebida",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 5 },
+      "ingredients": [
+        { "name": "Flores de jamaica secas", "amount": 5, "unit": "g" },
+        { "name": "Agua", "amount": 200, "unit": "ml" }
+      ],
+      "instructions": "1. Hierve el agua y añade la jamaica. 2. Cocina 5 min. 3. Deja infusionar 10 min. 4. Cuela y deja enfriar. 5. Sirve fría o al tiempo, sin azúcar.",
+      "tips": "Ligeramente ácida, ofrécela diluida al inicio. Rica en vitamina C.",
+      "allergens": []
+    },
+    {
+      "id": "bebida-agua-horchata-106",
+      "name": "Agua de horchata suave sin azúcar",
+      "emoji": "🥛",
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "category": "bebida",
+      "prep_time_min": 15,
+      "difficulty": "medio",
+      "portions": { "fruta_g": 0, "verdura_g": 0, "proteina_g": 0, "cereal_g": 20, "grasa_g": 0, "calorias_kcal": 85 },
+      "ingredients": [
+        { "name": "Arroz remojado", "amount": 20, "unit": "g" },
+        { "name": "Canela en rama", "amount": 1, "unit": "trocito" },
+        { "name": "Agua", "amount": 250, "unit": "ml" },
+        { "name": "Leche entera (>12m)", "amount": 50, "unit": "ml" }
+      ],
+      "instructions": "1. Remoja el arroz con canela toda la noche. 2. Licua con la leche. 3. Cuela con manta muy fina. 4. Sirve fría sin azúcar. La dulzura natural viene de la canela y el arroz.",
+      "tips": "Versión sin azúcar de la clásica horchata mexicana.",
+      "allergens": ["lacteos"]
+    },
+    {
+      "id": "bebida-agua-melon-107",
+      "name": "Agua fresca de melón sin azúcar",
+      "emoji": "🍈",
+      "age_min_months": 10,
+      "age_max_months": 36,
+      "category": "bebida",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 60, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 22 },
+      "ingredients": [
+        { "name": "Melón chino maduro", "amount": 60, "unit": "g" },
+        { "name": "Agua fría", "amount": 150, "unit": "ml" }
+      ],
+      "instructions": "1. Licua el melón con el agua. 2. Cuela si prefieres textura ligera. 3. Sirve fría sin azúcar.",
+      "tips": "El melón bien maduro es naturalmente dulce.",
+      "allergens": []
+    },
+    {
+      "id": "bebida-agua-pepino-108",
+      "name": "Agua fresca de pepino con limón",
+      "emoji": "🥒",
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "category": "bebida",
+      "prep_time_min": 5,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 50, "proteina_g": 0, "cereal_g": 0, "grasa_g": 0, "calorias_kcal": 10 },
+      "ingredients": [
+        { "name": "Pepino pelado", "amount": 50, "unit": "g" },
+        { "name": "Unas gotas de limón", "amount": 2, "unit": "ml" },
+        { "name": "Agua fría", "amount": 150, "unit": "ml" }
+      ],
+      "instructions": "1. Licua el pepino con el agua. 2. Cuela. 3. Añade unas gotas de limón. 4. Sirve fría sin azúcar.",
+      "tips": "Muy hidratante, ideal para épocas de calor.",
+      "allergens": []
+    },
+    {
+      "id": "bebida-atole-avena-109",
+      "name": "Atole de avena con canela",
+      "emoji": "🥣",
+      "age_min_months": 10,
+      "age_max_months": 36,
+      "category": "bebida",
+      "prep_time_min": 15,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 0, "proteina_g": 5, "cereal_g": 25, "grasa_g": 2, "calorias_kcal": 155 },
+      "ingredients": [
+        { "name": "Avena en hojuelas", "amount": 25, "unit": "g" },
+        { "name": "Leche materna, fórmula o entera", "amount": 200, "unit": "ml" },
+        { "name": "Canela en rama", "amount": 1, "unit": "trocito" }
+      ],
+      "instructions": "1. Cocina la avena con la leche y canela a fuego bajo 10 min removiendo. 2. Retira la canela. 3. Licua si prefieres textura sedosa. 4. Sirve tibio.",
+      "tips": "Sin azúcar añadida. Bebida caliente reconfortante.",
+      "allergens": ["gluten", "lacteos"]
+    },
+    {
+      "id": "bebida-agua-limon-chia-110",
+      "name": "Agua de limón con chía",
+      "emoji": "🍋",
+      "age_min_months": 12,
+      "age_max_months": 36,
+      "category": "bebida",
+      "prep_time_min": 10,
+      "difficulty": "facil",
+      "portions": { "fruta_g": 0, "verdura_g": 0, "proteina_g": 0, "cereal_g": 0, "grasa_g": 1, "calorias_kcal": 20 },
+      "ingredients": [
+        { "name": "Jugo de limón", "amount": 5, "unit": "ml" },
+        { "name": "Semillas de chía", "amount": 2, "unit": "g" },
+        { "name": "Agua", "amount": 200, "unit": "ml" }
+      ],
+      "instructions": "1. Remoja la chía en agua 30 min hasta que forme gel. 2. Añade el jugo de limón. 3. Sirve sin azúcar. Usa taza entrenadora con popote grueso.",
+      "tips": "La chía debe estar hidratada. Introduce en pequeñas cantidades.",
+      "allergens": []
+    }
+  ]
+}
