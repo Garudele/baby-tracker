@@ -82,8 +82,12 @@ function table_exists(PDO $pdo, string $table): bool {
 function run_schema_sql(PDO $pdo): void {
     $sql = file_get_contents(__DIR__ . '/schema.sql');
     if (!$sql) throw new RuntimeException('schema.sql no encontrado');
-    foreach (array_filter(array_map('trim', explode(';', $sql))) as $stmt) {
-        if ($stmt !== '' && stripos($stmt, '--') !== 0) $pdo->exec($stmt);
+    // Quitar TODAS las líneas de comentario primero, luego split por ;
+    $lines = explode("\n", $sql);
+    $lines = array_filter($lines, fn($l) => !preg_match('/^\s*(--|$)/', $l));
+    $cleanSql = implode("\n", $lines);
+    foreach (array_filter(array_map('trim', explode(';', $cleanSql))) as $stmt) {
+        if ($stmt !== '') $pdo->exec($stmt);
     }
 }
 function run_migrations(PDO $pdo): array {
