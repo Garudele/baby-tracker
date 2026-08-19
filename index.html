@@ -880,10 +880,17 @@ body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
     </form>
     <div style="text-align:center;margin-top:0.8rem;font-size:0.85rem">
       <button type="button" id="authPasskey" style="background:none;border:none;color:var(--baby-blue,#74B9FF);text-decoration:underline;cursor:pointer;padding:6px">🔑 Entrar con passkey (huella)</button>
+      <br>
+      <button type="button" id="authForgot" style="background:none;border:none;color:var(--text-light,#666);cursor:pointer;padding:6px;font-size:0.8rem">¿Olvidaste tu contraseña?</button>
     </div>
     <div class="auth-offline">
       <button type="button" id="authOffline">Continuar sin conexión (datos locales)</button>
     </div>
+    <p style="text-align:center;font-size:0.72rem;color:var(--text-light,#888);margin-top:0.8rem;line-height:1.4">
+      Al crear cuenta aceptas los
+      <a href="terms.html" target="_blank" style="color:inherit">Términos</a> y la
+      <a href="privacy.html" target="_blank" style="color:inherit">Privacidad</a>
+    </p>
   </div>
 </div>
 
@@ -1251,12 +1258,32 @@ body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
       <button class="btn btn-primary btn-small" id="sec2faBtn" onclick="Security.toggle2FA()">Activar 2FA</button>
     </div>
 
-    <div>
+    <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid rgba(0,0,0,0.08)">
       <h4 style="margin:0 0 6px;font-size:0.95rem">Passkeys / Huella digital</h4>
       <p style="font-size:0.82em;color:var(--text-light);margin:0 0 8px">Inicia sesión con tu huella o Face ID en vez de contraseña.</p>
       <div id="passkeyList" style="font-size:0.85em;margin-bottom:8px"></div>
       <button class="btn btn-primary btn-small" onclick="Security.registerPasskey()">+ Registrar este dispositivo</button>
     </div>
+
+    <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid rgba(0,0,0,0.08)">
+      <h4 style="margin:0 0 6px;font-size:0.95rem">Contraseña y email</h4>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-small" onclick="Security.changePassword()">Cambiar contraseña</button>
+        <button class="btn btn-primary btn-small" onclick="Security.verifyEmail()" id="verifyEmailBtn" style="display:none">Verificar email</button>
+        <button class="btn btn-primary btn-small" onclick="SYNC.logout().then(()=>location.reload())" style="background:#666">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div>
+      <h4 style="margin:0 0 6px;font-size:0.95rem;color:#a00">Zona peligrosa</h4>
+      <p style="font-size:0.82em;color:var(--text-light);margin:0 0 8px">Elimina permanentemente tu cuenta y todos los datos.</p>
+      <button class="btn btn-danger btn-small" onclick="Security.deleteAccount()">Eliminar mi cuenta</button>
+    </div>
+
+    <p style="font-size:0.72em;color:var(--text-light);margin-top:1rem;text-align:center">
+      <a href="privacy.html" target="_blank" style="color:inherit">Privacidad</a> ·
+      <a href="terms.html" target="_blank" style="color:inherit">Términos</a>
+    </p>
   </div>
 
   <!-- Modal setup 2FA -->
@@ -1934,6 +1961,19 @@ const AuthUI = (() => {
   offline.addEventListener('click', () => {
     overlay.classList.remove('show');
     if (resolver) { resolver(false); resolver = null; }
+  });
+
+  document.getElementById('authForgot').addEventListener('click', async () => {
+    const em = window.prompt('Escribe tu email para enviarte un link de reset:', email.value.trim());
+    if (!em) return;
+    const r = await fetch(new URL('api/password/reset/request', location.href), {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: em.trim().toLowerCase() }),
+    });
+    const j = await r.json();
+    alert(j.message || 'Si el email existe, recibirás instrucciones en unos minutos.');
   });
 
   document.getElementById('authPasskey').addEventListener('click', async () => {
@@ -3157,7 +3197,7 @@ function switchTab(name, btn) {
   if (name === 'vac') renderVaccines();
   if (name === 'act') renderActivities();
   if (name === 'rec') Recipes.render();
-  if (name === 'settings') { Babies.refresh(); Security.refresh(); Security.listPasskeys(); }
+  if (name === 'settings') { Babies.refresh(); Security.refresh(); Security.listPasskeys(); Security.refreshEmailStatus(); }
   window.scrollTo(0, 0);
 }
 
@@ -3469,6 +3509,32 @@ const Babies = (() => {
   return { refresh, switch: switchTo, add, remove, share, get list() { return list; }, get activeId() { return activeId; } };
 })();
 
+// ===== PASSWORD RESET FLOW (?reset=token) =====
+async function checkResetInUrl() {
+  const params = new URLSearchParams(location.search);
+  const token = params.get('reset');
+  if (!token) return;
+  const newPw = window.prompt('Elige tu nueva contraseña (mín 12 caracteres):');
+  if (!newPw) { history.replaceState({}, '', location.pathname); return; }
+  if (newPw.length < 12) { alert('Debe tener al menos 12 caracteres'); return; }
+  const confirmPw = window.prompt('Confírmala:');
+  if (newPw !== confirmPw) { alert('No coinciden'); return; }
+  const r = await fetch(new URL('api/password/reset/confirm', location.href), {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, password: newPw }),
+  });
+  const j = await r.json();
+  if (r.ok) {
+    alert('Contraseña actualizada ✓ Ahora inicia sesión con la nueva.');
+    history.replaceState({}, '', location.pathname);
+    location.reload();
+  } else {
+    alert('Error: ' + (j.error === 'invalid_or_expired' ? 'Link inválido o expirado' : j.error));
+  }
+}
+
 // ===== INVITATION ACCEPT FLOW =====
 async function checkInvitationInUrl() {
   const params = new URLSearchParams(location.search);
@@ -3652,7 +3718,56 @@ const Security = (() => {
     listPasskeys();
   }
 
-  return { refresh, toggle2FA, verify2FA, registerPasskey, removePasskey, listPasskeys, bufToB64, b64ToBuf };
+  async function changePassword() {
+    const oldPw = window.prompt('Contraseña actual:');
+    if (!oldPw) return;
+    const newPw = window.prompt('Nueva contraseña (mín 12 caracteres):');
+    if (!newPw) return;
+    if (newPw.length < 12) { alert('Mín 12 caracteres'); return; }
+    const confirmPw = window.prompt('Confírmala:');
+    if (newPw !== confirmPw) { alert('No coinciden'); return; }
+    const r = await api('password/change', { method: 'POST', body: JSON.stringify({ old_password: oldPw, new_password: newPw }) });
+    if (r.ok) alert('Contraseña actualizada ✓');
+    else alert('Error: contraseña actual incorrecta');
+  }
+
+  async function verifyEmail() {
+    const r = await api('email/send_verification', { method: 'POST' });
+    const j = await r.json();
+    if (j.already_verified) { alert('Ya está verificado ✓'); refreshEmailStatus(); return; }
+    if (!r.ok) { alert('Error al enviar código'); return; }
+    const code = window.prompt('Revisa tu email — Baby Tracker te envió un código de 6 dígitos. Escríbelo:');
+    if (!code) return;
+    const r2 = await api('email/verify', { method: 'POST', body: JSON.stringify({ code: code.trim() }) });
+    if (r2.ok) { alert('Email verificado ✓'); refreshEmailStatus(); }
+    else alert('Código incorrecto');
+  }
+
+  async function refreshEmailStatus() {
+    try {
+      const r = await fetch(new URL('api/me', location.href), { credentials: 'include' });
+      const j = await r.json();
+      const btn = document.getElementById('verifyEmailBtn');
+      if (btn && j.user && !j.user.email_verified) btn.style.display = 'inline-block';
+      else if (btn) btn.style.display = 'none';
+    } catch (e) {}
+  }
+
+  async function deleteAccount() {
+    const pw = window.prompt('⚠️ Vas a eliminar TU CUENTA y todos los datos permanentemente.\n\nEscribe tu contraseña para confirmar:');
+    if (!pw) return;
+    if (!confirm('¿Estás COMPLETAMENTE seguro? Esta acción NO se puede deshacer.')) return;
+    const r = await api('account', { method: 'DELETE', body: JSON.stringify({ password: pw }) });
+    if (r.ok) {
+      localStorage.clear();
+      alert('Cuenta eliminada.');
+      location.reload();
+    } else {
+      alert('Error: contraseña incorrecta');
+    }
+  }
+
+  return { refresh, toggle2FA, verify2FA, registerPasskey, removePasskey, listPasskeys, changePassword, verifyEmail, refreshEmailStatus, deleteAccount, bufToB64, b64ToBuf };
 })();
 
 function closeTotpSetup() {
@@ -3788,6 +3903,7 @@ applyDarkMode();
     console.warn('sync init failed', e);
   }
   initApp();
+  checkResetInUrl();
   checkInvitationInUrl();
 })();
 

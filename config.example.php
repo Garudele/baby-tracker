@@ -37,6 +37,11 @@ return [
         'https://garudele.github.io',
     ],
 
+    // ---------- Email (para verificación y reset) ----------
+    // Debe ser un email @tu-dominio para pasar filtros anti-spam
+    'mail_from'      => 'no-reply@angaes.com',
+    'mail_from_name' => 'Baby Tracker',
+
     // ---------- Rate limiting ----------
     'auth_max_attempts'   => 5,          // intentos fallidos de login antes de bloquear
     'auth_lockout_window' => 900,        // ventana en segundos (15 min)

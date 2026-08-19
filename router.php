@@ -112,6 +112,22 @@ function decrypt_secret(string $blob): string {
     return $pt;
 }
 
+// ---------- Email sending ---------------------------------------------------
+function send_email(string $to, string $subject, string $bodyHtml, string $bodyText): bool {
+    global $config;
+    $from = $config['mail_from'] ?? ('no-reply@' . ($config['webauthn_rp_id'] ?? 'baby.angaes.com'));
+    $fromName = $config['mail_from_name'] ?? 'Baby Tracker';
+    $boundary = 'bnd_' . bin2hex(random_bytes(8));
+    $headers = "From: $fromName <$from>\r\n";
+    $headers .= "Reply-To: $from\r\n";
+    $headers .= "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: multipart/alternative; boundary=\"$boundary\"\r\n";
+    $body  = "--$boundary\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n$bodyText\r\n\r\n";
+    $body .= "--$boundary\r\nContent-Type: text/html; charset=utf-8\r\n\r\n$bodyHtml\r\n\r\n";
+    $body .= "--$boundary--";
+    return @mail($to, $subject, $body, $headers, '-f' . $from);
+}
+
 // ---------- TOTP (RFC 6238) -------------------------------------------------
 function base32_encode(string $bin): string {
     $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -428,6 +444,52 @@ try {
         json_out(['ok' => true]);
     }
 
+    // ---- Password reset request (público) -------------------------------
+    if (($parts[0] ?? '') === 'password' && ($parts[1] ?? '') === 'reset' && ($parts[2] ?? '') === 'request' && $method === 'POST') {
+        if (is_ip_locked_out('reset', 5, 3600)) json_out(['error' => 'rate_limited'], 429);
+        $body = json_body();
+        $email = normalize_email((string)($body['email'] ?? ''));
+        if (!is_valid_email($email)) { record_attempt('reset', false, 'bad_email', $email); json_out(['error' => 'bad_email'], 400); }
+        $stmt = db()->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $u = $stmt->fetch();
+        // Siempre 200 (evita user enumeration)
+        if ($u) {
+            $token = bin2hex(random_bytes(32));
+            $ins = db()->prepare("INSERT INTO password_resets (token, user_id, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))");
+            $ins->execute([$token, $u['id']]);
+            $link = 'https://' . ($_SERVER['HTTP_HOST'] ?? $config['webauthn_rp_id']) . '/?reset=' . $token;
+            $html = "<p>Hola,</p><p>Recibimos una solicitud para restablecer tu contraseña de Baby Tracker.</p>"
+                . "<p><a href=\"$link\">Click aquí para elegir una nueva contraseña</a></p>"
+                . "<p>El link expira en 1 hora. Si no fuiste tú, ignora este correo.</p>";
+            $text = "Reset de contraseña Baby Tracker:\n$link\n\nExpira en 1 hora. Ignora si no fuiste tú.";
+            send_email($email, 'Baby Tracker — Reset de contraseña', $html, $text);
+            record_attempt('reset', true, null, $email);
+        } else {
+            record_attempt('reset', false, 'no_user', $email);
+        }
+        json_out(['ok' => true, 'message' => 'Si el email existe, recibirás instrucciones.']);
+    }
+
+    // ---- Password reset confirm (público) -------------------------------
+    if (($parts[0] ?? '') === 'password' && ($parts[1] ?? '') === 'reset' && ($parts[2] ?? '') === 'confirm' && $method === 'POST') {
+        $body = json_body();
+        $token = (string)($body['token'] ?? '');
+        $newPw = (string)($body['password'] ?? '');
+        if (strlen($newPw) < 12) json_out(['error' => 'weak_password'], 400);
+        $stmt = db()->prepare("SELECT user_id FROM password_resets WHERE token = ? AND used_at IS NULL AND expires_at > NOW()");
+        $stmt->execute([$token]);
+        $r = $stmt->fetch();
+        if (!$r) json_out(['error' => 'invalid_or_expired'], 400);
+        $hash = password_hash($newPw, PASSWORD_ARGON2ID);
+        $pdo = db();
+        $pdo->beginTransaction();
+        $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?")->execute([$hash, $r['user_id']]);
+        $pdo->prepare("UPDATE password_resets SET used_at = NOW() WHERE token = ?")->execute([$token]);
+        $pdo->commit();
+        json_out(['ok' => true]);
+    }
+
     // ---- Info pública de invitación (sin auth) --------------------------
     if (($parts[0] ?? '') === 'invitations' && isset($parts[1]) && !isset($parts[2]) && $method === 'GET') {
         $stmt = db()->prepare("SELECT i.baby_id, i.role, i.invitee_email, i.expires_at, b.name AS baby_name, b.emoji AS baby_emoji, u.email AS inviter_email FROM invitations i JOIN babies b ON b.id = i.baby_id JOIN users u ON u.id = i.inviter_id WHERE i.token = ? AND i.accepted_at IS NULL AND i.expires_at > NOW()");
@@ -501,6 +563,86 @@ try {
         $stmt->execute([$uid]);
         $u = $stmt->fetch();
         json_out(['enabled' => (bool)($u['totp_enabled'] ?? 0)]);
+    }
+
+    // ---- Cambiar contraseña ---------------------------------------------
+    if (($parts[0] ?? '') === 'password' && ($parts[1] ?? '') === 'change' && $method === 'POST') {
+        $body = json_body();
+        $oldPw = (string)($body['old_password'] ?? '');
+        $newPw = (string)($body['new_password'] ?? '');
+        if (strlen($newPw) < 12) json_out(['error' => 'weak_password'], 400);
+        $stmt = db()->prepare("SELECT password_hash FROM users WHERE id = ?");
+        $stmt->execute([$uid]);
+        $u = $stmt->fetch();
+        if (!$u || !password_verify($oldPw, $u['password_hash'])) json_out(['error' => 'bad_password'], 401);
+        $hash = password_hash($newPw, PASSWORD_ARGON2ID);
+        db()->prepare("UPDATE users SET password_hash = ? WHERE id = ?")->execute([$hash, $uid]);
+        json_out(['ok' => true]);
+    }
+
+    // ---- Verificar email ------------------------------------------------
+    if (($parts[0] ?? '') === 'email' && ($parts[1] ?? '') === 'send_verification' && $method === 'POST') {
+        $stmt = db()->prepare("SELECT email, email_verified FROM users WHERE id = ?");
+        $stmt->execute([$uid]);
+        $u = $stmt->fetch();
+        if (!$u) json_out(['error' => 'no_user'], 404);
+        if ((int)$u['email_verified']) json_out(['ok' => true, 'already_verified' => true]);
+        $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        db()->prepare("REPLACE INTO email_verifications (user_id, code, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))")->execute([$uid, $code]);
+        $html = "<p>Tu código de verificación de Baby Tracker es:</p>"
+            . "<h2 style=\"font-family:monospace;letter-spacing:0.3em;text-align:center\">$code</h2>"
+            . "<p>Expira en 15 minutos.</p>";
+        $text = "Código de verificación Baby Tracker: $code (expira en 15 min)";
+        send_email($u['email'], 'Baby Tracker — Verifica tu email', $html, $text);
+        json_out(['ok' => true]);
+    }
+    if (($parts[0] ?? '') === 'email' && ($parts[1] ?? '') === 'verify' && $method === 'POST') {
+        $body = json_body();
+        $code = trim((string)($body['code'] ?? ''));
+        if (!preg_match('/^\d{6}$/', $code)) json_out(['error' => 'bad_code'], 400);
+        $stmt = db()->prepare("SELECT code FROM email_verifications WHERE user_id = ? AND expires_at > NOW()");
+        $stmt->execute([$uid]);
+        $v = $stmt->fetch();
+        if (!$v || !hash_equals($v['code'], $code)) json_out(['error' => 'bad_code'], 400);
+        $pdo = db();
+        $pdo->beginTransaction();
+        $pdo->prepare("UPDATE users SET email_verified = 1 WHERE id = ?")->execute([$uid]);
+        $pdo->prepare("DELETE FROM email_verifications WHERE user_id = ?")->execute([$uid]);
+        $pdo->commit();
+        json_out(['ok' => true]);
+    }
+
+    // ---- Delete account -------------------------------------------------
+    if (($parts[0] ?? '') === 'account' && $method === 'DELETE') {
+        $body = json_body();
+        $pw = (string)($body['password'] ?? '');
+        $stmt = db()->prepare("SELECT password_hash FROM users WHERE id = ?");
+        $stmt->execute([$uid]);
+        $u = $stmt->fetch();
+        if (!$u || !password_verify($pw, $u['password_hash'])) json_out(['error' => 'bad_password'], 401);
+        // Borrar todo lo del usuario (cascade manual)
+        $pdo = db();
+        $pdo->beginTransaction();
+        // Bebés propios y sus datos
+        $bs = $pdo->prepare("SELECT id FROM babies WHERE owner_id = ?");
+        $bs->execute([$uid]);
+        foreach ($bs->fetchAll() as $b) {
+            $bid = (int)$b['id'];
+            $pdo->prepare("DELETE FROM entries WHERE baby_id = ?")->execute([$bid]);
+            $pdo->prepare("DELETE FROM photos WHERE baby_id = ?")->execute([$bid]);
+            $pdo->prepare("DELETE FROM baby_shares WHERE baby_id = ?")->execute([$bid]);
+            $pdo->prepare("DELETE FROM invitations WHERE baby_id = ?")->execute([$bid]);
+        }
+        $pdo->prepare("DELETE FROM babies WHERE owner_id = ?")->execute([$uid]);
+        $pdo->prepare("DELETE FROM baby_shares WHERE user_id = ?")->execute([$uid]);
+        $pdo->prepare("DELETE FROM webauthn_credentials WHERE user_id = ?")->execute([$uid]);
+        $pdo->prepare("DELETE FROM email_verifications WHERE user_id = ?")->execute([$uid]);
+        $pdo->prepare("DELETE FROM password_resets WHERE user_id = ?")->execute([$uid]);
+        $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$uid]);
+        $pdo->commit();
+        $_SESSION = [];
+        session_destroy();
+        json_out(['ok' => true]);
     }
 
     // ---- WebAuthn / Passkey management ----------------------------------
