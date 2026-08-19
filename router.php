@@ -357,6 +357,22 @@ try {
         json_out(['ok' => true]);
     }
 
+    // ---- Info pública de invitación (sin auth) --------------------------
+    if (($parts[0] ?? '') === 'invitations' && isset($parts[1]) && !isset($parts[2]) && $method === 'GET') {
+        $stmt = db()->prepare("SELECT i.baby_id, i.role, i.invitee_email, i.expires_at, b.name AS baby_name, b.emoji AS baby_emoji, u.email AS inviter_email FROM invitations i JOIN babies b ON b.id = i.baby_id JOIN users u ON u.id = i.inviter_id WHERE i.token = ? AND i.accepted_at IS NULL AND i.expires_at > NOW()");
+        $stmt->execute([$parts[1]]);
+        $row = $stmt->fetch();
+        if (!$row) json_out(['error' => 'invalid_or_expired'], 404);
+        json_out([
+            'baby_name' => $row['baby_name'],
+            'baby_emoji' => $row['baby_emoji'],
+            'role' => $row['role'],
+            'invitee_email' => $row['invitee_email'],
+            'inviter_email' => $row['inviter_email'],
+            'expires_at' => $row['expires_at'],
+        ]);
+    }
+
     // ---- Logout ----------------------------------------------------------
     if (($parts[0] ?? '') === 'logout' && $method === 'POST') {
         $_SESSION = [];
@@ -472,6 +488,74 @@ try {
         db()->prepare("DELETE FROM babies WHERE id = ? AND owner_id = ?")->execute([$bid, $uid]);
         if (($_SESSION['baby_id'] ?? null) == $bid) unset($_SESSION['baby_id']);
         json_out(['ok' => true]);
+    }
+
+    // ---- Sharing / Invitations -----------------------------------------
+    if (($parts[0] ?? '') === 'babies' && isset($parts[1]) && ctype_digit($parts[1]) && ($parts[2] ?? '') === 'invite' && $method === 'POST') {
+        $bid = (int)$parts[1];
+        $acc = baby_access($uid, $bid);
+        if (!$acc || !in_array($acc['role'], ['owner','admin'], true)) json_out(['error' => 'forbidden'], 403);
+        $body = json_body();
+        $role = in_array($body['role'] ?? '', ['viewer','editor','admin'], true) ? $body['role'] : 'editor';
+        $email = isset($body['email']) ? normalize_email((string)$body['email']) : null;
+        if ($email !== null && $email !== '' && !is_valid_email($email)) json_out(['error' => 'bad_email'], 400);
+        $token = bin2hex(random_bytes(32));
+        $stmt = db()->prepare("INSERT INTO invitations (token, baby_id, inviter_id, invitee_email, role, expires_at) VALUES (:t, :b, :i, :em, :r, DATE_ADD(NOW(), INTERVAL 7 DAY))");
+        $stmt->execute([':t' => $token, ':b' => $bid, ':i' => $uid, ':em' => $email ?: null, ':r' => $role]);
+        json_out(['ok' => true, 'token' => $token, 'expires_days' => 7]);
+    }
+    if (($parts[0] ?? '') === 'babies' && isset($parts[1]) && ctype_digit($parts[1]) && ($parts[2] ?? '') === 'shares' && $method === 'GET') {
+        $bid = (int)$parts[1];
+        $acc = baby_access($uid, $bid);
+        if (!$acc || !in_array($acc['role'], ['owner','admin'], true)) json_out(['error' => 'forbidden'], 403);
+        $stmt = db()->prepare("SELECT s.id, s.role, s.invited_at, s.accepted_at, u.email FROM baby_shares s JOIN users u ON u.id = s.user_id WHERE s.baby_id = ?");
+        $stmt->execute([$bid]);
+        $shares = $stmt->fetchAll();
+        $inv = db()->prepare("SELECT token, invitee_email, role, expires_at, accepted_at FROM invitations WHERE baby_id = ? AND accepted_at IS NULL AND expires_at > NOW()");
+        $inv->execute([$bid]);
+        $pending = $inv->fetchAll();
+        json_out(['shares' => $shares, 'pending' => $pending]);
+    }
+    if (($parts[0] ?? '') === 'shares' && isset($parts[1]) && ctype_digit($parts[1]) && $method === 'DELETE') {
+        $sid = (int)$parts[1];
+        // Verificar que el user es owner del baby del share
+        $s = db()->prepare("SELECT s.baby_id, b.owner_id FROM baby_shares s JOIN babies b ON b.id = s.baby_id WHERE s.id = ?");
+        $s->execute([$sid]);
+        $row = $s->fetch();
+        if (!$row || (int)$row['owner_id'] !== $uid) json_out(['error' => 'forbidden'], 403);
+        db()->prepare("DELETE FROM baby_shares WHERE id = ?")->execute([$sid]);
+        json_out(['ok' => true]);
+    }
+    if (($parts[0] ?? '') === 'invitations' && isset($parts[1]) && ($parts[2] ?? '') === 'accept' && $method === 'POST') {
+        $token = $parts[1];
+        $stmt = db()->prepare("SELECT * FROM invitations WHERE token = ? AND accepted_at IS NULL AND expires_at > NOW()");
+        $stmt->execute([$token]);
+        $inv = $stmt->fetch();
+        if (!$inv) json_out(['error' => 'invalid_or_expired'], 404);
+        // Si tiene invitee_email, verificar que coincide con el user
+        if ($inv['invitee_email']) {
+            $u = db()->prepare("SELECT email FROM users WHERE id = ?");
+            $u->execute([$uid]);
+            $urow = $u->fetch();
+            if (!$urow || normalize_email($urow['email']) !== normalize_email($inv['invitee_email'])) {
+                json_out(['error' => 'email_mismatch', 'expected' => $inv['invitee_email']], 403);
+            }
+        }
+        // No se puede aceptar invitación a bebé propio
+        $b = db()->prepare("SELECT owner_id FROM babies WHERE id = ?");
+        $b->execute([$inv['baby_id']]);
+        $baby = $b->fetch();
+        if (!$baby || (int)$baby['owner_id'] === $uid) json_out(['error' => 'own_baby'], 400);
+        try {
+            $ins = db()->prepare("INSERT INTO baby_shares (baby_id, user_id, role, invited_at, accepted_at) VALUES (:b, :u, :r, :inv, NOW())");
+            $ins->execute([':b' => $inv['baby_id'], ':u' => $uid, ':r' => $inv['role'], ':inv' => $inv['created_at']]);
+        } catch (PDOException $e) {
+            if ((int)$e->errorInfo[1] === 1062) {
+                // Ya compartido, solo marca invitación como aceptada
+            } else throw $e;
+        }
+        db()->prepare("UPDATE invitations SET accepted_at = NOW(), accepted_by = ? WHERE token = ?")->execute([$uid, $token]);
+        json_out(['ok' => true, 'baby_id' => (int)$inv['baby_id'], 'role' => $inv['role']]);
     }
 
     // Cambiar bebé activo

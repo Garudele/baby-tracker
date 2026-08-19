@@ -3348,6 +3348,7 @@ const Babies = (() => {
         <span class="baby-item-name">${escapeHTML(b.name)}</span>
         ${b.role !== 'owner' ? `<span class="baby-item-role">${b.role}</span>` : ''}
         ${b.id == activeId ? '<span class="baby-item-check">✓</span>' : ''}
+        ${b.role === 'owner' ? `<button class="baby-item-del" title="Compartir" onclick="event.stopPropagation();Babies.share(${b.id})">🔗</button>` : ''}
         ${b.role === 'owner' && list.length > 1 ? `<button class="baby-item-del" onclick="event.stopPropagation();Babies.remove(${b.id})">🗑️</button>` : ''}
       </div>
     `).join('');
@@ -3394,8 +3395,60 @@ const Babies = (() => {
     }
   }
 
-  return { refresh, switch: switchTo, add, remove, get list() { return list; }, get activeId() { return activeId; } };
+  async function share(id) {
+    const role = window.prompt('Rol para el invitado:\n- viewer (solo lectura)\n- editor (puede editar)\n- admin (puede invitar a otros)', 'editor');
+    if (!role || !['viewer','editor','admin'].includes(role)) return;
+    const email = window.prompt('Email del invitado (opcional — deja vacío para link universal):', '') || null;
+    const r = await api('babies/' + id + '/invite', { method: 'POST', body: JSON.stringify({ role, email }) });
+    if (!r.ok) { alert('Error al crear invitación'); return; }
+    const j = await r.json();
+    const link = location.origin + location.pathname + '?invite=' + j.token;
+    if (navigator.share) {
+      navigator.share({ title: 'Baby Tracker — Invitación', text: 'Te invito a ver a mi bebé', url: link }).catch(() => {});
+    } else {
+      window.prompt('Copia y comparte este link (válido 7 días):', link);
+    }
+  }
+
+  return { refresh, switch: switchTo, add, remove, share, get list() { return list; }, get activeId() { return activeId; } };
 })();
+
+// ===== INVITATION ACCEPT FLOW =====
+async function checkInvitationInUrl() {
+  const params = new URLSearchParams(location.search);
+  const token = params.get('invite');
+  if (!token) return;
+  try {
+    const r = await fetch(new URL('api/invitations/' + encodeURIComponent(token), location.href), { credentials: 'include' });
+    if (!r.ok) {
+      alert('Esta invitación no es válida o ya expiró.');
+      history.replaceState({}, '', location.pathname);
+      return;
+    }
+    const inv = await r.json();
+    const ok = confirm(`${inv.inviter_email} te invita a ver "${inv.baby_emoji || '👶'} ${inv.baby_name}" como ${inv.role}.\n\n¿Aceptar?`);
+    if (!ok) { history.replaceState({}, '', location.pathname); return; }
+    // Verifica auth
+    const me = await fetch(new URL('api/me', location.href), { credentials: 'include' }).then(r => r.json());
+    if (!me.auth) {
+      alert('Primero inicia sesión o crea cuenta, y vuelve a abrir este link.');
+      return;
+    }
+    const acc = await fetch(new URL('api/invitations/' + encodeURIComponent(token) + '/accept', location.href), {
+      method: 'POST', credentials: 'include',
+    });
+    const aj = await acc.json();
+    if (acc.ok) {
+      alert('¡Invitación aceptada! Ahora puedes ver este bebé.');
+      history.replaceState({}, '', location.pathname);
+      location.reload();
+    } else {
+      alert('Error: ' + (aj.error || 'no se pudo aceptar'));
+    }
+  } catch (e) {
+    alert('Error al procesar invitación: ' + e.message);
+  }
+}
 
 // ===== SECURITY (2FA) =====
 const Security = (() => {
@@ -3602,6 +3655,7 @@ applyDarkMode();
     console.warn('sync init failed', e);
   }
   initApp();
+  checkInvitationInUrl();
 })();
 
 // ===== SERVICE WORKER =====
