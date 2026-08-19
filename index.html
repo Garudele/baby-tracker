@@ -853,6 +853,26 @@ body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
 </head>
 <body>
 
+<!-- ===== RESET PASSWORD MODAL ===== -->
+<div class="auth-overlay" id="resetOverlay">
+  <div class="auth-modal">
+    <h2>🔐 Nueva contraseña</h2>
+    <p class="subtitle">Elige una contraseña nueva para tu cuenta</p>
+    <form class="auth-form" id="resetForm" autocomplete="off">
+      <label for="resetPw1">Nueva contraseña</label>
+      <input type="password" id="resetPw1" required minlength="12" autocomplete="new-password">
+      <label for="resetPw2">Confirmar</label>
+      <input type="password" id="resetPw2" required minlength="12" autocomplete="new-password">
+      <div class="auth-hint" style="display:block">Mínimo 12 caracteres.</div>
+      <div class="auth-error" id="resetError"></div>
+      <button type="submit" class="auth-submit" id="resetSubmit">Guardar</button>
+    </form>
+    <div class="auth-offline">
+      <button type="button" id="resetCancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== AUTH MODAL ===== -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-modal">
@@ -1923,7 +1943,8 @@ const AuthUI = (() => {
     errBox.classList.remove('show');
   }
   function showError(code) {
-    errBox.textContent = ERROR_MSGS[code] || ('Error: ' + code);
+    errBox.style.background = ''; errBox.style.color = '';
+    errBox.textContent = ERROR_MSGS[code] || code;
     errBox.classList.add('show');
   }
 
@@ -1964,16 +1985,28 @@ const AuthUI = (() => {
   });
 
   document.getElementById('authForgot').addEventListener('click', async () => {
-    const em = window.prompt('Escribe tu email para enviarte un link de reset:', email.value.trim());
-    if (!em) return;
-    const r = await fetch(new URL('api/password/reset/request', location.href), {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: em.trim().toLowerCase() }),
-    });
-    const j = await r.json();
-    alert(j.message || 'Si el email existe, recibirás instrucciones en unos minutos.');
+    const em = email.value.trim().toLowerCase();
+    if (!em || !em.includes('@')) {
+      showError('Escribe tu email arriba primero, y luego click aquí.');
+      email.focus();
+      return;
+    }
+    submit.disabled = true;
+    try {
+      const r = await fetch(new URL('api/password/reset/request', location.href), {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: em }),
+      });
+      const j = await r.json();
+      errBox.style.background = '#e6ffe6';
+      errBox.style.color = '#0a7';
+      errBox.textContent = '✓ Si el email existe, te enviamos un link. Revisa tu bandeja (y spam).';
+      errBox.classList.add('show');
+    } finally {
+      submit.disabled = false;
+    }
   });
 
   document.getElementById('authPasskey').addEventListener('click', async () => {
@@ -3510,30 +3543,79 @@ const Babies = (() => {
 })();
 
 // ===== PASSWORD RESET FLOW (?reset=token) =====
-async function checkResetInUrl() {
+function checkResetInUrl() {
   const params = new URLSearchParams(location.search);
   const token = params.get('reset');
-  if (!token) return;
-  const newPw = window.prompt('Elige tu nueva contraseña (mín 12 caracteres):');
-  if (!newPw) { history.replaceState({}, '', location.pathname); return; }
-  if (newPw.length < 12) { alert('Debe tener al menos 12 caracteres'); return; }
-  const confirmPw = window.prompt('Confírmala:');
-  if (newPw !== confirmPw) { alert('No coinciden'); return; }
-  const r = await fetch(new URL('api/password/reset/confirm', location.href), {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token, password: newPw }),
+  if (!token) return Promise.resolve();
+
+  const overlay = document.getElementById('resetOverlay');
+  const form    = document.getElementById('resetForm');
+  const pw1     = document.getElementById('resetPw1');
+  const pw2     = document.getElementById('resetPw2');
+  const errBox  = document.getElementById('resetError');
+  const submit  = document.getElementById('resetSubmit');
+  const cancel  = document.getElementById('resetCancel');
+
+  overlay.classList.add('show');
+  setTimeout(() => pw1.focus(), 100);
+
+  return new Promise((resolve) => {
+    function done() {
+      overlay.classList.remove('show');
+      history.replaceState({}, '', location.pathname);
+      resolve();
+    }
+    function showErr(msg) {
+      errBox.textContent = msg;
+      errBox.classList.add('show');
+    }
+    cancel.onclick = done;
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      errBox.classList.remove('show');
+      if (pw1.value.length < 12) { showErr('Mínimo 12 caracteres.'); return; }
+      if (pw1.value !== pw2.value) { showErr('Las contraseñas no coinciden.'); return; }
+      submit.disabled = true;
+      try {
+        const r = await fetch(new URL('api/password/reset/confirm', location.href), {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, password: pw1.value }),
+        });
+        const j = await r.json();
+        if (r.ok) {
+          overlay.classList.remove('show');
+          history.replaceState({}, '', location.pathname);
+          Toast.show('Contraseña actualizada ✓ Ahora inicia sesión.');
+          setTimeout(() => location.reload(), 1500);
+          resolve();
+        } else {
+          showErr(j.error === 'invalid_or_expired' ? 'Link inválido o expirado.' : (j.error === 'weak_password' ? 'Muy corta (mín 12).' : 'Error: ' + j.error));
+        }
+      } finally {
+        submit.disabled = false;
+      }
+    };
   });
-  const j = await r.json();
-  if (r.ok) {
-    alert('Contraseña actualizada ✓ Ahora inicia sesión con la nueva.');
-    history.replaceState({}, '', location.pathname);
-    location.reload();
-  } else {
-    alert('Error: ' + (j.error === 'invalid_or_expired' ? 'Link inválido o expirado' : j.error));
-  }
 }
+
+// Toast helper (para no depender de alert)
+const Toast = {
+  show(msg, ms = 2200) {
+    let el = document.getElementById('appToast');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'appToast';
+      el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2b2b3a;color:#fff;padding:12px 20px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.3);z-index:10000;font-size:0.95rem;opacity:0;transition:opacity 0.2s;';
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.opacity = '1';
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.opacity = '0'; }, ms);
+  }
+};
 
 // ===== INVITATION ACCEPT FLOW =====
 async function checkInvitationInUrl() {
