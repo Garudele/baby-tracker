@@ -3893,6 +3893,8 @@ function renderAll() {
 // Start
 applyDarkMode();
 (async () => {
+  // Reset de contraseña PRIMERO (no requiere login)
+  await checkResetInUrl();
   try {
     const authed = await SYNC.ensureAuth();
     if (authed) {
@@ -3903,7 +3905,6 @@ applyDarkMode();
     console.warn('sync init failed', e);
   }
   initApp();
-  checkResetInUrl();
   checkInvitationInUrl();
 })();
 
