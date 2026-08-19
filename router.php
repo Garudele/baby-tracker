@@ -112,6 +112,65 @@ function decrypt_secret(string $blob): string {
     return $pt;
 }
 
+// ---------- TOTP (RFC 6238) -------------------------------------------------
+function base32_encode(string $bin): string {
+    $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    $bits = '';
+    for ($i = 0; $i < strlen($bin); $i++) {
+        $bits .= str_pad(decbin(ord($bin[$i])), 8, '0', STR_PAD_LEFT);
+    }
+    $out = '';
+    foreach (str_split($bits, 5) as $chunk) {
+        $chunk = str_pad($chunk, 5, '0', STR_PAD_RIGHT);
+        $out .= $alphabet[bindec($chunk)];
+    }
+    return $out;
+}
+function base32_decode(string $s): string {
+    $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    $s = strtoupper(preg_replace('/[^A-Z2-7]/', '', $s));
+    $bits = '';
+    for ($i = 0; $i < strlen($s); $i++) {
+        $pos = strpos($alphabet, $s[$i]);
+        if ($pos === false) continue;
+        $bits .= str_pad(decbin($pos), 5, '0', STR_PAD_LEFT);
+    }
+    $out = '';
+    foreach (str_split($bits, 8) as $chunk) {
+        if (strlen($chunk) === 8) $out .= chr(bindec($chunk));
+    }
+    return $out;
+}
+function totp_generate(string $secret, ?int $time = null): string {
+    $time = $time ?? time();
+    $counter = intdiv($time, 30);
+    $binCounter = pack('J', $counter);
+    $hash = hash_hmac('sha1', $binCounter, $secret, true);
+    $offset = ord($hash[19]) & 0x0f;
+    $code = (
+        ((ord($hash[$offset]) & 0x7f) << 24) |
+        ((ord($hash[$offset + 1]) & 0xff) << 16) |
+        ((ord($hash[$offset + 2]) & 0xff) << 8) |
+        (ord($hash[$offset + 3]) & 0xff)
+    ) % 1000000;
+    return str_pad((string)$code, 6, '0', STR_PAD_LEFT);
+}
+function totp_verify(string $secret, string $code, int $window = 1): bool {
+    $code = trim($code);
+    if (!preg_match('/^\d{6}$/', $code)) return false;
+    $now = time();
+    for ($w = -$window; $w <= $window; $w++) {
+        if (hash_equals(totp_generate($secret, $now + $w * 30), $code)) return true;
+    }
+    return false;
+}
+function totp_uri(string $secretB32, string $email, string $issuer = 'Baby Tracker'): string {
+    return 'otpauth://totp/' . rawurlencode($issuer . ':' . $email)
+        . '?secret=' . $secretB32
+        . '&issuer=' . rawurlencode($issuer)
+        . '&algorithm=SHA1&digits=6&period=30';
+}
+
 // ---------- Babies helpers --------------------------------------------------
 function list_user_babies(int $uid): array {
     // Bebés propios + compartidos (aceptados)
@@ -263,6 +322,41 @@ try {
         json_out(['ok' => true]);
     }
 
+    // ---- Login 2do paso: TOTP -------------------------------------------
+    if (($parts[0] ?? '') === 'login' && ($parts[1] ?? '') === 'totp' && $method === 'POST') {
+        if (empty($_SESSION['pending_totp_uid'])) json_out(['error' => 'no_pending_login'], 400);
+        $uid = (int)$_SESSION['pending_totp_uid'];
+        $body = json_body();
+        $code = (string)($body['code'] ?? '');
+        $stmt = db()->prepare("SELECT totp_secret_encrypted FROM users WHERE id = ?");
+        $stmt->execute([$uid]);
+        $u = $stmt->fetch();
+        if (!$u || !$u['totp_secret_encrypted']) json_out(['error' => 'no_totp_setup'], 400);
+        try {
+            $secret = decrypt_secret($u['totp_secret_encrypted']);
+        } catch (Throwable $e) {
+            json_out(['error' => 'decrypt_failed'], 500);
+        }
+        if (!totp_verify($secret, $code)) {
+            record_attempt('login_totp', false, 'bad_totp', null);
+            usleep(500000);
+            json_out(['error' => 'bad_code'], 401);
+        }
+        unset($_SESSION['pending_totp_uid']);
+        session_regenerate_id(true);
+        $_SESSION['uid'] = $uid;
+        // Auto-crear bebé si no tiene
+        $chk = db()->prepare("SELECT id FROM babies WHERE owner_id = ? LIMIT 1");
+        $chk->execute([$uid]);
+        if (!$chk->fetch()) {
+            $ins = db()->prepare("INSERT INTO babies (owner_id, name, emoji) VALUES (?, 'Mi bebé', '👶')");
+            $ins->execute([$uid]);
+            $_SESSION['baby_id'] = (int)db()->lastInsertId();
+        }
+        record_attempt('login_totp', true);
+        json_out(['ok' => true]);
+    }
+
     // ---- Logout ----------------------------------------------------------
     if (($parts[0] ?? '') === 'logout' && $method === 'POST') {
         $_SESSION = [];
@@ -272,6 +366,55 @@ try {
 
     require_auth();
     $uid = (int)$_SESSION['uid'];
+
+    // ---- 2FA management -------------------------------------------------
+    if (($parts[0] ?? '') === '2fa' && ($parts[1] ?? '') === 'setup' && $method === 'POST') {
+        // Genera un nuevo secreto TENTATIVO (aún no activo)
+        $secret = random_bytes(20);
+        $secretB32 = base32_encode($secret);
+        $_SESSION['pending_totp_secret_b32'] = $secretB32;
+        $stmt = db()->prepare("SELECT email FROM users WHERE id = ?");
+        $stmt->execute([$uid]);
+        $u = $stmt->fetch();
+        $email = $u['email'] ?? 'user';
+        json_out([
+            'ok' => true,
+            'secret' => $secretB32,
+            'uri' => totp_uri($secretB32, $email),
+        ]);
+    }
+    if (($parts[0] ?? '') === '2fa' && ($parts[1] ?? '') === 'enable' && $method === 'POST') {
+        if (empty($_SESSION['pending_totp_secret_b32'])) json_out(['error' => 'no_pending_setup'], 400);
+        $body = json_body();
+        $code = (string)($body['code'] ?? '');
+        $secret = base32_decode($_SESSION['pending_totp_secret_b32']);
+        if (!totp_verify($secret, $code)) json_out(['error' => 'bad_code'], 400);
+        $enc = encrypt_secret($secret);
+        $up = db()->prepare("UPDATE users SET totp_secret_encrypted = :s, totp_enabled = 1 WHERE id = :u");
+        $up->bindValue(':s', $enc, PDO::PARAM_LOB);
+        $up->bindValue(':u', $uid, PDO::PARAM_INT);
+        $up->execute();
+        unset($_SESSION['pending_totp_secret_b32']);
+        json_out(['ok' => true]);
+    }
+    if (($parts[0] ?? '') === '2fa' && ($parts[1] ?? '') === 'disable' && $method === 'POST') {
+        $body = json_body();
+        // Requerir password para desactivar 2FA
+        $pw = (string)($body['password'] ?? '');
+        $stmt = db()->prepare("SELECT password_hash FROM users WHERE id = ?");
+        $stmt->execute([$uid]);
+        $u = $stmt->fetch();
+        if (!$u || !password_verify($pw, $u['password_hash'])) json_out(['error' => 'bad_password'], 401);
+        $up = db()->prepare("UPDATE users SET totp_secret_encrypted = NULL, totp_enabled = 0 WHERE id = ?");
+        $up->execute([$uid]);
+        json_out(['ok' => true]);
+    }
+    if (($parts[0] ?? '') === '2fa' && ($parts[1] ?? '') === 'status' && $method === 'GET') {
+        $stmt = db()->prepare("SELECT totp_enabled FROM users WHERE id = ?");
+        $stmt->execute([$uid]);
+        $u = $stmt->fetch();
+        json_out(['enabled' => (bool)($u['totp_enabled'] ?? 0)]);
+    }
 
     // ---- Babies CRUD -----------------------------------------------------
     if (($parts[0] ?? '') === 'babies' && !isset($parts[1]) && $method === 'GET') {

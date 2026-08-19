@@ -857,17 +857,24 @@ body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-modal">
     <h2>👶 Baby Tracker</h2>
-    <p class="subtitle">Registra el crecimiento de tu bebé</p>
-    <div class="auth-tabs">
+    <p class="subtitle" id="authSubtitle">Registra el crecimiento de tu bebé</p>
+    <div class="auth-tabs" id="authTabs">
       <button type="button" class="auth-tab active" id="tabLogin">Entrar</button>
       <button type="button" class="auth-tab" id="tabSignup">Crear cuenta</button>
     </div>
     <form class="auth-form" id="authForm" autocomplete="on">
-      <label for="authEmail">Email</label>
-      <input type="email" id="authEmail" name="email" required autocomplete="email" inputmode="email">
-      <label for="authPassword">Contraseña</label>
-      <input type="password" id="authPassword" name="password" required minlength="12" autocomplete="current-password">
-      <div class="auth-hint" id="authHint" style="display:none;">Mínimo 12 caracteres.</div>
+      <div id="authCredFields">
+        <label for="authEmail">Email</label>
+        <input type="email" id="authEmail" name="email" required autocomplete="email" inputmode="email">
+        <label for="authPassword">Contraseña</label>
+        <input type="password" id="authPassword" name="password" required minlength="12" autocomplete="current-password">
+        <div class="auth-hint" id="authHint" style="display:none;">Mínimo 12 caracteres.</div>
+      </div>
+      <div id="authTotpFields" style="display:none;">
+        <label for="authTotp">Código de 6 dígitos</label>
+        <input type="text" id="authTotp" name="totp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" placeholder="000000" style="font-size:1.4rem;letter-spacing:0.3em;text-align:center;">
+        <div class="auth-hint" style="display:block;">Abre tu app de autenticación (Google Authenticator, Authy) y escribe el código actual.</div>
+      </div>
       <div class="auth-error" id="authError"></div>
       <button type="submit" class="auth-submit" id="authSubmit">Entrar</button>
     </form>
@@ -1229,6 +1236,34 @@ body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
     <h3>🔔 Notificaciones</h3>
     <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Activa avisos cuando abras la app y para recordarte la próxima cita.</p>
     <button class="btn btn-primary btn-small" onclick="requestNotificationPermission()">Activar notificaciones</button>
+  </div>
+
+  <div class="card">
+    <h3>🔒 Seguridad</h3>
+    <p style="font-size:0.82em;color:var(--text-light);margin-bottom:12px">Autenticación en dos pasos con Google Authenticator, Authy, etc.</p>
+    <div id="secStatus" style="font-size:0.9em;margin-bottom:12px">Cargando...</div>
+    <button class="btn btn-primary btn-small" id="sec2faBtn" onclick="Security.toggle2FA()">Activar 2FA</button>
+  </div>
+
+  <!-- Modal setup 2FA -->
+  <div class="rec-modal-overlay" id="totpSetupOverlay" onclick="if(event.target===this)closeTotpSetup()">
+    <div class="rec-modal" style="max-width:400px;">
+      <h2>🔐 Activar 2FA</h2>
+      <p style="font-size:0.9em;color:var(--text-light)">
+        1. Instala <strong>Google Authenticator</strong> o <strong>Authy</strong> en tu teléfono.<br>
+        2. Escanea el código QR o escribe el secreto manualmente.<br>
+        3. Escribe el código de 6 dígitos que aparece.
+      </p>
+      <div id="totpQrBox" style="text-align:center;margin:1rem 0;"></div>
+      <div style="background:#f4f4f4;padding:10px;border-radius:8px;font-family:monospace;text-align:center;font-size:0.85em;word-break:break-all" id="totpSecretBox"></div>
+      <label style="margin-top:1rem;display:block;font-weight:600">Código de 6 dígitos</label>
+      <input type="text" id="totpVerifyInput" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="000000" style="width:100%;padding:0.7rem;font-size:1.4rem;letter-spacing:0.3em;text-align:center;border:1px solid #ddd;border-radius:10px;box-sizing:border-box">
+      <div id="totpError" class="auth-error"></div>
+      <div class="rec-actions">
+        <button class="rec-btn secondary" onclick="closeTotpSetup()">Cancelar</button>
+        <button class="rec-btn primary" onclick="Security.verify2FA()">Activar</button>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -1672,6 +1707,14 @@ const SYNC = (() => {
     } catch { return { ok: false, status: 0, body: {} }; }
   }
 
+  async function loginTotp(code) {
+    try {
+      const r = await api('login/totp', { method: 'POST', body: JSON.stringify({ code }) });
+      const j = await r.json().catch(() => ({}));
+      return { ok: r.ok, status: r.status, body: j };
+    } catch { return { ok: false, status: 0, body: {} }; }
+  }
+
   async function signup(email, password) {
     try {
       const r = await api('signup', { method: 'POST', body: JSON.stringify({ email, password }) });
@@ -1778,7 +1821,7 @@ const SYNC = (() => {
     if (!r.ok) throw new Error('photo delete http ' + r.status);
   }
 
-  return { ensureAuth, isAuthed, login, signup, logout, pullData, pullPhotos, pushPhoto, deletePhoto };
+  return { ensureAuth, isAuthed, login, loginTotp, signup, logout, pullData, pullPhotos, pushPhoto, deletePhoto };
 })();
 
 // ===== AUTH UI (modal login/signup) =====
@@ -1794,8 +1837,14 @@ const AuthUI = (() => {
   const submit   = document.getElementById('authSubmit');
   const offline  = document.getElementById('authOffline');
 
-  let mode = 'login';           // 'login' | 'signup'
-  let resolver = null;          // Promise resolver
+  let mode = 'login';           // 'login' | 'signup' | 'totp'
+  let resolver = null;
+
+  const credFields = document.getElementById('authCredFields');
+  const totpFields = document.getElementById('authTotpFields');
+  const totpInput  = document.getElementById('authTotp');
+  const tabs       = document.getElementById('authTabs');
+  const subtitle   = document.getElementById('authSubtitle');
 
   const ERROR_MSGS = {
     bad_credentials: 'Email o contraseña incorrectos.',
@@ -1806,15 +1855,30 @@ const AuthUI = (() => {
     signup_rate_limited: 'Demasiados registros desde tu IP. Intenta mañana.',
     server_error: 'Error del servidor. Inténtalo más tarde.',
     not_installed: 'El servidor no está listo. Contacta al administrador.',
+    bad_code: 'Código incorrecto.',
+    no_pending_login: 'Sesión expirada, empieza de nuevo.',
   };
 
   function setMode(m) {
     mode = m;
-    tabLogin.classList.toggle('active', m === 'login');
-    tabSignup.classList.toggle('active', m === 'signup');
-    submit.textContent = m === 'login' ? 'Entrar' : 'Crear cuenta';
-    pw.setAttribute('autocomplete', m === 'login' ? 'current-password' : 'new-password');
-    hint.style.display = m === 'signup' ? 'block' : 'none';
+    if (m === 'totp') {
+      tabs.style.display = 'none';
+      credFields.style.display = 'none';
+      totpFields.style.display = '';
+      submit.textContent = 'Verificar';
+      subtitle.textContent = 'Verificación en dos pasos';
+      setTimeout(() => totpInput.focus(), 100);
+    } else {
+      tabs.style.display = '';
+      credFields.style.display = '';
+      totpFields.style.display = 'none';
+      subtitle.textContent = 'Registra el crecimiento de tu bebé';
+      tabLogin.classList.toggle('active', m === 'login');
+      tabSignup.classList.toggle('active', m === 'signup');
+      submit.textContent = m === 'login' ? 'Entrar' : 'Crear cuenta';
+      pw.setAttribute('autocomplete', m === 'login' ? 'current-password' : 'new-password');
+      hint.style.display = m === 'signup' ? 'block' : 'none';
+    }
     errBox.classList.remove('show');
   }
   function showError(code) {
@@ -1829,17 +1893,24 @@ const AuthUI = (() => {
     e.preventDefault();
     errBox.classList.remove('show');
     submit.disabled = true;
-    const em = email.value.trim().toLowerCase();
-    const pass = pw.value;
     try {
-      const res = mode === 'login'
-        ? await SYNC.login(em, pass)
-        : await SYNC.signup(em, pass);
-      if (res.ok) {
-        overlay.classList.remove('show');
-        if (resolver) { resolver(true); resolver = null; }
+      let res;
+      if (mode === 'totp') {
+        res = await SYNC.loginTotp(totpInput.value.trim());
+        if (res.ok) { overlay.classList.remove('show'); if (resolver) { resolver(true); resolver = null; } }
+        else { showError(res.body?.error || 'server_error'); }
       } else {
-        showError(res.body?.error || 'server_error');
+        const em = email.value.trim().toLowerCase();
+        const pass = pw.value;
+        res = mode === 'login' ? await SYNC.login(em, pass) : await SYNC.signup(em, pass);
+        if (res.ok && res.body?.need_totp) {
+          setMode('totp');
+        } else if (res.ok) {
+          overlay.classList.remove('show');
+          if (resolver) { resolver(true); resolver = null; }
+        } else {
+          showError(res.body?.error || 'server_error');
+        }
       }
     } finally {
       submit.disabled = false;
@@ -3030,7 +3101,7 @@ function switchTab(name, btn) {
   if (name === 'vac') renderVaccines();
   if (name === 'act') renderActivities();
   if (name === 'rec') Recipes.render();
-  if (name === 'settings') Babies.refresh();
+  if (name === 'settings') { Babies.refresh(); Security.refresh(); }
   window.scrollTo(0, 0);
 }
 
@@ -3325,6 +3396,82 @@ const Babies = (() => {
 
   return { refresh, switch: switchTo, add, remove, get list() { return list; }, get activeId() { return activeId; } };
 })();
+
+// ===== SECURITY (2FA) =====
+const Security = (() => {
+  const API = new URL('api/', location.href).href;
+  async function api(p, o = {}) {
+    return fetch(API + p, { credentials: 'include', ...o, headers: { 'Content-Type': 'application/json', ...(o.headers || {}) } });
+  }
+  let pendingSecret = null;
+
+  async function refresh() {
+    try {
+      const r = await api('2fa/status');
+      const j = await r.json();
+      const status = document.getElementById('secStatus');
+      const btn = document.getElementById('sec2faBtn');
+      if (j.enabled) {
+        status.innerHTML = '✅ <strong>2FA activado</strong> — Se pedirá código al iniciar sesión';
+        btn.textContent = 'Desactivar 2FA';
+        btn.className = 'btn btn-danger btn-small';
+      } else {
+        status.innerHTML = '⚠️ 2FA desactivado — Tu cuenta está protegida solo por contraseña';
+        btn.textContent = 'Activar 2FA';
+        btn.className = 'btn btn-primary btn-small';
+      }
+    } catch (e) {}
+  }
+
+  async function toggle2FA() {
+    const status = document.getElementById('secStatus').textContent;
+    if (status.includes('activado')) {
+      const pw = window.prompt('Escribe tu contraseña para desactivar 2FA:');
+      if (!pw) return;
+      const r = await api('2fa/disable', { method: 'POST', body: JSON.stringify({ password: pw }) });
+      if (r.ok) {
+        alert('2FA desactivado');
+        refresh();
+      } else {
+        alert('Contraseña incorrecta');
+      }
+    } else {
+      const r = await api('2fa/setup', { method: 'POST' });
+      const j = await r.json();
+      if (!r.ok) { alert('Error: ' + (j.error || 'server')); return; }
+      pendingSecret = j.secret;
+      document.getElementById('totpSecretBox').textContent = j.secret;
+      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(j.uri);
+      document.getElementById('totpQrBox').innerHTML =
+        `<img src="${qrUrl}" alt="QR" style="max-width:200px;border-radius:8px;background:#fff;padding:8px" onerror="this.style.display='none'">`;
+      document.getElementById('totpVerifyInput').value = '';
+      document.getElementById('totpError').classList.remove('show');
+      document.getElementById('totpSetupOverlay').classList.add('show');
+      setTimeout(() => document.getElementById('totpVerifyInput').focus(), 200);
+    }
+  }
+
+  async function verify2FA() {
+    const code = document.getElementById('totpVerifyInput').value.trim();
+    const err = document.getElementById('totpError');
+    if (!/^\d{6}$/.test(code)) { err.textContent = 'Debe ser 6 dígitos'; err.classList.add('show'); return; }
+    const r = await api('2fa/enable', { method: 'POST', body: JSON.stringify({ code }) });
+    if (r.ok) {
+      closeTotpSetup();
+      alert('2FA activado con éxito ✓');
+      refresh();
+    } else {
+      err.textContent = 'Código incorrecto, intenta con el actual';
+      err.classList.add('show');
+    }
+  }
+
+  return { refresh, toggle2FA, verify2FA };
+})();
+
+function closeTotpSetup() {
+  document.getElementById('totpSetupOverlay').classList.remove('show');
+}
 
 function promptAddBaby() {
   const name = window.prompt('Nombre del bebé:');
