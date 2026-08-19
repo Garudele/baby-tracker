@@ -878,6 +878,9 @@ body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
       <div class="auth-error" id="authError"></div>
       <button type="submit" class="auth-submit" id="authSubmit">Entrar</button>
     </form>
+    <div style="text-align:center;margin-top:0.8rem;font-size:0.85rem">
+      <button type="button" id="authPasskey" style="background:none;border:none;color:var(--baby-blue,#74B9FF);text-decoration:underline;cursor:pointer;padding:6px">🔑 Entrar con passkey (huella)</button>
+    </div>
     <div class="auth-offline">
       <button type="button" id="authOffline">Continuar sin conexión (datos locales)</button>
     </div>
@@ -1240,9 +1243,20 @@ body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
 
   <div class="card">
     <h3>🔒 Seguridad</h3>
-    <p style="font-size:0.82em;color:var(--text-light);margin-bottom:12px">Autenticación en dos pasos con Google Authenticator, Authy, etc.</p>
-    <div id="secStatus" style="font-size:0.9em;margin-bottom:12px">Cargando...</div>
-    <button class="btn btn-primary btn-small" id="sec2faBtn" onclick="Security.toggle2FA()">Activar 2FA</button>
+
+    <div style="margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid rgba(0,0,0,0.08)">
+      <h4 style="margin:0 0 6px;font-size:0.95rem">Autenticación en dos pasos (2FA)</h4>
+      <p style="font-size:0.82em;color:var(--text-light);margin:0 0 8px">Google Authenticator, Authy, 1Password, etc.</p>
+      <div id="secStatus" style="font-size:0.9em;margin-bottom:8px">Cargando...</div>
+      <button class="btn btn-primary btn-small" id="sec2faBtn" onclick="Security.toggle2FA()">Activar 2FA</button>
+    </div>
+
+    <div>
+      <h4 style="margin:0 0 6px;font-size:0.95rem">Passkeys / Huella digital</h4>
+      <p style="font-size:0.82em;color:var(--text-light);margin:0 0 8px">Inicia sesión con tu huella o Face ID en vez de contraseña.</p>
+      <div id="passkeyList" style="font-size:0.85em;margin-bottom:8px"></div>
+      <button class="btn btn-primary btn-small" onclick="Security.registerPasskey()">+ Registrar este dispositivo</button>
+    </div>
   </div>
 
   <!-- Modal setup 2FA -->
@@ -1920,6 +1934,48 @@ const AuthUI = (() => {
   offline.addEventListener('click', () => {
     overlay.classList.remove('show');
     if (resolver) { resolver(false); resolver = null; }
+  });
+
+  document.getElementById('authPasskey').addEventListener('click', async () => {
+    if (!window.PublicKeyCredential) { showError('Passkey no soportado en este navegador'); return; }
+    const em = email.value.trim().toLowerCase();
+    if (!em) { showError('bad_email'); email.focus(); return; }
+    submit.disabled = true;
+    try {
+      const r = await fetch(new URL('api/passkey/auth/start', location.href), {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: em }),
+      });
+      const opts = await r.json();
+      if (!r.ok) { showError(opts.error || 'server_error'); return; }
+      opts.publicKey.challenge = Security.b64ToBuf(opts.publicKey.challenge);
+      if (opts.publicKey.allowCredentials) {
+        opts.publicKey.allowCredentials = opts.publicKey.allowCredentials.map(c => ({ ...c, id: Security.b64ToBuf(c.id) }));
+      }
+      const cred = await navigator.credentials.get({ publicKey: opts.publicKey });
+      const finish = await fetch(new URL('api/passkey/auth/finish', location.href), {
+        method: 'POST', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          credentialId: Security.bufToB64(cred.rawId),
+          clientDataJSON: Security.bufToB64(cred.response.clientDataJSON),
+          authenticatorData: Security.bufToB64(cred.response.authenticatorData),
+          signature: Security.bufToB64(cred.response.signature),
+        }),
+      });
+      const fj = await finish.json();
+      if (finish.ok) {
+        overlay.classList.remove('show');
+        if (resolver) { resolver(true); resolver = null; }
+      } else {
+        showError(fj.error || 'passkey_failed');
+      }
+    } catch (e) {
+      showError('passkey_cancelled');
+    } finally {
+      submit.disabled = false;
+    }
   });
 
   return {
@@ -3101,7 +3157,7 @@ function switchTab(name, btn) {
   if (name === 'vac') renderVaccines();
   if (name === 'act') renderActivities();
   if (name === 'rec') Recipes.render();
-  if (name === 'settings') { Babies.refresh(); Security.refresh(); }
+  if (name === 'settings') { Babies.refresh(); Security.refresh(); Security.listPasskeys(); }
   window.scrollTo(0, 0);
 }
 
@@ -3519,7 +3575,84 @@ const Security = (() => {
     }
   }
 
-  return { refresh, toggle2FA, verify2FA };
+  // ---- WebAuthn helpers ------
+  function bufToB64(buf) {
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+  function b64ToBuf(b64) {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes.buffer;
+  }
+
+  async function listPasskeys() {
+    const box = document.getElementById('passkeyList');
+    if (!box) return;
+    try {
+      const r = await api('passkey');
+      const list = await r.json();
+      if (!Array.isArray(list) || list.length === 0) {
+        box.innerHTML = '<em style="color:var(--text-light)">Sin dispositivos registrados.</em>';
+        return;
+      }
+      box.innerHTML = list.map(p => `
+        <div class="baby-item" style="padding:8px 12px">
+          <span class="baby-item-emoji">🔑</span>
+          <span class="baby-item-name" style="font-size:0.9em">${escapeHTML(p.device_name || 'Dispositivo')}</span>
+          <button class="baby-item-del" onclick="Security.removePasskey(${p.id})">🗑️</button>
+        </div>
+      `).join('');
+    } catch (e) {}
+  }
+
+  async function registerPasskey() {
+    if (!window.PublicKeyCredential) {
+      alert('Este navegador no soporta passkeys.');
+      return;
+    }
+    const deviceName = window.prompt('Nombre para este dispositivo (ej: iPhone de Vale):', navigator.platform || 'Dispositivo');
+    if (!deviceName) return;
+    try {
+      const r = await api('passkey/register/start', { method: 'POST' });
+      const opts = await r.json();
+      if (!r.ok) { alert('Error: ' + (opts.error || 'no se pudo iniciar registro')); return; }
+      // Convert base64 fields to ArrayBuffer
+      const publicKey = opts.publicKey;
+      publicKey.challenge = b64ToBuf(publicKey.challenge);
+      publicKey.user.id = b64ToBuf(publicKey.user.id);
+      if (publicKey.excludeCredentials) {
+        publicKey.excludeCredentials = publicKey.excludeCredentials.map(c => ({ ...c, id: b64ToBuf(c.id) }));
+      }
+      const cred = await navigator.credentials.create({ publicKey });
+      const send = {
+        clientDataJSON: bufToB64(cred.response.clientDataJSON),
+        attestationObject: bufToB64(cred.response.attestationObject),
+        device_name: deviceName,
+      };
+      const r2 = await api('passkey/register/finish', { method: 'POST', body: JSON.stringify(send) });
+      const j2 = await r2.json();
+      if (r2.ok) {
+        alert('Passkey registrado ✓');
+        listPasskeys();
+      } else {
+        alert('Error al registrar: ' + (j2.detail || j2.error));
+      }
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  }
+
+  async function removePasskey(id) {
+    if (!confirm('¿Eliminar este passkey?')) return;
+    await api('passkey/' + id, { method: 'DELETE' });
+    listPasskeys();
+  }
+
+  return { refresh, toggle2FA, verify2FA, registerPasskey, removePasskey, listPasskeys, bufToB64, b64ToBuf };
 })();
 
 function closeTotpSetup() {

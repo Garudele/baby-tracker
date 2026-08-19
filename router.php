@@ -357,6 +357,77 @@ try {
         json_out(['ok' => true]);
     }
 
+    // ---- WebAuthn passkey login (sin auth previa) -----------------------
+    if (($parts[0] ?? '') === 'passkey' && ($parts[1] ?? '') === 'auth' && ($parts[2] ?? '') === 'start' && $method === 'POST') {
+        require_once __DIR__ . '/webauthn/WebAuthn.php';
+        $body = json_body();
+        $email = normalize_email((string)($body['email'] ?? ''));
+        if (!is_valid_email($email)) json_out(['error' => 'bad_email'], 400);
+        $u = db()->prepare("SELECT id FROM users WHERE email = ?");
+        $u->execute([$email]);
+        $user = $u->fetch();
+        if (!$user) {
+            usleep(500000);
+            json_out(['error' => 'no_credentials'], 404);
+        }
+        $c = db()->prepare("SELECT credential_id FROM webauthn_credentials WHERE user_id = ?");
+        $c->execute([$user['id']]);
+        $creds = [];
+        foreach ($c->fetchAll() as $r) $creds[] = $r['credential_id'];
+        if (!$creds) json_out(['error' => 'no_credentials'], 404);
+        $wa = new \lbuchs\WebAuthn\WebAuthn($config['webauthn_rp_name'], $config['webauthn_rp_id']);
+        $args = $wa->getGetArgs($creds, 60 * 2, true, true, true, true, 'discouraged');
+        $_SESSION['wa_auth_challenge'] = $wa->getChallenge()->getBinaryString();
+        $_SESSION['wa_auth_uid'] = (int)$user['id'];
+        json_out($args);
+    }
+    if (($parts[0] ?? '') === 'passkey' && ($parts[1] ?? '') === 'auth' && ($parts[2] ?? '') === 'finish' && $method === 'POST') {
+        require_once __DIR__ . '/webauthn/WebAuthn.php';
+        if (empty($_SESSION['wa_auth_challenge']) || empty($_SESSION['wa_auth_uid'])) json_out(['error' => 'no_challenge'], 400);
+        $body = json_body();
+        $uid = (int)$_SESSION['wa_auth_uid'];
+        $wa = new \lbuchs\WebAuthn\WebAuthn($config['webauthn_rp_name'], $config['webauthn_rp_id']);
+        $challenge = new \lbuchs\WebAuthn\Binary\ByteBuffer($_SESSION['wa_auth_challenge']);
+        $credentialId = base64_decode($body['credentialId'] ?? '');
+        // Buscar la credential
+        $c = db()->prepare("SELECT id, public_key, sign_count FROM webauthn_credentials WHERE user_id = ? AND credential_id = ?");
+        $c->bindValue(1, $uid, PDO::PARAM_INT);
+        $c->bindValue(2, $credentialId, PDO::PARAM_LOB);
+        $c->execute();
+        $cred = $c->fetch();
+        if (!$cred) json_out(['error' => 'unknown_credential'], 400);
+        try {
+            $wa->processGet(
+                base64_decode($body['clientDataJSON'] ?? ''),
+                base64_decode($body['authenticatorData'] ?? ''),
+                base64_decode($body['signature'] ?? ''),
+                $cred['public_key'],
+                $challenge,
+                (int)$cred['sign_count'],
+                true,
+                false
+            );
+        } catch (Throwable $e) {
+            record_attempt('passkey_login', false, 'bad_assertion');
+            json_out(['error' => 'assertion_failed', 'detail' => $e->getMessage()], 401);
+        }
+        // Actualizar last_used + sign_count
+        db()->prepare("UPDATE webauthn_credentials SET sign_count = sign_count + 1, last_used_at = NOW() WHERE id = ?")->execute([$cred['id']]);
+        unset($_SESSION['wa_auth_challenge'], $_SESSION['wa_auth_uid']);
+        session_regenerate_id(true);
+        $_SESSION['uid'] = $uid;
+        // Auto-crear bebé si no tiene
+        $chk = db()->prepare("SELECT id FROM babies WHERE owner_id = ? LIMIT 1");
+        $chk->execute([$uid]);
+        if (!$chk->fetch()) {
+            $ins = db()->prepare("INSERT INTO babies (owner_id, name, emoji) VALUES (?, 'Mi bebé', '👶')");
+            $ins->execute([$uid]);
+            $_SESSION['baby_id'] = (int)db()->lastInsertId();
+        }
+        record_attempt('passkey_login', true);
+        json_out(['ok' => true]);
+    }
+
     // ---- Info pública de invitación (sin auth) --------------------------
     if (($parts[0] ?? '') === 'invitations' && isset($parts[1]) && !isset($parts[2]) && $method === 'GET') {
         $stmt = db()->prepare("SELECT i.baby_id, i.role, i.invitee_email, i.expires_at, b.name AS baby_name, b.emoji AS baby_emoji, u.email AS inviter_email FROM invitations i JOIN babies b ON b.id = i.baby_id JOIN users u ON u.id = i.inviter_id WHERE i.token = ? AND i.accepted_at IS NULL AND i.expires_at > NOW()");
@@ -430,6 +501,68 @@ try {
         $stmt->execute([$uid]);
         $u = $stmt->fetch();
         json_out(['enabled' => (bool)($u['totp_enabled'] ?? 0)]);
+    }
+
+    // ---- WebAuthn / Passkey management ----------------------------------
+    if (($parts[0] ?? '') === 'passkey' && !isset($parts[1]) && $method === 'GET') {
+        $stmt = db()->prepare("SELECT id, device_name, created_at, last_used_at FROM webauthn_credentials WHERE user_id = ? ORDER BY id DESC");
+        $stmt->execute([$uid]);
+        json_out($stmt->fetchAll());
+    }
+    if (($parts[0] ?? '') === 'passkey' && isset($parts[1]) && ctype_digit($parts[1]) && $method === 'DELETE') {
+        $cid = (int)$parts[1];
+        db()->prepare("DELETE FROM webauthn_credentials WHERE id = ? AND user_id = ?")->execute([$cid, $uid]);
+        json_out(['ok' => true]);
+    }
+    if (($parts[0] ?? '') === 'passkey' && ($parts[1] ?? '') === 'register' && ($parts[2] ?? '') === 'start' && $method === 'POST') {
+        require_once __DIR__ . '/webauthn/WebAuthn.php';
+        $u = db()->prepare("SELECT email FROM users WHERE id = ?");
+        $u->execute([$uid]);
+        $urow = $u->fetch();
+        $wa = new \lbuchs\WebAuthn\WebAuthn($config['webauthn_rp_name'], $config['webauthn_rp_id']);
+        // Excluir credenciales ya registradas
+        $ex = db()->prepare("SELECT credential_id FROM webauthn_credentials WHERE user_id = ?");
+        $ex->execute([$uid]);
+        $excluded = [];
+        foreach ($ex->fetchAll() as $r) $excluded[] = $r['credential_id'];
+        $args = $wa->getCreateArgs(
+            (string)$uid, $urow['email'], $urow['email'],
+            60 * 4, // timeout 4min
+            'discouraged', // userVerification
+            null, // requireResidentKey
+            $excluded
+        );
+        $_SESSION['wa_challenge'] = $wa->getChallenge()->getBinaryString();
+        json_out($args);
+    }
+    if (($parts[0] ?? '') === 'passkey' && ($parts[1] ?? '') === 'register' && ($parts[2] ?? '') === 'finish' && $method === 'POST') {
+        require_once __DIR__ . '/webauthn/WebAuthn.php';
+        if (empty($_SESSION['wa_challenge'])) json_out(['error' => 'no_challenge'], 400);
+        $body = json_body();
+        $wa = new \lbuchs\WebAuthn\WebAuthn($config['webauthn_rp_name'], $config['webauthn_rp_id']);
+        $challenge = new \lbuchs\WebAuthn\Binary\ByteBuffer($_SESSION['wa_challenge']);
+        try {
+            $data = $wa->processCreate(
+                base64_decode($body['clientDataJSON'] ?? ''),
+                base64_decode($body['attestationObject'] ?? ''),
+                $challenge,
+                'discouraged',
+                true, // requireUserPresent
+                false // requireUserVerified
+            );
+        } catch (Throwable $e) {
+            json_out(['error' => 'attestation_failed', 'detail' => $e->getMessage()], 400);
+        }
+        $deviceName = (string)($body['device_name'] ?? 'Dispositivo');
+        $ins = db()->prepare("INSERT INTO webauthn_credentials (user_id, credential_id, public_key, sign_count, device_name) VALUES (:u, :c, :p, :s, :d)");
+        $ins->bindValue(':u', $uid, PDO::PARAM_INT);
+        $ins->bindValue(':c', $data->credentialId, PDO::PARAM_LOB);
+        $ins->bindValue(':p', $data->credentialPublicKey);
+        $ins->bindValue(':s', $data->signatureCounter, PDO::PARAM_INT);
+        $ins->bindValue(':d', substr($deviceName, 0, 100));
+        $ins->execute();
+        unset($_SESSION['wa_challenge']);
+        json_out(['ok' => true]);
     }
 
     // ---- Babies CRUD -----------------------------------------------------
