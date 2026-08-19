@@ -825,6 +825,30 @@ body.dark .rec-btn.secondary { background: rgba(255,255,255,0.08); color: #eee; 
 body.dark .rec-input { background: #1e1e2a; color: #eee; border-color: #444; }
 body.dark .rec-chip { color: #eee; border-color: #444; }
 body.dark .rec-card { background: #2b2b3a; border-color: rgba(255,255,255,0.06); }
+
+/* ===== Babies list ===== */
+.baby-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; margin-bottom: 6px;
+  background: var(--input-bg, #fafafa); border-radius: 12px; cursor: pointer;
+  border: 2px solid transparent; transition: all 0.15s;
+}
+.baby-item:hover { background: rgba(116,185,255,0.08); }
+.baby-item.active { border-color: var(--baby-blue, #74B9FF); background: rgba(116,185,255,0.1); }
+.baby-item-emoji { font-size: 1.4rem; }
+.baby-item-name { flex: 1; font-weight: 600; }
+.baby-item-role {
+  font-size: 0.7rem; padding: 2px 8px; border-radius: 10px;
+  background: rgba(0,0,0,0.08); color: var(--text-light, #666);
+}
+.baby-item-check { color: var(--baby-blue, #74B9FF); font-weight: bold; }
+.baby-item-del {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  border-radius: 6px; font-size: 1rem; opacity: 0.6;
+}
+.baby-item-del:hover { opacity: 1; background: rgba(255,0,0,0.1); }
+body.dark .baby-item { background: rgba(255,255,255,0.05); }
+body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
 </style>
 </head>
 <body>
@@ -1174,8 +1198,15 @@ body.dark .rec-card { background: #2b2b3a; border-color: rgba(255,255,255,0.06);
 
 <!-- AJUSTES -->
 <div class="section" id="settingsSection">
+  <div class="card" id="babiesCard">
+    <h3>👶 Mis Bebés</h3>
+    <p style="font-size:0.82em;color:var(--text-light);margin-bottom:12px">Puedes agregar múltiples bebés y compartir con familia (próximamente).</p>
+    <div id="babiesList" style="margin-bottom:12px"></div>
+    <button class="btn btn-primary btn-small" onclick="promptAddBaby()">+ Agregar bebé</button>
+  </div>
+
   <div class="card">
-    <h3>👶 Datos del Bebé</h3>
+    <h3>📝 Datos del Bebé Activo</h3>
     <div class="form-group">
       <label>Nombre</label>
       <input type="text" id="editName">
@@ -2999,6 +3030,7 @@ function switchTab(name, btn) {
   if (name === 'vac') renderVaccines();
   if (name === 'act') renderActivities();
   if (name === 'rec') Recipes.render();
+  if (name === 'settings') Babies.refresh();
   window.scrollTo(0, 0);
 }
 
@@ -3204,6 +3236,105 @@ const Recipes = (() => {
 
 function closeRecDetail() {
   document.getElementById('recDetailOverlay')?.classList.remove('show');
+}
+
+// ===== BABIES MANAGER =====
+const Babies = (() => {
+  let list = [];
+  let activeId = null;
+
+  const API = new URL('api/', location.href).href;
+  async function api(path, opts = {}) {
+    return fetch(API + path, {
+      credentials: 'include',
+      ...opts,
+      headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
+    });
+  }
+
+  async function refresh() {
+    try {
+      const r = await api('me');
+      const j = await r.json();
+      if (j.babies) {
+        list = j.babies;
+        activeId = j.active_baby_id;
+        renderList();
+      }
+    } catch (e) { console.warn('babies refresh failed', e); }
+  }
+
+  function renderList() {
+    const box = document.getElementById('babiesList');
+    if (!box) return;
+    if (!list.length) {
+      box.innerHTML = '<p style="color:var(--text-light);font-size:0.85em">Sin bebés. Agrega uno para empezar.</p>';
+      return;
+    }
+    box.innerHTML = list.map(b => `
+      <div class="baby-item ${b.id == activeId ? 'active' : ''}" onclick="Babies.switch(${b.id})">
+        <span class="baby-item-emoji">${b.emoji || '👶'}</span>
+        <span class="baby-item-name">${escapeHTML(b.name)}</span>
+        ${b.role !== 'owner' ? `<span class="baby-item-role">${b.role}</span>` : ''}
+        ${b.id == activeId ? '<span class="baby-item-check">✓</span>' : ''}
+        ${b.role === 'owner' && list.length > 1 ? `<button class="baby-item-del" onclick="event.stopPropagation();Babies.remove(${b.id})">🗑️</button>` : ''}
+      </div>
+    `).join('');
+  }
+
+  async function switchTo(id) {
+    try {
+      const r = await api('active_baby', { method: 'POST', body: JSON.stringify({ baby_id: id }) });
+      if (r.ok) {
+        activeId = id;
+        renderList();
+        // Refresh app data for new baby
+        localStorage.clear();
+        if (window.SYNC) {
+          await SYNC.pullData();
+          await SYNC.pullPhotos();
+        }
+        location.reload();
+      }
+    } catch (e) { console.warn(e); }
+  }
+
+  async function add(name, birth, sex, emoji) {
+    const r = await api('babies', {
+      method: 'POST',
+      body: JSON.stringify({ name, birthdate: birth || null, sex: sex || 'other', emoji: emoji || '👶' }),
+    });
+    if (r.ok) {
+      await refresh();
+      const j = await r.json();
+      if (j.id) await switchTo(j.id);
+      return true;
+    }
+    return false;
+  }
+
+  async function remove(id) {
+    if (!confirm('¿Eliminar este bebé? Se borrarán todos sus datos, fotos y comidas registradas.')) return;
+    const r = await api('babies/' + id, { method: 'DELETE' });
+    if (r.ok) {
+      if (activeId == id) localStorage.clear();
+      await refresh();
+      if (activeId == id) location.reload();
+    }
+  }
+
+  return { refresh, switch: switchTo, add, remove, get list() { return list; }, get activeId() { return activeId; } };
+})();
+
+function promptAddBaby() {
+  const name = window.prompt('Nombre del bebé:');
+  if (!name || !name.trim()) return;
+  const birth = window.prompt('Fecha de nacimiento (YYYY-MM-DD, opcional):') || null;
+  const sex = window.prompt('Sexo (girl/boy/other):', 'other') || 'other';
+  const emoji = window.prompt('Emoji (opcional):', '👶') || '👶';
+  Babies.add(name.trim(), birth, sex, emoji).then(ok => {
+    if (!ok) alert('Error al crear bebé');
+  });
 }
 
 // ===== EXPORT / IMPORT =====

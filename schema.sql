@@ -42,17 +42,58 @@ CREATE TABLE IF NOT EXISTS auth_attempts (
   INDEX email_time_idx (email, attempted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS babies (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  owner_id INT UNSIGNED NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  birthdate DATE NULL,
+  sex ENUM('girl','boy','other') NOT NULL DEFAULT 'other',
+  emoji VARCHAR(8) NOT NULL DEFAULT '👶',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  INDEX owner_idx (owner_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS baby_shares (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  baby_id INT UNSIGNED NOT NULL,
+  user_id INT UNSIGNED NOT NULL,
+  role ENUM('viewer','editor','admin') NOT NULL DEFAULT 'editor',
+  invited_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  accepted_at TIMESTAMP NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY unique_share (baby_id, user_id),
+  INDEX baby_idx (baby_id),
+  INDEX user_idx (user_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS invitations (
+  token VARCHAR(64) NOT NULL,
+  baby_id INT UNSIGNED NOT NULL,
+  inviter_id INT UNSIGNED NOT NULL,
+  invitee_email VARCHAR(255) NULL,
+  role ENUM('viewer','editor','admin') NOT NULL DEFAULT 'editor',
+  expires_at TIMESTAMP NOT NULL,
+  accepted_at TIMESTAMP NULL,
+  accepted_by INT UNSIGNED NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (token),
+  INDEX baby_idx (baby_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS entries (
-  user_id INT UNSIGNED NOT NULL DEFAULT 1,
+  baby_id INT UNSIGNED NOT NULL,
   data_key VARCHAR(50) NOT NULL,
   data_json LONGTEXT NOT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (user_id, data_key)
+  PRIMARY KEY (baby_id, data_key),
+  INDEX baby_idx (baby_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS photos (
   id VARCHAR(64) NOT NULL,
-  user_id INT UNSIGNED NOT NULL DEFAULT 1,
+  baby_id INT UNSIGNED NOT NULL,
   record_type VARCHAR(30) NULL,
   record_id BIGINT NULL,
   mime VARCHAR(50) NOT NULL,
@@ -60,6 +101,6 @@ CREATE TABLE IF NOT EXISTS photos (
   data LONGBLOB NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
-  INDEX user_idx (user_id),
-  INDEX record_idx (user_id, record_type, record_id)
+  INDEX baby_idx (baby_id),
+  INDEX record_idx (baby_id, record_type, record_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
