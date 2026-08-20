@@ -2866,7 +2866,7 @@ async function stagePhoto(kind, event) {
     stagedPhotos[kind].push({ blob, url, name: file.name });
     renderStagedPhotos(kind);
   } catch (err) {
-    alert('No se pudo procesar la imagen');
+    Toast.show('No se pudo procesar la imagen');
     console.error(err);
   }
 }
@@ -2916,7 +2916,7 @@ async function renderRecordPhotos(recordType, recordId, containerId) {
 }
 
 async function deleteRecordPhoto(photoId, recordType, recordId, containerId) {
-  if (!confirm('¿Eliminar foto?')) return;
+  if (!(await Modal.confirm('¿Eliminar esta foto?', { okText: 'Eliminar', danger: true }))) return;
   await PhotoDB.delete(photoId);
   renderRecordPhotos(recordType, recordId, containerId);
 }
@@ -2934,9 +2934,9 @@ function closePhotoModal(event) {
 function saveBaby() {
   const name = document.getElementById('babyName').value.trim();
   const birth = document.getElementById('babyBirth').value;
-  if (!name || !birth) { alert('Completa nombre y fecha de nacimiento'); return; }
+  if (!name || !birth) { Toast.show('Completa nombre y fecha de nacimiento'); return; }
   const today = new Date().toISOString().split('T')[0];
-  if (birth > today) { alert('La fecha de nacimiento no puede ser futura'); return; }
+  if (birth > today) { Toast.show('La fecha de nacimiento no puede ser futura'); return; }
 
   const baby = {
     name,
@@ -2977,16 +2977,16 @@ function validateRecordDate(date) {
   const baby = DB.get('info');
   if (!baby) return true;
   const today = new Date().toISOString().split('T')[0];
-  if (date < baby.birth) { alert('La fecha no puede ser anterior al nacimiento (' + formatDate(baby.birth) + ')'); return false; }
-  if (date > today) { alert('La fecha no puede ser futura'); return false; }
+  if (date < baby.birth) { Toast.show('Fecha inválida (anterior al nacimiento)'); return false; }
+  if (date > today) { Toast.show('La fecha no puede ser futura'); return false; }
   return true;
 }
 
-function saveGrowth() {
+async function saveGrowth() {
   const date = document.getElementById('growthDate').value;
   const weight = parseFloat(document.getElementById('growthWeight').value);
   const height = parseFloat(document.getElementById('growthHeight').value);
-  if (!date || (!weight && !height)) { alert('Completa fecha y al menos peso o talla'); return; }
+  if (!date || (!weight && !height)) { Toast.show('Completa fecha y al menos peso o talla'); return; }
   if (!validateRecordDate(date)) return;
 
   const fields = {
@@ -3004,7 +3004,7 @@ function saveGrowth() {
     // Avoid duplicates: if a record already exists on same date, ask to replace
     const existing = (DB.get('growth') || []).find(r => r.date === date);
     if (existing) {
-      if (!confirm('Ya hay un registro en esta fecha. ¿Reemplazarlo?')) return;
+      if (!(await Modal.confirm('Ya hay un registro en esta fecha. ¿Reemplazarlo?', { okText: 'Reemplazar' }))) return;
       DB.update('growth', existing.id, fields);
       showToast('Registro reemplazado');
     } else {
@@ -3056,7 +3056,7 @@ function renderGrowth() {
 function saveMedicine() {
   const date = document.getElementById('medDate').value;
   const name = document.getElementById('medName').value.trim();
-  if (!date || !name) { alert('Completa fecha y nombre del medicamento'); return; }
+  if (!date || !name) { Toast.show('Completa fecha y nombre del medicamento'); return; }
   if (!validateRecordDate(date)) return;
 
   const fields = {
@@ -3126,7 +3126,7 @@ function renderMedicines() {
 function saveStudy() {
   const date = document.getElementById('studyDate').value;
   const name = document.getElementById('studyName').value.trim();
-  if (!date || !name) { alert('Completa fecha y nombre del estudio'); return; }
+  if (!date || !name) { Toast.show('Completa fecha y nombre del estudio'); return; }
   if (!validateRecordDate(date)) return;
 
   const fields = {
@@ -3231,14 +3231,14 @@ function cancelEdit(kind) {
 
 // ===== DELETE =====
 function deleteRecord(key, id) {
-  if (confirm('¿Eliminar este registro?')) {
+  Modal.confirm('¿Eliminar este registro?', { okText: 'Eliminar', danger: true }).then(ok => {
+    if (!ok) return;
     DB.remove(key, id);
-    // Also delete attached photos
     if (key === 'medicines') PhotoDB.deleteByRecord('medicine', id);
     if (key === 'studies') PhotoDB.deleteByRecord('study', id);
     renderAll();
     showToast('Eliminado');
-  }
+  });
 }
 
 // ===== DASHBOARD =====
@@ -3448,9 +3448,9 @@ function renderChart(canvasId, growthData, metric, label, sex) {
 function saveAppt() {
   const date = document.getElementById('apptDate').value;
   const doctor = document.getElementById('apptDoctor').value.trim();
-  if (!date) { alert('Selecciona una fecha'); return; }
+  if (!date) { Toast.show('Selecciona una fecha'); return; }
   const baby = DB.get('info');
-  if (baby && date < baby.birth) { alert('La fecha no puede ser anterior al nacimiento'); return; }
+  if (baby && date < baby.birth) { Toast.show('Fecha inválida (anterior al nacimiento)'); return; }
 
   const fields = {
     date,
@@ -3585,7 +3585,7 @@ function renderReminders() {
 
 // ===== NOTIFICACIONES =====
 function requestNotificationPermission() {
-  if (!('Notification' in window)) { alert('Tu navegador no soporta notificaciones'); return; }
+  if (!('Notification' in window)) { Toast.show('Tu navegador no soporta notificaciones'); return; }
   Notification.requestPermission().then(p => {
     if (p === 'granted') showToast('Notificaciones activadas');
     else showToast('Permiso denegado');
@@ -3669,7 +3669,7 @@ async function loadPhotosForRecords(recordType, records) {
 
 async function printReport() {
   const baby = DB.get('info');
-  if (!baby) { alert('No hay datos del bebé'); return; }
+  if (!baby) { Toast.show('Configura los datos del bebé primero'); return; }
 
   const today = new Date();
   const todayStr = today.toLocaleDateString('es-MX', { day:'numeric', month:'long', year:'numeric' });
@@ -3916,8 +3916,8 @@ function markVaccine(name) {
   showToast('Vacuna registrada');
 }
 
-function unmarkVaccine(id) {
-  if (!confirm('¿Quitar registro de aplicación?')) return;
+async function unmarkVaccine(id) {
+  if (!(await Modal.confirm('¿Quitar registro de aplicación?', { okText: 'Quitar', danger: true }))) return;
   DB.remove('vaccines', id);
   renderVaccines();
   renderDashboard();
@@ -3991,6 +3991,104 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
 }
+
+// ===== MODAL SYSTEM (reemplazo de alert/confirm/prompt del navegador) =====
+const Modal = (() => {
+  function ensure() {
+    if (document.getElementById('modalGeneric')) return;
+    const el = document.createElement('div');
+    el.id = 'modalGeneric';
+    el.className = 'auth-overlay';
+    el.innerHTML = `
+      <div class="auth-modal" style="max-width:360px">
+        <h2 id="mgTitle" style="text-align:center;font-size:1.15rem;margin-bottom:0.5rem"></h2>
+        <p id="mgMsg" style="text-align:center;color:var(--text-light);margin-bottom:1rem;white-space:pre-line;line-height:1.5"></p>
+        <div id="mgInputWrap" style="display:none;margin-bottom:12px">
+          <input type="text" id="mgInput" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:1em;background:var(--input-bg);color:var(--text);font-family:inherit;box-sizing:border-box">
+        </div>
+        <div id="mgBtns" style="display:flex;gap:8px"></div>
+      </div>
+    `;
+    document.body.appendChild(el);
+  }
+
+  function open(opts) {
+    ensure();
+    const overlay = document.getElementById('modalGeneric');
+    document.getElementById('mgTitle').textContent = opts.title || '';
+    document.getElementById('mgMsg').textContent = opts.msg || '';
+    document.getElementById('mgTitle').style.display = opts.title ? 'block' : 'none';
+    const inputWrap = document.getElementById('mgInputWrap');
+    const input = document.getElementById('mgInput');
+    if (opts.input) {
+      inputWrap.style.display = 'block';
+      input.type = opts.inputType || 'text';
+      input.placeholder = opts.placeholder || '';
+      input.value = opts.defaultValue || '';
+      setTimeout(() => { input.focus(); input.select(); }, 200);
+    } else {
+      inputWrap.style.display = 'none';
+    }
+    const btns = document.getElementById('mgBtns');
+    btns.innerHTML = '';
+    return new Promise((resolve) => {
+      let resolved = false;
+      const done = (v) => {
+        if (resolved) return; resolved = true;
+        overlay.classList.remove('show');
+        resolve(v);
+      };
+      for (const b of opts.buttons) {
+        const btn = document.createElement('button');
+        btn.className = 'rec-btn ' + (b.primary ? 'primary' : 'secondary');
+        if (b.danger) { btn.style.background = 'var(--danger)'; btn.style.color = '#fff'; }
+        btn.textContent = b.text;
+        btn.onclick = () => done(b.input ? input.value : b.value);
+        btns.appendChild(btn);
+      }
+      if (opts.input) {
+        input.onkeydown = (e) => {
+          if (e.key === 'Enter') {
+            const primary = opts.buttons.find(b => b.input || b.primary);
+            if (primary) done(primary.input ? input.value : primary.value);
+          }
+          if (e.key === 'Escape') done(null);
+        };
+      }
+      overlay.classList.add('show');
+    });
+  }
+
+  return {
+    alert(msg, title = '') {
+      return open({ title, msg, buttons: [{ text: 'OK', primary: true, value: true }] });
+    },
+    confirm(msg, opts = {}) {
+      return open({
+        title: opts.title || '',
+        msg,
+        buttons: [
+          { text: opts.cancelText || 'Cancelar', value: false },
+          { text: opts.okText || 'Sí', primary: !opts.danger, danger: opts.danger, value: true }
+        ]
+      });
+    },
+    prompt(msg, opts = {}) {
+      return open({
+        title: opts.title || '',
+        msg,
+        input: true,
+        inputType: opts.inputType || 'text',
+        placeholder: opts.placeholder || '',
+        defaultValue: opts.defaultValue || '',
+        buttons: [
+          { text: 'Cancelar', value: null },
+          { text: opts.okText || 'OK', primary: true, input: true }
+        ]
+      });
+    }
+  };
+})();
 
 // ===== BOTTOM SHEET DRAG-TO-CLOSE =====
 document.addEventListener('touchstart', (e) => {
@@ -4171,7 +4269,7 @@ const InstallPWA = (() => {
         if (outcome === 'accepted') banner.classList.remove('show');
         deferredPrompt = null;
       } else if (isIOS()) {
-        alert('En Safari:\n1. Toca el botón compartir 􀈂\n2. Elige "Añadir a pantalla de inicio"');
+        Modal.alert('1. Toca el botón Compartir de Safari\n2. Elige "Añadir a pantalla de inicio"', '📱 Instalar en iPhone');
       }
     });
     close?.addEventListener('click', () => {
@@ -4198,9 +4296,9 @@ const AiChat = (() => {
   }
   function close() { document.getElementById('aiChatOverlay')?.classList.remove('show'); }
   function clear() {
-    if (!confirm('¿Borrar historial del chat?')) return;
-    saveHistory([]);
-    render();
+    Modal.confirm('Se borrará todo el historial de esta conversación.', {
+      title: '¿Borrar chat?', okText: 'Borrar', danger: true
+    }).then(ok => { if (ok) { saveHistory([]); render(); Toast.show('Historial borrado'); } });
   }
 
   function render() {
@@ -4454,13 +4552,18 @@ const Milestones = (() => {
   }
 
   function addCustom() {
-    const title = window.prompt('Nombre del logro:');
-    if (!title || !title.trim()) return;
-    const desc = window.prompt('Descripción (opcional):') || '';
-    const list = customList();
-    list.push({ id: 'custom-' + Date.now(), title: title.trim(), description: desc.trim(), emoji: '⭐', category: 'custom' });
-    saveCustom(list);
-    render();
+    Modal.prompt('¿Qué logro quieres agregar?', {
+      title: '⭐ Nuevo logro',
+      placeholder: 'Ej: Primer diente'
+    }).then(async title => {
+      if (!title || !title.trim()) return;
+      const desc = await Modal.prompt('Descripción (opcional):', { title: 'Detalles', placeholder: 'Ej: Le salió el diente inferior' });
+      const list = customList();
+      list.push({ id: 'custom-' + Date.now(), title: title.trim(), description: (desc||'').trim(), emoji: '⭐', category: 'custom' });
+      saveCustom(list);
+      render();
+      Toast.show('Logro agregado ✓');
+    });
   }
 
   function allMiles() {
@@ -4734,7 +4837,7 @@ const Notify = (() => {
   const SHOWN_KEY = 'notify_shown_ids';
 
   async function requestPermission() {
-    if (!('Notification' in window)) { alert('Este navegador no soporta notificaciones.'); return false; }
+    if (!('Notification' in window)) { Toast.show('Este navegador no soporta notificaciones'); return false; }
     const p = await Notification.requestPermission();
     if (p === 'granted') { Toast.show('Notificaciones activadas ✓'); return true; }
     Toast.show('Notificaciones bloqueadas');
@@ -4899,10 +5002,11 @@ const Diary = (() => {
   }
 
   function addNote() {
-    const text = window.prompt('Nota rápida:');
-    if (!text || !text.trim()) return;
-    push({ type: 'note', ts_start: Date.now(), text: text.trim() });
-    Toast.show('Nota guardada ✓');
+    Modal.prompt('¿Qué quieres anotar?', { title: '📝 Nota', placeholder: 'Ej: Fiebre baja, primera papilla...' }).then(text => {
+      if (!text || !text.trim()) return;
+      push({ type: 'note', ts_start: Date.now(), text: text.trim() });
+      Toast.show('Nota guardada ✓');
+    });
   }
 
   function shiftDay(delta) {
@@ -4988,9 +5092,13 @@ const Diary = (() => {
   function editEvent(id) {
     const e = events().find(x => x.id === id);
     if (!e) return;
-    if (!confirm('¿Eliminar este registro?\n\n' + (TYPE_ICON[e.type]||'') + ' ' + fmtTime(e.ts_start||e.ts))) return;
-    remove(id);
-    Toast.show('Registro eliminado ✓');
+    Modal.confirm((TYPE_ICON[e.type]||'') + ' ' + fmtTime(e.ts_start||e.ts), {
+      title: '¿Eliminar este registro?', okText: 'Eliminar', danger: true
+    }).then(ok => {
+      if (!ok) return;
+      remove(id);
+      Toast.show('Registro eliminado ✓');
+    });
   }
 
   function renderSummary() {
@@ -5430,7 +5538,10 @@ const Babies = (() => {
   }
 
   async function remove(id) {
-    if (!confirm('¿Eliminar este bebé? Se borrarán todos sus datos, fotos y comidas registradas.')) return;
+    const ok = await Modal.confirm('Se borrarán todos sus datos, fotos y comidas registradas. Esta acción no se puede deshacer.', {
+      title: '¿Eliminar este bebé?', okText: 'Eliminar', danger: true
+    });
+    if (!ok) return;
     const r = await api('babies/' + id, { method: 'DELETE' });
     if (r.ok) {
       if (activeId == id) localStorage.clear();
@@ -5657,17 +5768,19 @@ async function checkInvitationInUrl() {
   try {
     const r = await fetch(new URL('api/invitations/' + encodeURIComponent(token), location.href), { credentials: 'include' });
     if (!r.ok) {
-      alert('Esta invitación no es válida o ya expiró.');
+      await Modal.alert('Esta invitación no es válida o ya expiró.', 'Invitación');
       history.replaceState({}, '', location.pathname);
       return;
     }
     const inv = await r.json();
-    const ok = confirm(`${inv.inviter_email} te invita a ver "${inv.baby_emoji || '👶'} ${inv.baby_name}" como ${inv.role}.\n\n¿Aceptar?`);
+    const ok = await Modal.confirm(
+      `${inv.inviter_email} te invita a ver "${inv.baby_emoji || '👶'} ${inv.baby_name}" como ${inv.role}.`,
+      { title: 'Aceptar invitación', okText: 'Aceptar' }
+    );
     if (!ok) { history.replaceState({}, '', location.pathname); return; }
-    // Verifica auth
     const me = await fetch(new URL('api/me', location.href), { credentials: 'include' }).then(r => r.json());
     if (!me.auth) {
-      alert('Primero inicia sesión o crea cuenta, y vuelve a abrir este link.');
+      await Modal.alert('Primero inicia sesión o crea cuenta, luego vuelve a abrir este link.', 'Sesión requerida');
       return;
     }
     const acc = await fetch(new URL('api/invitations/' + encodeURIComponent(token) + '/accept', location.href), {
@@ -5675,14 +5788,14 @@ async function checkInvitationInUrl() {
     });
     const aj = await acc.json();
     if (acc.ok) {
-      alert('¡Invitación aceptada! Ahora puedes ver este bebé.');
+      Toast.show('¡Invitación aceptada! ✓');
       history.replaceState({}, '', location.pathname);
-      location.reload();
+      setTimeout(() => location.reload(), 1200);
     } else {
-      alert('Error: ' + (aj.error || 'no se pudo aceptar'));
+      Modal.alert(aj.error || 'No se pudo aceptar la invitación', 'Error');
     }
   } catch (e) {
-    alert('Error al procesar invitación: ' + e.message);
+    Modal.alert('Error al procesar invitación', 'Error');
   }
 }
 
@@ -5715,19 +5828,21 @@ const Security = (() => {
   async function toggle2FA() {
     const status = document.getElementById('secStatus').textContent;
     if (status.includes('activado')) {
-      const pw = window.prompt('Escribe tu contraseña para desactivar 2FA:');
+      const pw = await Modal.prompt('Escribe tu contraseña actual para desactivar 2FA', {
+        title: 'Confirmar', inputType: 'password'
+      });
       if (!pw) return;
       const r = await api('2fa/disable', { method: 'POST', body: JSON.stringify({ password: pw }) });
       if (r.ok) {
-        alert('2FA desactivado');
+        Toast.show('2FA desactivado ✓');
         refresh();
       } else {
-        alert('Contraseña incorrecta');
+        Toast.show('Contraseña incorrecta');
       }
     } else {
       const r = await api('2fa/setup', { method: 'POST' });
       const j = await r.json();
-      if (!r.ok) { alert('Error: ' + (j.error || 'server')); return; }
+      if (!r.ok) { Toast.show('Error: ' + (j.error || 'server')); return; }
       pendingSecret = j.secret;
       document.getElementById('totpSecretBox').textContent = j.secret;
       const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(j.uri);
@@ -5747,7 +5862,7 @@ const Security = (() => {
     const r = await api('2fa/enable', { method: 'POST', body: JSON.stringify({ code }) });
     if (r.ok) {
       closeTotpSetup();
-      alert('2FA activado con éxito ✓');
+      Toast.show('2FA activado ✓');
       refresh();
     } else {
       err.textContent = 'Código incorrecto, intenta con el actual';
@@ -5791,15 +5906,19 @@ const Security = (() => {
 
   async function registerPasskey() {
     if (!window.PublicKeyCredential) {
-      alert('Este navegador no soporta passkeys.');
+      Modal.alert('Este navegador no soporta passkeys.', 'No compatible');
       return;
     }
-    const deviceName = window.prompt('Nombre para este dispositivo (ej: iPhone de Vale):', navigator.platform || 'Dispositivo');
+    const deviceName = await Modal.prompt('Nombre para este dispositivo:', {
+      title: '🔑 Registrar dispositivo',
+      placeholder: 'Ej: iPhone Vale',
+      defaultValue: navigator.platform || 'Dispositivo'
+    });
     if (!deviceName) return;
     try {
       const r = await api('passkey/register/start', { method: 'POST' });
       const opts = await r.json();
-      if (!r.ok) { alert('Error: ' + (opts.error || 'no se pudo iniciar registro')); return; }
+      if (!r.ok) { Toast.show('Error: ' + (opts.error || 'no se pudo iniciar')); return; }
       // Convert base64 fields to ArrayBuffer
       const publicKey = opts.publicKey;
       publicKey.challenge = b64ToBuf(publicKey.challenge);
@@ -5816,18 +5935,18 @@ const Security = (() => {
       const r2 = await api('passkey/register/finish', { method: 'POST', body: JSON.stringify(send) });
       const j2 = await r2.json();
       if (r2.ok) {
-        alert('Passkey registrado ✓');
+        Toast.show('Passkey registrado ✓');
         listPasskeys();
       } else {
-        alert('Error al registrar: ' + (j2.detail || j2.error));
+        Modal.alert(j2.detail || j2.error || 'No se pudo registrar', 'Error');
       }
     } catch (e) {
-      alert('Error: ' + e.message);
+      Modal.alert('Registro cancelado o falló', 'Error');
     }
   }
 
   async function removePasskey(id) {
-    if (!confirm('¿Eliminar este passkey?')) return;
+    if (!(await Modal.confirm('¿Eliminar este passkey?', { okText: 'Eliminar', danger: true }))) return;
     await api('passkey/' + id, { method: 'DELETE' });
     listPasskeys();
   }
@@ -5866,13 +5985,17 @@ const Security = (() => {
   async function verifyEmail() {
     const r = await api('email/send_verification', { method: 'POST' });
     const j = await r.json();
-    if (j.already_verified) { alert('Ya está verificado ✓'); refreshEmailStatus(); return; }
-    if (!r.ok) { alert('Error al enviar código'); return; }
-    const code = window.prompt('Revisa tu email — Baby Tracker te envió un código de 6 dígitos. Escríbelo:');
+    if (j.already_verified) { Toast.show('Email ya verificado ✓'); refreshEmailStatus(); return; }
+    if (!r.ok) { Toast.show('Error al enviar código'); return; }
+    const code = await Modal.prompt('Revisa tu email. Te enviamos un código de 6 dígitos:', {
+      title: '📧 Verificar email',
+      inputType: 'text',
+      placeholder: '000000'
+    });
     if (!code) return;
     const r2 = await api('email/verify', { method: 'POST', body: JSON.stringify({ code: code.trim() }) });
-    if (r2.ok) { alert('Email verificado ✓'); refreshEmailStatus(); }
-    else alert('Código incorrecto');
+    if (r2.ok) { Toast.show('Email verificado ✓'); refreshEmailStatus(); }
+    else Toast.show('Código incorrecto');
   }
 
   async function refreshEmailStatus() {
@@ -5886,16 +6009,22 @@ const Security = (() => {
   }
 
   async function deleteAccount() {
-    const pw = window.prompt('⚠️ Vas a eliminar TU CUENTA y todos los datos permanentemente.\n\nEscribe tu contraseña para confirmar:');
+    const confirmDel = await Modal.confirm(
+      'Vas a eliminar TU CUENTA y todos los datos permanentemente. Esta acción NO se puede deshacer.',
+      { title: '⚠️ Eliminar cuenta', okText: 'Continuar', danger: true }
+    );
+    if (!confirmDel) return;
+    const pw = await Modal.prompt('Escribe tu contraseña para confirmar:', {
+      title: 'Confirmación final', inputType: 'password'
+    });
     if (!pw) return;
-    if (!confirm('¿Estás COMPLETAMENTE seguro? Esta acción NO se puede deshacer.')) return;
     const r = await api('account', { method: 'DELETE', body: JSON.stringify({ password: pw }) });
     if (r.ok) {
       localStorage.clear();
-      alert('Cuenta eliminada.');
+      await Modal.alert('Cuenta eliminada.', 'Hasta pronto');
       location.reload();
     } else {
-      alert('Error: contraseña incorrecta');
+      Modal.alert('Contraseña incorrecta', 'Error');
     }
   }
 
@@ -5981,14 +6110,20 @@ function importData(event) {
       if (data.activities) DB.set('activities', data.activities);
       initApp();
       showToast('Datos importados');
-    } catch { alert('Archivo no válido'); }
+    } catch { Toast.show('Archivo no válido'); }
   };
   reader.readAsText(file);
 }
 
-function resetAll() {
-  if (confirm('¿Estás segura? Se borrarán TODOS los datos.')) {
-    if (confirm('Esta acción no se puede deshacer. ¿Continuar?')) {
+async function resetAll() {
+  const ok1 = await Modal.confirm('Se borrarán TODOS los datos locales del bebé (crecimiento, vacunas, fotos, etc.)', {
+    title: '⚠️ Borrar todo', okText: 'Continuar', danger: true
+  });
+  if (!ok1) return;
+  const ok2 = await Modal.confirm('Esta acción NO se puede deshacer. ¿Continuar de todos modos?', {
+    title: 'Confirmación final', okText: 'Borrar todo', danger: true
+  });
+  if (!ok2) return;
       localStorage.removeItem('baby_info');
       localStorage.removeItem('baby_growth');
       localStorage.removeItem('baby_medicines');
@@ -5998,9 +6133,6 @@ function resetAll() {
       localStorage.removeItem('baby_activities');
       localStorage.removeItem('baby_lastNotify');
       PhotoDB.clear().finally(() => location.reload());
-      return;
-    }
-  }
 }
 
 // ===== INIT =====
