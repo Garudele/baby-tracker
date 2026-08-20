@@ -383,6 +383,7 @@ try {
     // ---- WebAuthn passkey login (sin auth previa) -----------------------
     if (($parts[0] ?? '') === 'passkey' && ($parts[1] ?? '') === 'auth' && ($parts[2] ?? '') === 'start' && $method === 'POST') {
         require_once __DIR__ . '/webauthn/WebAuthn.php';
+        \lbuchs\WebAuthn\Binary\ByteBuffer::$useBase64UrlEncoding = true;
         $body = json_body();
         $email = normalize_email((string)($body['email'] ?? ''));
         if (!is_valid_email($email)) json_out(['error' => 'bad_email'], 400);
@@ -406,6 +407,7 @@ try {
     }
     if (($parts[0] ?? '') === 'passkey' && ($parts[1] ?? '') === 'auth' && ($parts[2] ?? '') === 'finish' && $method === 'POST') {
         require_once __DIR__ . '/webauthn/WebAuthn.php';
+        \lbuchs\WebAuthn\Binary\ByteBuffer::$useBase64UrlEncoding = true;
         if (empty($_SESSION['wa_auth_challenge']) || empty($_SESSION['wa_auth_uid'])) json_out(['error' => 'no_challenge'], 400);
         $body = json_body();
         $uid = (int)$_SESSION['wa_auth_uid'];
@@ -799,6 +801,7 @@ try {
     }
     if (($parts[0] ?? '') === 'passkey' && ($parts[1] ?? '') === 'register' && ($parts[2] ?? '') === 'start' && $method === 'POST') {
         require_once __DIR__ . '/webauthn/WebAuthn.php';
+        \lbuchs\WebAuthn\Binary\ByteBuffer::$useBase64UrlEncoding = true;
         $u = db()->prepare("SELECT email FROM users WHERE id = ?");
         $u->execute([$uid]);
         $urow = $u->fetch();
@@ -820,6 +823,7 @@ try {
     }
     if (($parts[0] ?? '') === 'passkey' && ($parts[1] ?? '') === 'register' && ($parts[2] ?? '') === 'finish' && $method === 'POST') {
         require_once __DIR__ . '/webauthn/WebAuthn.php';
+        \lbuchs\WebAuthn\Binary\ByteBuffer::$useBase64UrlEncoding = true;
         if (empty($_SESSION['wa_challenge'])) json_out(['error' => 'no_challenge'], 400);
         $body = json_body();
         $wa = new \lbuchs\WebAuthn\WebAuthn($config['webauthn_rp_name'], $config['webauthn_rp_id']);
