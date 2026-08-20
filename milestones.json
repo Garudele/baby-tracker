@@ -1,0 +1,835 @@
+{
+  "version": 1,
+  "milestones": [
+    {
+      "id": "lifts-head-briefly",
+      "emoji": "🐣",
+      "title": "Levanta la cabeza brevemente",
+      "description": "Boca abajo, logra levantar la cabeza unos segundos.",
+      "age_min_weeks": 0,
+      "age_max_weeks": 6,
+      "category": "motora_gruesa",
+      "tip": "Practica el 'tummy time' unos minutos varias veces al día."
+    },
+    {
+      "id": "visual-tracking",
+      "emoji": "👀",
+      "title": "Sigue objetos con la mirada",
+      "description": "Sigue con los ojos una cara u objeto que se mueve lentamente.",
+      "age_min_weeks": 2,
+      "age_max_weeks": 10,
+      "category": "cognitiva",
+      "tip": "Mueve un sonajero lentamente frente a él a unos 25 cm."
+    },
+    {
+      "id": "startles-to-sound",
+      "emoji": "🔔",
+      "title": "Reacciona a sonidos fuertes",
+      "description": "Se sobresalta o gira la cabeza hacia ruidos inesperados.",
+      "age_min_weeks": 0,
+      "age_max_weeks": 8,
+      "category": "cognitiva"
+    },
+    {
+      "id": "smile-social",
+      "emoji": "😊",
+      "title": "Primera sonrisa social",
+      "description": "Sonríe en respuesta a tu voz o cara, no solo por gases.",
+      "age_min_weeks": 4,
+      "age_max_weeks": 12,
+      "category": "social",
+      "tip": "Háblale de cerca con voz suave y sonríele mucho."
+    },
+    {
+      "id": "coos-and-gurgles",
+      "emoji": "🗣️",
+      "title": "Hace arrullos y gorjeos",
+      "description": "Emite sonidos como 'ah', 'eh', 'oh' cuando está tranquilo.",
+      "age_min_weeks": 6,
+      "age_max_weeks": 14,
+      "category": "lenguaje",
+      "tip": "Respóndele imitando sus sonidos, como si fuera una plática."
+    },
+    {
+      "id": "holds-head-up",
+      "emoji": "💪",
+      "title": "Sostiene la cabeza firme",
+      "description": "Boca abajo levanta la cabeza a 45° y la sostiene.",
+      "age_min_weeks": 6,
+      "age_max_weeks": 16,
+      "category": "motora_gruesa"
+    },
+    {
+      "id": "grasps-object",
+      "emoji": "✊",
+      "title": "Agarra un objeto puesto en su mano",
+      "description": "Cierra su manita cuando le pones un sonajero o tu dedo.",
+      "age_min_weeks": 4,
+      "age_max_weeks": 12,
+      "category": "motora_fina"
+    },
+    {
+      "id": "opens-hands",
+      "emoji": "🖐️",
+      "title": "Abre y cierra las manos",
+      "description": "Deja de mantener los puños cerrados todo el tiempo.",
+      "age_min_weeks": 8,
+      "age_max_weeks": 14,
+      "category": "motora_fina"
+    },
+    {
+      "id": "laughs-out-loud",
+      "emoji": "😂",
+      "title": "Ríe a carcajadas",
+      "description": "Suelta risas fuertes cuando juegas con él.",
+      "age_min_weeks": 12,
+      "age_max_weeks": 20,
+      "category": "social",
+      "tip": "Prueba hacer sonidos chistosos o soplarle suavecito en la panza."
+    },
+    {
+      "id": "rolls-over",
+      "emoji": "🔄",
+      "title": "Se voltea (boca abajo a arriba)",
+      "description": "Logra girar de una posición a otra por sí mismo.",
+      "age_min_weeks": 14,
+      "age_max_weeks": 26,
+      "category": "motora_gruesa",
+      "tip": "Nunca lo dejes solo en superficies altas cuando ya se voltea."
+    },
+    {
+      "id": "reaches-for-objects",
+      "emoji": "🤲",
+      "title": "Estira los brazos para alcanzar",
+      "description": "Extiende sus brazos para tomar juguetes que le interesan.",
+      "age_min_weeks": 12,
+      "age_max_weeks": 22,
+      "category": "motora_fina"
+    },
+    {
+      "id": "brings-hands-to-mouth",
+      "emoji": "👶",
+      "title": "Se lleva las manos a la boca",
+      "description": "Descubre sus manitas y las chupa con curiosidad.",
+      "age_min_weeks": 10,
+      "age_max_weeks": 18,
+      "category": "motora_fina"
+    },
+    {
+      "id": "sits-with-support",
+      "emoji": "🪑",
+      "title": "Se sienta con apoyo",
+      "description": "Se mantiene sentado si lo recargas con almohadas o tus manos.",
+      "age_min_weeks": 16,
+      "age_max_weeks": 26,
+      "category": "motora_gruesa"
+    },
+    {
+      "id": "recognizes-family",
+      "emoji": "👨‍👩‍👧",
+      "title": "Reconoce a papá y mamá",
+      "description": "Se emociona al ver caras familiares y las distingue de extraños.",
+      "age_min_weeks": 12,
+      "age_max_weeks": 24,
+      "category": "social"
+    },
+    {
+      "id": "first-solids",
+      "emoji": "🥣",
+      "title": "Primera papilla",
+      "description": "Prueba sus primeros alimentos sólidos (papillas o BLW).",
+      "age_min_weeks": 22,
+      "age_max_weeks": 28,
+      "category": "alimentacion",
+      "tip": "Empieza con verduras suaves como calabacita o chayote cocido."
+    },
+    {
+      "id": "grabs-two-hands",
+      "emoji": "🧸",
+      "title": "Agarra objetos con dos manos",
+      "description": "Pasa un objeto de una mano a la otra o lo sostiene con ambas.",
+      "age_min_weeks": 18,
+      "age_max_weeks": 28,
+      "category": "motora_fina"
+    },
+    {
+      "id": "babbles",
+      "emoji": "💬",
+      "title": "Balbucea sílabas",
+      "description": "Repite sílabas como 'ba-ba', 'da-da', 'ma-ma' sin significado.",
+      "age_min_weeks": 20,
+      "age_max_weeks": 32,
+      "category": "lenguaje",
+      "tip": "Cántale canciones de cuna y repite sus sonidos."
+    },
+    {
+      "id": "responds-to-name",
+      "emoji": "👂",
+      "title": "Responde a su nombre",
+      "description": "Voltea cuando lo llamas por su nombre.",
+      "age_min_weeks": 20,
+      "age_max_weeks": 30,
+      "category": "lenguaje"
+    },
+    {
+      "id": "sits-alone",
+      "emoji": "🧘",
+      "title": "Se sienta sin apoyo",
+      "description": "Se mantiene sentado firme sin necesidad de recargarse.",
+      "age_min_weeks": 24,
+      "age_max_weeks": 36,
+      "category": "motora_gruesa"
+    },
+    {
+      "id": "transfers-objects",
+      "emoji": "🔁",
+      "title": "Pasa objetos de una mano a otra",
+      "description": "Cambia juguetes intencionalmente entre sus manitas.",
+      "age_min_weeks": 22,
+      "age_max_weeks": 32,
+      "category": "motora_fina"
+    },
+    {
+      "id": "crawls",
+      "emoji": "🐛",
+      "title": "Gatea",
+      "description": "Se desplaza gateando sobre manos y rodillas.",
+      "age_min_weeks": 28,
+      "age_max_weeks": 44,
+      "category": "motora_gruesa",
+      "tip": "Asegura enchufes y escaleras antes de que empiece a moverse."
+    },
+    {
+      "id": "pincer-grasp",
+      "emoji": "🤏",
+      "title": "Pinza fina con dedos",
+      "description": "Toma objetos pequeños con el pulgar e índice.",
+      "age_min_weeks": 32,
+      "age_max_weeks": 44,
+      "category": "motora_fina"
+    },
+    {
+      "id": "eats-finger-foods",
+      "emoji": "🍌",
+      "title": "Come solo con los dedos",
+      "description": "Se lleva a la boca trocitos suaves de comida.",
+      "age_min_weeks": 32,
+      "age_max_weeks": 44,
+      "category": "alimentacion",
+      "tip": "Prueba con plátano, aguacate maduro o tortilla suave en tiras."
+    },
+    {
+      "id": "pulls-to-stand",
+      "emoji": "🧍",
+      "title": "Se pone de pie con apoyo",
+      "description": "Se sostiene de muebles para pararse.",
+      "age_min_weeks": 32,
+      "age_max_weeks": 48,
+      "category": "motora_gruesa"
+    },
+    {
+      "id": "claps-hands",
+      "emoji": "👏",
+      "title": "Aplaude",
+      "description": "Junta sus manitas y aplaude, muchas veces imitando.",
+      "age_min_weeks": 32,
+      "age_max_weeks": 44,
+      "category": "social",
+      "tip": "Juega 'palmas palmitas' con él, le encantará."
+    },
+    {
+      "id": "first-syllables",
+      "emoji": "🗨️",
+      "title": "Primeras sílabas con intención",
+      "description": "Dice 'mamá' o 'papá' refiriéndose a ustedes.",
+      "age_min_weeks": 36,
+      "age_max_weeks": 52,
+      "category": "lenguaje"
+    },
+    {
+      "id": "object-permanence",
+      "emoji": "🫣",
+      "title": "Busca objetos escondidos",
+      "description": "Busca un juguete que se cae o que escondes bajo una tela.",
+      "age_min_weeks": 28,
+      "age_max_weeks": 40,
+      "category": "cognitiva",
+      "tip": "Juega a las escondidas con un trapo, es 'peekaboo' clásico."
+    },
+    {
+      "id": "cruises-furniture",
+      "emoji": "🛋️",
+      "title": "Camina apoyado en muebles",
+      "description": "Da pasitos laterales sosteniéndose de sillas y sillones.",
+      "age_min_weeks": 36,
+      "age_max_weeks": 52,
+      "category": "motora_gruesa"
+    },
+    {
+      "id": "waves-bye",
+      "emoji": "👋",
+      "title": "Dice adiós con la mano",
+      "description": "Mueve la manita para despedirse imitándote.",
+      "age_min_weeks": 36,
+      "age_max_weeks": 52,
+      "category": "social"
+    },
+    {
+      "id": "first-steps",
+      "emoji": "🚶",
+      "title": "Primeros pasos",
+      "description": "Da sus primeros pasos sin agarrarse de nada.",
+      "age_min_weeks": 48,
+      "age_max_weeks": 68,
+      "category": "motora_gruesa",
+      "tip": "Deja que ande descalzo en casa para fortalecer sus piecitos."
+    },
+    {
+      "id": "first-word",
+      "emoji": "🎙️",
+      "title": "Primera palabra clara",
+      "description": "Dice una palabra reconocible con significado (agua, mamá, más).",
+      "age_min_weeks": 44,
+      "age_max_weeks": 68,
+      "category": "lenguaje"
+    },
+    {
+      "id": "eats-with-spoon",
+      "emoji": "🥄",
+      "title": "Come solo con cuchara",
+      "description": "Usa la cuchara con ayuda o solo, aunque tire un poco.",
+      "age_min_weeks": 56,
+      "age_max_weeks": 80,
+      "category": "alimentacion",
+      "tip": "Ten paciencia con el tiradero, es parte del aprendizaje."
+    },
+    {
+      "id": "points-with-finger",
+      "emoji": "☝️",
+      "title": "Señala con el dedo",
+      "description": "Apunta con el índice para pedir o mostrar cosas.",
+      "age_min_weeks": 48,
+      "age_max_weeks": 68,
+      "category": "lenguaje"
+    },
+    {
+      "id": "stacks-blocks",
+      "emoji": "🧱",
+      "title": "Apila 2-3 bloques",
+      "description": "Pone un bloque sobre otro para hacer una torre pequeña.",
+      "age_min_weeks": 56,
+      "age_max_weeks": 78,
+      "category": "motora_fina"
+    },
+    {
+      "id": "climbs-stairs-crawling",
+      "emoji": "🪜",
+      "title": "Sube escalones gateando",
+      "description": "Trepa escalones bajos apoyándose con manos y rodillas.",
+      "age_min_weeks": 52,
+      "age_max_weeks": 72,
+      "category": "motora_gruesa"
+    },
+    {
+      "id": "understands-simple-orders",
+      "emoji": "🧠",
+      "title": "Entiende órdenes sencillas",
+      "description": "Sigue instrucciones como 'dame la pelota' o 'ven'.",
+      "age_min_weeks": 48,
+      "age_max_weeks": 72,
+      "category": "lenguaje"
+    },
+    {
+      "id": "scribbles",
+      "emoji": "✏️",
+      "title": "Hace garabatos",
+      "description": "Sostiene una crayola y raya el papel libremente.",
+      "age_min_weeks": 60,
+      "age_max_weeks": 84,
+      "category": "motora_fina",
+      "tip": "Usa crayolas gruesas de cera para que las agarre mejor."
+    },
+    {
+      "id": "runs",
+      "emoji": "🏃",
+      "title": "Corre",
+      "description": "Camina rápido y logra correr, aunque a veces se caiga.",
+      "age_min_weeks": 72,
+      "age_max_weeks": 92,
+      "category": "motora_gruesa"
+    },
+    {
+      "id": "climbs-stairs-alone",
+      "emoji": "🧗",
+      "title": "Sube escaleras solo",
+      "description": "Sube escalones parado, agarrado del barandal.",
+      "age_min_weeks": 76,
+      "age_max_weeks": 100,
+      "category": "motora_gruesa"
+    },
+    {
+      "id": "two-word-phrases",
+      "emoji": "🗣️",
+      "title": "Frases de 2 palabras",
+      "description": "Junta dos palabras: 'más agua', 'papá ven', 'quiero galleta'.",
+      "age_min_weeks": 80,
+      "age_max_weeks": 100,
+      "category": "lenguaje",
+      "tip": "Amplía sus frases: si dice 'más agua', responde 'sí, quieres más agua'."
+    },
+    {
+      "id": "removes-clothes",
+      "emoji": "👕",
+      "title": "Se quita ropa sencilla",
+      "description": "Se quita calcetines, gorros o zapatos con velcro.",
+      "age_min_weeks": 76,
+      "age_max_weeks": 96,
+      "category": "otro"
+    },
+    {
+      "id": "identifies-body-parts",
+      "emoji": "👃",
+      "title": "Identifica partes del cuerpo",
+      "description": "Señala nariz, ojos, boca cuando se los preguntas.",
+      "age_min_weeks": 72,
+      "age_max_weeks": 96,
+      "category": "cognitiva",
+      "tip": "Canta 'cabeza, hombros, rodillas y pies' frente al espejo."
+    },
+    {
+      "id": "kicks-ball",
+      "emoji": "⚽",
+      "title": "Patea una pelota",
+      "description": "Patea una pelota grande sin perder el equilibrio.",
+      "age_min_weeks": 76,
+      "age_max_weeks": 96,
+      "category": "motora_gruesa"
+    },
+    {
+      "id": "pretend-play",
+      "emoji": "🍽️",
+      "title": "Juego simbólico",
+      "description": "Imita acciones cotidianas: dar de comer a un muñeco, hablar por teléfono.",
+      "age_min_weeks": 80,
+      "age_max_weeks": 104,
+      "category": "cognitiva"
+    },
+    {
+      "id": "drinks-from-cup",
+      "emoji": "🥛",
+      "title": "Bebe de vaso solo",
+      "description": "Toma agua o leche de un vaso sin tapa sin derramar mucho.",
+      "age_min_weeks": 60,
+      "age_max_weeks": 84,
+      "category": "alimentacion"
+    },
+    {
+      "id": "jumps-two-feet",
+      "emoji": "🦘",
+      "title": "Salta con los dos pies",
+      "description": "Logra despegar ambos pies del suelo al saltar.",
+      "age_min_weeks": 88,
+      "age_max_weeks": 108,
+      "category": "motora_gruesa"
+    },
+    {
+      "id": "names-objects",
+      "emoji": "🔤",
+      "title": "Nombra objetos comunes",
+      "description": "Dice el nombre de cosas de la casa: pelota, leche, perro, agua.",
+      "age_min_weeks": 84,
+      "age_max_weeks": 104,
+      "category": "lenguaje",
+      "tip": "Señala objetos y espera a que él intente nombrarlos antes de decirlo tú."
+    },
+    {
+      "id": "follows-two-step-orders",
+      "emoji": "🎯",
+      "title": "Sigue órdenes de 2 pasos",
+      "description": "Entiende instrucciones como 'toma tu vaso y dáselo a mamá'.",
+      "age_min_weeks": 88,
+      "age_max_weeks": 108,
+      "category": "cognitiva"
+    },
+    {
+      "id": "sings-parts-songs",
+      "emoji": "🎶",
+      "title": "Canta pedacitos de canciones",
+      "description": "Intenta seguir la melodía o palabras de canciones familiares.",
+      "age_min_weeks": 92,
+      "age_max_weeks": 108,
+      "category": "lenguaje",
+      "tip": "Cántale 'Los pollitos dicen' o 'La vaca lola', clásicas mexicanas."
+    }
+  ],
+  "weekly_tips": [
+    {
+      "week": 1,
+      "title": "Semana 1 — Recién nacido",
+      "size_emoji": "🍅",
+      "size_compare": "Del tamaño de un jitomate saladette (unos 50 cm)",
+      "highlights": ["Duerme 16-18 horas al día", "Ve solo hasta 20-30 cm de distancia", "Reconoce tu voz desde el útero"],
+      "tip": "Aprovecha para descansar cuando el bebé duerma. El puerperio también te toca a ti."
+    },
+    {
+      "week": 2,
+      "title": "Semana 2",
+      "size_emoji": "🥑",
+      "size_compare": "Pesa como 2 aguacates Hass grandes (3-3.5 kg)",
+      "highlights": ["Ya recuperó su peso al nacer", "Empieza a fijar la mirada en caras", "Se calma con contacto piel a piel"],
+      "tip": "El contacto piel con piel regula su temperatura y su corazón. Aprovéchalo mucho."
+    },
+    {
+      "week": 3,
+      "title": "Semana 3",
+      "size_emoji": "🥭",
+      "size_compare": "Como un mango Ataulfo grande",
+      "highlights": ["Come cada 2-3 horas", "Distingue tu olor entre otros", "Sus ojos pueden 'bizquear' brevemente, es normal"],
+      "tip": "Si amamantas, checa el agarre. Si usas fórmula, calienta a temperatura ambiente, no hirviendo."
+    },
+    {
+      "week": 4,
+      "title": "Semana 4 — 1 mes",
+      "size_emoji": "🥥",
+      "size_compare": "Su cabecita es como un coco pequeño",
+      "highlights": ["Puede levantar la cabeza brevemente boca abajo", "Empieza a hacer arrullos", "Llora con más 'personalidad' según lo que necesita"],
+      "tip": "Practica 'tummy time' 3-5 minutos varias veces al día para fortalecer su cuello."
+    },
+    {
+      "week": 5,
+      "title": "Semana 5",
+      "size_emoji": "🍋",
+      "size_compare": "Sus manitas caben en un limón",
+      "highlights": ["Sigue objetos con la mirada", "Reacciona a sonidos fuertes", "Puede tener 'crisis de crecimiento'"],
+      "tip": "Si de repente pide comer más seguido, es un brote de crecimiento. Ofrece más pecho o biberón."
+    },
+    {
+      "week": 6,
+      "title": "Semana 6",
+      "size_emoji": "😊",
+      "size_compare": "Del tamaño de un chayote grande",
+      "highlights": ["¡Primera sonrisa social!", "Alza más la cabecita", "Empieza a producir lágrimas al llorar"],
+      "tip": "Su primera sonrisa real es una recompensa preciosa. Grábala si puedes."
+    },
+    {
+      "week": 7,
+      "title": "Semana 7",
+      "size_emoji": "🎵",
+      "size_compare": "Como una calabacita mediana",
+      "highlights": ["Se calma con música o canciones", "Hace más 'agú' y gorjeos", "Empieza a distinguir el día de la noche"],
+      "tip": "Cántale canciones de cuna mexicanas: 'A la rorro niño', 'Duérmete mi niño'."
+    },
+    {
+      "week": 8,
+      "title": "Semana 8 — 2 meses",
+      "size_emoji": "🧀",
+      "size_compare": "Como una bolita de queso Oaxaca mediana en el puño",
+      "highlights": ["Sostiene mejor la cabeza", "Sonríe mucho más seguido", "Vacunas de los 2 meses en el centro de salud"],
+      "tip": "Toca acudir a la revisión y vacunas del bebé. Lleva su cartilla de vacunación."
+    },
+    {
+      "week": 9,
+      "title": "Semana 9",
+      "size_emoji": "🥒",
+      "size_compare": "Aproximadamente 55-58 cm, como un pepino grande",
+      "highlights": ["Sigue objetos hasta 180°", "Se lleva las manos a la boca", "Empieza a 'conversar' contigo con sonidos"],
+      "tip": "Cuando te haga sonidos, respóndele como si fuera una plática real. Fomenta el lenguaje."
+    },
+    {
+      "week": 10,
+      "title": "Semana 10",
+      "size_emoji": "🍐",
+      "size_compare": "Su cabecita es como una pera grande",
+      "highlights": ["Sonríe a extraños amigables", "Empuja con las piernitas cuando lo cargas de pie", "Reconoce el biberón o el pecho a la vista"],
+      "tip": "Establece una mini rutina antes de dormir: baño tibio, masaje, canción. Le da seguridad."
+    },
+    {
+      "week": 11,
+      "title": "Semana 11",
+      "size_emoji": "🍊",
+      "size_compare": "Sus puñitos son como mandarinas",
+      "highlights": ["Abre y cierra las manos", "Descubre sus manitas y las estudia", "Puede aguantar más tiempo despierto entre siestas"],
+      "tip": "Ofrécele juguetes de texturas variadas: tela, madera lisa, plástico suave."
+    },
+    {
+      "week": 12,
+      "title": "Semana 12 — 3 meses",
+      "size_emoji": "🎈",
+      "size_compare": "Pesa como 5-6 kg, como un melón chino grande",
+      "highlights": ["Ríe fuerte por primera vez", "Sostiene la cabeza casi todo el tiempo", "Duerme siestas más predecibles"],
+      "tip": "¡3 meses! El famoso 'cuarto trimestre' está terminando. Ya es un bebé más 'social'."
+    },
+    {
+      "week": 13,
+      "title": "Semana 13",
+      "size_emoji": "🐟",
+      "size_compare": "Del tamaño de un pescado mediano",
+      "highlights": ["Agarra objetos que le acercas", "Balbucea con más variedad de sonidos", "Se emociona al verte llegar"],
+      "tip": "Sale a caminar con él en carriola o rebozo. Los cambios de escenario lo estimulan."
+    },
+    {
+      "week": 14,
+      "title": "Semana 14",
+      "size_emoji": "🥔",
+      "size_compare": "Sus pies son como papas pequeñas",
+      "highlights": ["Empieza a intentar rodar", "Explora todo con la boca", "Se ríe fuerte con juegos como 'donde está el bebé'"],
+      "tip": "Cuidado con lo que dejas a su alcance. Todo va directo a la boca."
+    },
+    {
+      "week": 15,
+      "title": "Semana 15",
+      "size_emoji": "🌽",
+      "size_compare": "Como un elote grande",
+      "highlights": ["Reconoce claramente a mamá, papá y hermanitos", "Sonríe frente al espejo", "Empieza a chuparse los deditos con intención"],
+      "tip": "Ponle un espejo irrompible a su altura. Le fascinará ver a 'ese otro bebé'."
+    },
+    {
+      "week": 16,
+      "title": "Semana 16 — 4 meses",
+      "size_emoji": "🍉",
+      "size_compare": "Pesa como una sandía chica (6-7 kg)",
+      "highlights": ["Puede voltearse (boca abajo a arriba)", "Vacunas de los 4 meses", "Sujeta objetos firmemente"],
+      "tip": "Cuidado con la cama o cambiador: si ya se voltea, nunca lo dejes sin vigilancia."
+    },
+    {
+      "week": 17,
+      "title": "Semana 17",
+      "size_emoji": "🥭",
+      "size_compare": "Como 2 mangos petacones juntos",
+      "highlights": ["Regresión de sueño típica de los 4 meses", "Descubre sus pies", "Aguanta más tiempo boca abajo"],
+      "tip": "Si el sueño se descontroló, es normal. Mantén rutinas y esto también pasará."
+    },
+    {
+      "week": 18,
+      "title": "Semana 18",
+      "size_emoji": "🎯",
+      "size_compare": "Alcanza objetos a unos 30 cm con precisión",
+      "highlights": ["Estira los brazos para pedir cargarlo", "Empieza a soltar carcajadas fuertes", "Le atraen los colores brillantes"],
+      "tip": "Juega 'aserrín aserrán' o 'tortillitas'. Las rimas fomentan el lenguaje."
+    },
+    {
+      "week": 19,
+      "title": "Semana 19",
+      "size_emoji": "🥬",
+      "size_compare": "Como una lechuga romana",
+      "highlights": ["Puede pasar objetos de una mano a otra", "Muestra preferencia por juguetes", "Empieza a mostrar 'ansiedad por extraños'"],
+      "tip": "Es normal que llore con desconocidos. No lo fuerces al contacto."
+    },
+    {
+      "week": 20,
+      "title": "Semana 20 — 5 meses",
+      "size_emoji": "🍈",
+      "size_compare": "Como un melón valenciano",
+      "highlights": ["Se sienta con apoyo de almohadas", "Responde cuando escucha su nombre", "Muestra curiosidad por lo que comes"],
+      "tip": "Se acerca la alimentación complementaria. Investiga si harás papillas o BLW."
+    },
+    {
+      "week": 21,
+      "title": "Semana 21",
+      "size_emoji": "🎪",
+      "size_compare": "Como una pelota mediana",
+      "highlights": ["Empuja con fuerza con las piernas", "Se voltea en ambos sentidos", "Sostiene su biberón brevemente"],
+      "tip": "Ponlo sobre una manta en el piso con juguetes alrededor para que se mueva."
+    },
+    {
+      "week": 22,
+      "title": "Semana 22",
+      "size_emoji": "🥕",
+      "size_compare": "Sus muslitos son como zanahorias grandes",
+      "highlights": ["Balbucea 'ba-ba-ba' y 'da-da-da'", "Explora texturas con las manos", "Reconoce su nombre claramente"],
+      "tip": "Ofrécele objetos de distintas texturas: madera, tela, silicón. Estimula sus sentidos."
+    },
+    {
+      "week": 23,
+      "title": "Semana 23",
+      "size_emoji": "🍯",
+      "size_compare": "Sus manitas son pegajosas como el chapopote… ¡y llenas de baba!",
+      "highlights": ["Puede salivar mucho (¡vienen dientes!)", "Muerde todo", "Su primer diente puede estar por asomar"],
+      "tip": "Ofrécele un mordedor frío del refri (no del congelador) para calmar las encías."
+    },
+    {
+      "week": 24,
+      "title": "Semana 24 — 6 meses",
+      "size_emoji": "🥣",
+      "size_compare": "Pesa como una bolsa de arroz de 8 kg… ¡casi!",
+      "highlights": ["¡Empieza la alimentación complementaria!", "Se sienta con menos apoyo", "Vacunas de los 6 meses"],
+      "tip": "Empieza con verduras suaves: calabacita, chayote, camote. Sin sal ni azúcar."
+    },
+    {
+      "week": 25,
+      "title": "Semana 25",
+      "size_emoji": "🍠",
+      "size_compare": "Como un camote mediano",
+      "highlights": ["Prueba nuevos sabores todos los días", "Puede agarrar objetos pequeños con toda la mano", "Se voltea en ambos sentidos con facilidad"],
+      "tip": "Introduce un alimento nuevo cada 3 días para detectar alergias."
+    },
+    {
+      "week": 26,
+      "title": "Semana 26",
+      "size_emoji": "🐒",
+      "size_compare": "Le crece cabello y se ve más 'niño' que bebé",
+      "highlights": ["Se para con apoyo si lo sostienes", "Grita para llamar la atención", "Le encantan los cuentos con imágenes grandes"],
+      "tip": "Léele cuentos cortos con colores. No importa que no entienda las palabras aún."
+    },
+    {
+      "week": 30,
+      "title": "Semana 30 — 7 meses",
+      "size_emoji": "🍑",
+      "size_compare": "Sus cachetes son como duraznos",
+      "highlights": ["Se sienta solo por ratos", "Balbucea con muchas sílabas", "Reconoce tono de voz enojado vs cariñoso"],
+      "tip": "Habla mucho con él, describe lo que hacen: 'ahora vamos a bañarnos'."
+    },
+    {
+      "week": 34,
+      "title": "Semana 34 — 8 meses",
+      "size_emoji": "🐛",
+      "size_compare": "Se arrastra como oruga por todos lados",
+      "highlights": ["Puede gatear o desplazarse", "Hace pinza con pulgar e índice", "Come trocitos con los dedos"],
+      "tip": "Instala protectores en enchufes y esquinas. Ya es un explorador."
+    },
+    {
+      "week": 38,
+      "title": "Semana 38 — 9 meses",
+      "size_emoji": "🍞",
+      "size_compare": "Come pedacitos como un bolillo tierno",
+      "highlights": ["Se pone de pie apoyado en muebles", "Dice 'mamá' y 'papá' con intención", "Juega a las escondidas"],
+      "tip": "Ofrécele agua en vaso entrenador. Es momento de ir dejando el biberón poco a poco."
+    },
+    {
+      "week": 42,
+      "title": "Semana 42 — 10 meses",
+      "size_emoji": "👏",
+      "size_compare": "Aplaude como si hubiera ganado en el estadio Azteca",
+      "highlights": ["Aplaude y dice 'adiós'", "Camina apoyado en muebles", "Entiende 'no'"],
+      "tip": "Cuando digas 'no', sé firme pero cariñoso. Ya empieza a poner límites."
+    },
+    {
+      "week": 46,
+      "title": "Semana 46 — 11 meses",
+      "size_emoji": "🎉",
+      "size_compare": "¡Se acerca su primer año!",
+      "highlights": ["Puede dar pasitos con apoyo mínimo", "Imita sonidos de animales", "Busca objetos escondidos"],
+      "tip": "Enséñale sonidos: perro dice 'guau', vaca 'muuu'. Le encantará imitarte."
+    },
+    {
+      "week": 50,
+      "title": "Semana 50",
+      "size_emoji": "🎂",
+      "size_compare": "Casi cumple 1 año, ¡ya casi es toda una tortillita!",
+      "highlights": ["Podría dar sus primeros pasos", "Dice una o dos palabras claras", "Reconoce imágenes en libros"],
+      "tip": "Planea el mero mero de su primer año. Un smash cake mexicano con fruta es buena opción."
+    },
+    {
+      "week": 52,
+      "title": "Semana 52 — ¡1 año!",
+      "size_emoji": "🥳",
+      "size_compare": "Ha triplicado su peso al nacer (unos 9-10 kg)",
+      "highlights": ["Vacunas del año (SRP, varicela)", "Puede caminar solo o casi", "Dice 1-3 palabras con significado"],
+      "tip": "¡Feliz primer año! Ya puede comer casi de todo (sin miel, sin sal excesiva)."
+    },
+    {
+      "week": 56,
+      "title": "Semana 56 — 13 meses",
+      "size_emoji": "👣",
+      "size_compare": "Sus piecitos son como panecitos dulces",
+      "highlights": ["Camina con más seguridad", "Señala lo que quiere", "Bebe de vaso con menos derrames"],
+      "tip": "Zapatos flexibles y suaves. En casa, mejor descalzo para desarrollar el arco."
+    },
+    {
+      "week": 60,
+      "title": "Semana 60 — 14 meses",
+      "size_emoji": "🖍️",
+      "size_compare": "Hace garabatos como un pequeño Diego Rivera",
+      "highlights": ["Empieza a hacer garabatos", "Sube escalones gateando", "Entiende órdenes simples"],
+      "tip": "Ofrécele crayolas gruesas y papel grande. Sin exigir 'dibujos', que explore."
+    },
+    {
+      "week": 64,
+      "title": "Semana 64 — 15 meses",
+      "size_emoji": "🥄",
+      "size_compare": "Ya come con cuchara como todo un comensal",
+      "highlights": ["Usa la cuchara (con tiradero)", "Apila 2 bloques", "Sabe 3-10 palabras"],
+      "tip": "Deja que coma solo aunque tire. Pon un mantel plástico bajo la silla."
+    },
+    {
+      "week": 68,
+      "title": "Semana 68 — 16 meses",
+      "size_emoji": "🏃",
+      "size_compare": "Corre como pequeño roadrunner por toda la casa",
+      "highlights": ["Camina firme y empieza a correr", "Sigue instrucciones de 1 paso", "Le gusta cargar objetos"],
+      "tip": "Sácalo al parque a diario. Necesita gastar energía."
+    },
+    {
+      "week": 72,
+      "title": "Semana 72 — 18 meses",
+      "size_emoji": "🗣️",
+      "size_compare": "Habla más y ya se hace entender",
+      "highlights": ["Sabe 10-25 palabras", "Señala partes del cuerpo", "Imita quehaceres del hogar"],
+      "tip": "Dale una escoba pequeña o un trapo. Le fascinará 'ayudar'."
+    },
+    {
+      "week": 76,
+      "title": "Semana 76 — 19 meses",
+      "size_emoji": "🎭",
+      "size_compare": "Empieza a jugar 'a que era…'",
+      "highlights": ["Juego simbólico (da de comer al muñeco)", "Sube escaleras agarrado del barandal", "Empieza los famosos berrinches"],
+      "tip": "Los berrinches son normales. Valida su emoción antes de corregir."
+    },
+    {
+      "week": 80,
+      "title": "Semana 80 — 20 meses",
+      "size_emoji": "🗨️",
+      "size_compare": "Frases de 2 palabras salen solitas",
+      "highlights": ["Junta 2 palabras: 'más agua', 'papá ven'", "Patea pelotas", "Se quita zapatos y calcetines"],
+      "tip": "Amplía sus frases. Si dice 'agua', responde 'sí, quieres más agua fresquita'."
+    },
+    {
+      "week": 84,
+      "title": "Semana 84 — 21 meses",
+      "size_emoji": "🎨",
+      "size_compare": "Colorea como pequeño Frida Kahlo (con más manchas)",
+      "highlights": ["Hace garabatos más definidos", "Aprende colores básicos", "Reconoce animales en libros"],
+      "tip": "Enséñale colores usando objetos cotidianos: 'esta jícama es blanca'."
+    },
+    {
+      "week": 88,
+      "title": "Semana 88 — 22 meses",
+      "size_emoji": "🧩",
+      "size_compare": "Arma rompecabezas simples",
+      "highlights": ["Encaja piezas grandes", "Empieza a compartir (a veces)", "Sabe unas 50 palabras"],
+      "tip": "Los rompecabezas de 2-4 piezas grandes son excelentes a esta edad."
+    },
+    {
+      "week": 92,
+      "title": "Semana 92 — 23 meses",
+      "size_emoji": "🚽",
+      "size_compare": "Podría interesarse por la bacinica",
+      "highlights": ["Muestra interés por el baño", "Se sube y baja de sillas", "Canta pedacitos de canciones"],
+      "tip": "No fuerces el control de esfínteres. Cuando esté listo, él mismo avisará."
+    },
+    {
+      "week": 96,
+      "title": "Semana 96 — 2 años",
+      "size_emoji": "🎂",
+      "size_compare": "¡Feliz segundo cumpleaños! Pesa 11-13 kg",
+      "highlights": ["Corre bien, salta con dos pies", "Frases de 3 palabras", "Vacunas del refuerzo"],
+      "tip": "¡2 años! Empieza la etapa del 'yo solito'. Fomenta su independencia."
+    },
+    {
+      "week": 100,
+      "title": "Semana 100 — 25 meses",
+      "size_emoji": "🚴",
+      "size_compare": "Ya se anima con triciclos y correpasillos",
+      "highlights": ["Pedalea o empuja con los pies", "Nombra objetos comunes", "Sigue órdenes de 2 pasos"],
+      "tip": "Un correpasillo (sin pedales) es ideal antes que la bicicleta."
+    },
+    {
+      "week": 104,
+      "title": "Semana 104 — 2 años completos",
+      "size_emoji": "🌟",
+      "size_compare": "Ha crecido más que un elote de temporada",
+      "highlights": ["Habla con 50-200 palabras", "Se lava las manos con ayuda", "Juega junto a otros niños"],
+      "tip": "Léele mucho, canta con él y disfruta cada logro. El tiempo vuela."
+    }
+  ]
+}

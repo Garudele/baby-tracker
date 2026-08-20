@@ -972,6 +972,89 @@ body.dark .feed-kind, body.dark .diaper-btn { background: rgba(255,255,255,0.06)
 .timeline-empty {
   text-align: center; padding: 2rem 1rem; color: var(--text-light, #888);
 }
+
+/* ===== Weekly card (dashboard) ===== */
+.weekly-card {
+  background: linear-gradient(135deg, #FF9A9E 0%, #FAD0C4 50%, #FBC2EB 100%);
+  border-radius: 16px; padding: 18px; margin-bottom: 15px;
+  color: #4a2a4a; box-shadow: var(--shadow);
+}
+.weekly-card .wc-week {
+  font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;
+  opacity: 0.75; margin-bottom: 6px;
+}
+.weekly-card .wc-title {
+  font-size: 1.3rem; font-weight: 700; margin-bottom: 10px;
+}
+.weekly-card .wc-size {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.35); padding: 10px 14px; border-radius: 12px;
+  margin-bottom: 10px;
+}
+.weekly-card .wc-size-emoji { font-size: 2rem; }
+.weekly-card .wc-size-text { font-size: 0.9rem; font-weight: 600; }
+.weekly-card .wc-list { margin: 6px 0; padding-left: 1.2rem; font-size: 0.85rem; }
+.weekly-card .wc-list li { margin-bottom: 4px; }
+.weekly-card .wc-tip {
+  background: rgba(255,255,255,0.45); padding: 8px 12px; border-radius: 10px;
+  font-size: 0.82rem; margin-top: 8px;
+}
+body.dark .weekly-card { color: #2a1a2a; }
+
+/* ===== Milestones ===== */
+.miles-filters { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.miles-item {
+  display: flex; gap: 12px; padding: 12px;
+  border-radius: 12px; margin-bottom: 8px;
+  background: var(--input-bg, #fafafa);
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 2px solid transparent;
+}
+.miles-item:hover { background: rgba(116,185,255,0.08); }
+.miles-item.achieved {
+  background: rgba(40,167,69,0.1);
+  border-color: rgba(40,167,69,0.3);
+}
+.miles-icon { font-size: 1.8rem; }
+.miles-body { flex: 1; min-width: 0; }
+.miles-title { font-weight: 600; font-size: 0.95rem; }
+.miles-desc { font-size: 0.78rem; color: var(--text-light, #888); margin-top: 2px; }
+.miles-age { font-size: 0.7rem; color: var(--text-light, #888); margin-top: 4px; }
+.miles-check {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid #ccc; display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; flex-shrink: 0;
+}
+.miles-item.achieved .miles-check {
+  background: #28a745; border-color: #28a745; color: #fff;
+}
+.miles-progress-bar {
+  height: 8px; background: rgba(0,0,0,0.1); border-radius: 4px;
+  overflow: hidden; margin-top: 6px;
+}
+.miles-progress-fill {
+  height: 100%; background: linear-gradient(90deg, #28a745, #34ce57);
+  border-radius: 4px; transition: width 0.4s;
+}
+body.dark .miles-item { background: rgba(255,255,255,0.04); }
+body.dark .miles-item.achieved { background: rgba(40,167,69,0.15); }
+
+/* ===== Onboarding ===== */
+.onboard-slide { display: none; text-align: center; padding: 1rem; }
+.onboard-slide.active { display: block; animation: fadeIn 0.3s; }
+.onboard-emoji { font-size: 4rem; margin: 1rem 0; }
+.onboard-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+.onboard-desc { color: var(--text-light, #666); margin-bottom: 1rem; }
+.onboard-nav {
+  display: flex; justify-content: space-between; margin-top: 1.5rem;
+}
+.onboard-dots { display: flex; gap: 6px; justify-content: center; margin: 1rem 0; }
+.onboard-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: #ccc;
+  transition: all 0.2s;
+}
+.onboard-dot.active { background: var(--baby-blue, #74B9FF); width: 24px; border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -1192,6 +1275,7 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
 
 <!-- DASHBOARD -->
 <div class="section" id="dashSection">
+  <div id="weeklyCard"></div>
   <div id="remindersCard"></div>
 
   <div class="growth-summary">
@@ -1529,6 +1613,31 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
   </div>
 </div>
 
+<!-- LOGROS / MILESTONES -->
+<div class="section" id="milesSection">
+  <div class="card">
+    <h3>🏆 Logros de tu bebé</h3>
+    <p style="font-size:0.82em;color:var(--text-light);margin-bottom:12px" id="milesAgeHint">Marca los logros que ya alcanzó y agrega los tuyos.</p>
+    <div id="milesProgress" style="margin-bottom:12px"></div>
+
+    <div class="miles-filters">
+      <div class="rec-chips" id="milesCategoryChips"></div>
+      <label class="rec-toggle">
+        <input type="checkbox" id="milesOnlyAgeMatch" checked>
+        <span>Solo apropiados para la edad</span>
+      </label>
+      <label class="rec-toggle">
+        <input type="checkbox" id="milesOnlyAchieved">
+        <span>Solo logrados</span>
+      </label>
+    </div>
+
+    <div id="milesList"></div>
+
+    <button class="btn btn-primary btn-small" style="margin-top:12px" onclick="Milestones.addCustom()">+ Agregar logro personalizado</button>
+  </div>
+</div>
+
 <!-- RECETAS -->
 <div class="section" id="recSection">
   <div class="card">
@@ -1584,8 +1693,8 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
 
   <div class="card">
     <h3>🔔 Notificaciones</h3>
-    <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Activa avisos cuando abras la app y para recordarte la próxima cita.</p>
-    <button class="btn btn-primary btn-small" onclick="requestNotificationPermission()">Activar notificaciones</button>
+    <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Recibe recordatorios de citas próximas y medicinas activas.</p>
+    <button class="btn btn-primary btn-small" onclick="Notify.requestPermission().then(ok => { if (ok) Notify.startPolling(); })">Activar notificaciones</button>
   </div>
 
   <div class="card">
@@ -1704,6 +1813,9 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
   </button>
   <button class="tab" data-tab="act" onclick="switchTab('act', this)">
     <span class="tab-icon">🎯</span>Juegos
+  </button>
+  <button class="tab" data-tab="miles" onclick="switchTab('miles', this)">
+    <span class="tab-icon">🏆</span>Logros
   </button>
   <button class="tab" data-tab="rec" onclick="switchTab('rec', this)">
     <span class="tab-icon">🍽️</span>Recetas
@@ -3546,6 +3658,333 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+// ===== MILESTONES =====
+const Milestones = (() => {
+  let data = null;
+  let categoryFilter = 'todas';
+  let onlyAgeMatch = true;
+  let onlyAchieved = false;
+
+  const CATEGORY_LABELS = {
+    todas: 'Todos',
+    social: '😊 Social',
+    motora_gruesa: '🏃 Motora',
+    motora_fina: '✋ Motora fina',
+    lenguaje: '🗣️ Lenguaje',
+    cognitiva: '🧠 Cognitiva',
+    alimentacion: '🍽️ Alimentación',
+    otro: '⭐ Otro',
+    custom: '✨ Personalizados',
+  };
+
+  async function load() {
+    if (data) return data;
+    try {
+      const r = await fetch('milestones.json', { cache: 'default' });
+      const j = await r.json();
+      data = j;
+      return j;
+    } catch { data = { milestones: [], weekly_tips: [] }; return data; }
+  }
+
+  function babyAgeWeeks() {
+    const info = DB.get('info');
+    if (!info?.birth) return null;
+    const b = new Date(info.birth);
+    const days = Math.floor((Date.now() - b.getTime()) / 86400000);
+    return Math.floor(days / 7);
+  }
+  function babyAgeMonths() {
+    const w = babyAgeWeeks();
+    return w === null ? null : Math.floor(w / 4.34);
+  }
+
+  function achieved() { return DB.get('milestones') || {}; }
+  function saveAchieved(a) { DB.set('milestones', a); }
+  function customList() { return DB.get('milestones_custom') || []; }
+  function saveCustom(list) { DB.set('milestones_custom', list); }
+
+  function toggleAchieved(id) {
+    const a = achieved();
+    if (a[id]) delete a[id];
+    else a[id] = new Date().toISOString().slice(0, 10);
+    saveAchieved(a);
+    render();
+  }
+
+  function addCustom() {
+    const title = window.prompt('Nombre del logro:');
+    if (!title || !title.trim()) return;
+    const desc = window.prompt('Descripción (opcional):') || '';
+    const list = customList();
+    list.push({ id: 'custom-' + Date.now(), title: title.trim(), description: desc.trim(), emoji: '⭐', category: 'custom' });
+    saveCustom(list);
+    render();
+  }
+
+  function allMiles() {
+    return [...(data?.milestones || []), ...customList()];
+  }
+
+  function renderProgress() {
+    const box = document.getElementById('milesProgress');
+    if (!box) return;
+    const total = (data?.milestones || []).length + customList().length;
+    const done = Object.keys(achieved()).length;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+    box.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:4px">
+        <span><strong>${done}</strong> / ${total} logros</span>
+        <span>${pct}%</span>
+      </div>
+      <div class="miles-progress-bar"><div class="miles-progress-fill" style="width:${pct}%"></div></div>
+    `;
+  }
+
+  function renderChips() {
+    const box = document.getElementById('milesCategoryChips');
+    if (!box) return;
+    const cats = ['todas', ...new Set(allMiles().map(m => m.category))];
+    box.innerHTML = cats.map(c =>
+      `<button type="button" class="rec-chip${c === categoryFilter ? ' active' : ''}" onclick="Milestones.setCategory('${c}')">${CATEGORY_LABELS[c] || c}</button>`
+    ).join('');
+  }
+
+  function renderList() {
+    const box = document.getElementById('milesList');
+    if (!box) return;
+    const ageW = babyAgeWeeks();
+    const ach = achieved();
+    let items = allMiles();
+    if (categoryFilter !== 'todas') items = items.filter(m => m.category === categoryFilter);
+    if (onlyAgeMatch && ageW !== null) {
+      items = items.filter(m => {
+        if (m.category === 'custom') return true;
+        return (m.age_min_weeks || 0) <= ageW + 8; // hasta 2 meses después de la edad actual
+      });
+    }
+    if (onlyAchieved) items = items.filter(m => ach[m.id]);
+    // Sort: pendientes primero, luego por edad
+    items.sort((a,b) => {
+      const aAch = !!ach[a.id], bAch = !!ach[b.id];
+      if (aAch !== bAch) return aAch ? 1 : -1;
+      return (a.age_min_weeks || 0) - (b.age_min_weeks || 0);
+    });
+    if (items.length === 0) {
+      box.innerHTML = '<div class="rec-empty">No hay logros que coincidan.</div>';
+      return;
+    }
+    box.innerHTML = items.map(m => {
+      const isAch = !!ach[m.id];
+      const ageLabel = m.age_min_weeks !== undefined ?
+        Math.floor(m.age_min_weeks/4.34) + '-' + Math.floor((m.age_max_weeks||m.age_min_weeks)/4.34) + ' meses' : 'Custom';
+      return `
+        <div class="miles-item ${isAch ? 'achieved' : ''}" onclick="Milestones.toggle('${m.id}')">
+          <span class="miles-icon">${m.emoji || '⭐'}</span>
+          <div class="miles-body">
+            <div class="miles-title">${escapeHTML(m.title)}</div>
+            <div class="miles-desc">${escapeHTML(m.description || '')}</div>
+            <div class="miles-age">${ageLabel}${isAch ? ' · ✓ ' + ach[m.id] : ''}</div>
+          </div>
+          <div class="miles-check">${isAch ? '✓' : ''}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function render() {
+    await load();
+    // Wire inputs once
+    const catBox = document.getElementById('milesCategoryChips');
+    if (catBox && !catBox._wired) {
+      catBox._wired = true;
+    }
+    const ageCheck = document.getElementById('milesOnlyAgeMatch');
+    if (ageCheck && !ageCheck._wired) { ageCheck._wired = true; ageCheck.addEventListener('change', e => { onlyAgeMatch = e.target.checked; renderList(); }); }
+    const achCheck = document.getElementById('milesOnlyAchieved');
+    if (achCheck && !achCheck._wired) { achCheck._wired = true; achCheck.addEventListener('change', e => { onlyAchieved = e.target.checked; renderList(); }); }
+
+    renderChips();
+    renderProgress();
+    renderList();
+    // Age hint
+    const ageM = babyAgeMonths();
+    const hint = document.getElementById('milesAgeHint');
+    if (hint) hint.textContent = ageM === null
+      ? 'Configura la fecha de nacimiento en Ajustes.'
+      : `Filtrados para ${ageM} mes${ageM===1?'':'es'}.`;
+  }
+  function setCategory(c) { categoryFilter = c; renderChips(); renderList(); }
+
+  return { render, toggle: toggleAchieved, setCategory, addCustom, load, babyAgeWeeks, babyAgeMonths, getData: () => data };
+})();
+
+// ===== WEEKLY CARD (dashboard) =====
+const Weekly = (() => {
+  async function render() {
+    await Milestones.load();
+    const box = document.getElementById('weeklyCard');
+    if (!box) return;
+    const data = Milestones.getData();
+    if (!data) return;
+    const w = Milestones.babyAgeWeeks();
+    if (w === null || w < 0) { box.innerHTML = ''; return; }
+    // Buscar tip más cercano ≤ w
+    const tips = data.weekly_tips || [];
+    let best = null;
+    for (const t of tips) if (t.week <= w && (!best || t.week > best.week)) best = t;
+    if (!best) best = tips[0];
+    if (!best) { box.innerHTML = ''; return; }
+    const m = Math.floor(w / 4.34);
+    box.innerHTML = `
+      <div class="weekly-card">
+        <div class="wc-week">${w} semanas · ${m} ${m === 1 ? 'mes' : 'meses'}</div>
+        <div class="wc-title">${escapeHTML(best.title)}</div>
+        <div class="wc-size">
+          <span class="wc-size-emoji">${best.size_emoji || '🍼'}</span>
+          <span class="wc-size-text">${escapeHTML(best.size_compare || '')}</span>
+        </div>
+        <ul class="wc-list">
+          ${(best.highlights || []).map(h => '<li>' + escapeHTML(h) + '</li>').join('')}
+        </ul>
+        ${best.tip ? '<div class="wc-tip">💡 ' + escapeHTML(best.tip) + '</div>' : ''}
+      </div>
+    `;
+  }
+  return { render };
+})();
+
+// ===== ONBOARDING =====
+const Onboarding = (() => {
+  const SLIDES = [
+    { emoji: '👶', title: '¡Bienvenido/a a Baby Tracker!', desc: 'Tu compañero para seguir el crecimiento y desarrollo de tu bebé.' },
+    { emoji: '📔', title: 'Registra el día a día', desc: 'Sueño, tomas, pañales, notas — todo con un toque desde el tab Diario.' },
+    { emoji: '📏', title: 'Salud completa', desc: 'Medidas con curvas OMS, vacunas del esquema mexicano, medicinas, citas y estudios.' },
+    { emoji: '🍽️', title: 'Recetas por edad', desc: '110 recetas mexicanas adaptadas por edad, con porciones de nutrientes.' },
+    { emoji: '👨‍👩‍👧', title: 'Comparte con tu pareja', desc: 'Invita a papá/mamá desde Ajustes > Mis Bebés. Verán los mismos datos.' },
+    { emoji: '🎉', title: '¡Listo!', desc: 'Empieza registrando la fecha de nacimiento de tu bebé en Ajustes.' },
+  ];
+  let idx = 0;
+
+  function show() {
+    if (DB.get('onboarded')) return;
+    let overlay = document.getElementById('onboardOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'onboardOverlay';
+      overlay.className = 'auth-overlay show';
+      overlay.innerHTML = `
+        <div class="auth-modal">
+          <div id="onboardBody"></div>
+          <div class="onboard-dots" id="onboardDots"></div>
+          <div class="onboard-nav">
+            <button type="button" class="btn btn-small" id="onboardSkip">Saltar</button>
+            <button type="button" class="auth-submit" style="width:auto;padding:0.7rem 1.4rem;margin-top:0" id="onboardNext">Siguiente →</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      document.getElementById('onboardSkip').onclick = finish;
+      document.getElementById('onboardNext').onclick = next;
+    } else {
+      overlay.classList.add('show');
+    }
+    idx = 0;
+    renderSlide();
+  }
+
+  function renderSlide() {
+    const s = SLIDES[idx];
+    document.getElementById('onboardBody').innerHTML = `
+      <div class="onboard-slide active">
+        <div class="onboard-emoji">${s.emoji}</div>
+        <div class="onboard-title">${s.title}</div>
+        <div class="onboard-desc">${s.desc}</div>
+      </div>
+    `;
+    document.getElementById('onboardDots').innerHTML = SLIDES.map((_, i) =>
+      `<span class="onboard-dot${i === idx ? ' active' : ''}"></span>`
+    ).join('');
+    document.getElementById('onboardNext').textContent = idx === SLIDES.length - 1 ? '¡Empezar!' : 'Siguiente →';
+    document.getElementById('onboardSkip').style.visibility = idx === SLIDES.length - 1 ? 'hidden' : 'visible';
+  }
+
+  function next() {
+    if (idx < SLIDES.length - 1) { idx++; renderSlide(); }
+    else finish();
+  }
+
+  function finish() {
+    DB.set('onboarded', true);
+    document.getElementById('onboardOverlay')?.classList.remove('show');
+    // Ir a Ajustes para configurar bebé
+    switchTab('settings');
+  }
+
+  return { show };
+})();
+
+// ===== NOTIFICATIONS (recordatorios locales) =====
+const Notify = (() => {
+  const LAST_KEY = 'notify_last_check';
+  const SHOWN_KEY = 'notify_shown_ids';
+
+  async function requestPermission() {
+    if (!('Notification' in window)) { alert('Este navegador no soporta notificaciones.'); return false; }
+    const p = await Notification.requestPermission();
+    if (p === 'granted') { Toast.show('Notificaciones activadas ✓'); return true; }
+    Toast.show('Notificaciones bloqueadas');
+    return false;
+  }
+  function isEnabled() {
+    return 'Notification' in window && Notification.permission === 'granted';
+  }
+  function show(title, body, tag) {
+    if (!isEnabled()) return;
+    const shown = DB.get('_ns') || [];
+    if (tag && shown.includes(tag)) return;
+    try {
+      const n = new Notification(title, { body, icon: 'icon-192.png', tag, badge: 'icon-192.png' });
+      if (tag) { shown.push(tag); DB.set('_ns', shown.slice(-100)); }
+      setTimeout(() => n.close(), 8000);
+    } catch (e) {}
+  }
+  function check() {
+    if (!isEnabled()) return;
+    const now = Date.now();
+    const today = new Date(); today.setHours(0,0,0,0);
+    const tomorrow = today.getTime() + 86400000;
+    const in3days = today.getTime() + 3 * 86400000;
+
+    // Citas próximas
+    const appts = DB.get('appointments') || [];
+    for (const a of appts) {
+      if (!a.date) continue;
+      const dt = new Date(a.date + 'T' + (a.time || '09:00'));
+      const t = dt.getTime();
+      if (t >= today.getTime() && t <= in3days && t >= now) {
+        const days = Math.ceil((t - now) / 86400000);
+        show('🏥 Cita próxima', (a.doctor || 'Cita pediátrica') + ' — ' + (days === 0 ? 'hoy' : 'en ' + days + ' días'), 'appt-' + a.id);
+      }
+    }
+    // Medicinas activas
+    const meds = DB.get('medicines') || [];
+    for (const m of meds) {
+      if (!m.endDate) continue;
+      const end = new Date(m.endDate).getTime();
+      if (end < now) continue; // ya terminada
+      show('💊 Medicina', m.name + ' — recuerda dar la dosis', 'med-' + m.id + '-' + today.getTime());
+    }
+    DB.set(LAST_KEY, now);
+  }
+  function startPolling() {
+    check();
+    setInterval(check, 30 * 60 * 1000); // cada 30 min
+  }
+
+  return { requestPermission, isEnabled, show, check, startPolling };
+})();
+
 // ===== DIARY =====
 const Diary = (() => {
   let currentDate = new Date();
@@ -3837,6 +4276,8 @@ function switchTab(name, btn) {
   if (name === 'vac') renderVaccines();
   if (name === 'act') renderActivities();
   if (name === 'rec') Recipes.render();
+  if (name === 'miles') Milestones.render();
+  if (name === 'dash') Weekly.render();
   if (name === 'diary') { Diary.render(); Diary.startTicker(); }
   if (name === 'settings') { Babies.refresh(); Security.refresh(); Security.listPasskeys(); Security.refreshEmailStatus(); }
   window.scrollTo(0, 0);
@@ -4757,6 +5198,12 @@ applyDarkMode();
   }
   initApp();
   checkInvitationInUrl();
+  // Weekly card en dashboard
+  Weekly.render();
+  // Onboarding si nunca lo hizo
+  setTimeout(() => Onboarding.show(), 500);
+  // Notificaciones si están activadas
+  if (Notify.isEnabled()) Notify.startPolling();
 })();
 
 // ===== SERVICE WORKER =====
