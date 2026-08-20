@@ -908,6 +908,70 @@ body.dark .pw-bar { background: rgba(255,255,255,0.1); }
   background: var(--baby-blue, #74B9FF); color: #fff; cursor: pointer;
   font-size: 0.85rem; font-weight: 600;
 }
+
+/* ===== Diario ===== */
+.diary-summary {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  padding: 12px !important;
+}
+.diary-stat { text-align: center; }
+.diary-stat-val { font-size: 1.4rem; font-weight: 700; color: var(--primary); }
+.diary-stat-label { font-size: 0.72rem; color: var(--text-light, #666); margin-top: 2px; }
+
+.quick-log-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.ql-btn {
+  padding: 16px 12px;
+  border: none; border-radius: 16px;
+  background: var(--input-bg, #f5f5f5);
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  transition: transform 0.1s, box-shadow 0.15s;
+  min-height: 100px;
+}
+.ql-btn:active { transform: scale(0.97); }
+.ql-btn.active {
+  background: linear-gradient(135deg, #74B9FF, #A29BFE);
+  color: #fff; box-shadow: 0 4px 15px rgba(116,185,255,0.4);
+}
+.ql-btn.active .ql-sub, .ql-btn.active .ql-label { color: #fff; }
+.ql-icon { font-size: 2rem; }
+.ql-label { font-size: 0.95rem; font-weight: 600; color: var(--text, #222); }
+.ql-sub { font-size: 0.72rem; color: var(--text-light, #888); }
+body.dark .ql-btn { background: rgba(255,255,255,0.06); }
+
+.diary-date-nav {
+  display: flex; align-items: center; gap: 6px;
+}
+.diary-date-nav button { padding: 4px 10px; font-size: 1.2rem; min-width: 36px; }
+
+.timeline-item {
+  display: flex; gap: 12px; padding: 10px 12px;
+  border-radius: 12px; margin-bottom: 6px;
+  background: var(--input-bg, #fafafa);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.timeline-item:hover { background: rgba(116,185,255,0.08); }
+.timeline-icon { font-size: 1.5rem; flex-shrink: 0; }
+.timeline-body { flex: 1; min-width: 0; }
+.timeline-title { font-weight: 600; font-size: 0.9rem; }
+.timeline-sub { font-size: 0.75rem; color: var(--text-light, #888); margin-top: 2px; }
+.timeline-time { font-size: 0.75rem; color: var(--text-light, #888); white-space: nowrap; }
+body.dark .timeline-item { background: rgba(255,255,255,0.04); }
+
+.feed-kind, .diaper-btn {
+  padding: 14px 10px; border: 1px solid #ddd; border-radius: 12px;
+  background: var(--input-bg, #fafafa); cursor: pointer;
+  font-size: 0.9rem; font-weight: 600;
+}
+.feed-kind:hover, .diaper-btn:hover { background: rgba(116,185,255,0.1); }
+body.dark .feed-kind, body.dark .diaper-btn { background: rgba(255,255,255,0.06); color: #eee; border-color: #444; }
+
+.timeline-empty {
+  text-align: center; padding: 2rem 1rem; color: var(--text-light, #888);
+}
 </style>
 </head>
 <body>
@@ -1379,6 +1443,92 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
   </div>
 </div>
 
+<!-- DIARIO -->
+<div class="section" id="diarySection">
+  <div class="card diary-summary" id="diarySummary"></div>
+
+  <div class="card">
+    <h3>⚡ Registro rápido</h3>
+    <div class="quick-log-grid">
+      <button class="ql-btn ql-sleep" onclick="Diary.toggleSleep()">
+        <span class="ql-icon" id="qlSleepIcon">😴</span>
+        <span class="ql-label" id="qlSleepLabel">Iniciar sueño</span>
+        <span class="ql-sub" id="qlSleepSub"></span>
+      </button>
+      <button class="ql-btn ql-feed" onclick="Diary.openFeed()">
+        <span class="ql-icon">🍼</span>
+        <span class="ql-label">Toma</span>
+        <span class="ql-sub" id="qlFeedSub"></span>
+      </button>
+      <button class="ql-btn ql-diaper" onclick="Diary.openDiaper()">
+        <span class="ql-icon">👶</span>
+        <span class="ql-label">Pañal</span>
+        <span class="ql-sub" id="qlDiaperSub"></span>
+      </button>
+      <button class="ql-btn ql-note" onclick="Diary.addNote()">
+        <span class="ql-icon">📝</span>
+        <span class="ql-label">Nota</span>
+        <span class="ql-sub"></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="margin:0">📅 Timeline</h3>
+      <div class="diary-date-nav">
+        <button onclick="Diary.shiftDay(-1)" class="btn btn-small">‹</button>
+        <span id="diaryDate" style="min-width:100px;text-align:center;font-size:0.9rem;font-weight:600"></span>
+        <button onclick="Diary.shiftDay(1)" class="btn btn-small" id="diaryNext">›</button>
+      </div>
+    </div>
+    <div id="diaryTimeline"></div>
+  </div>
+</div>
+
+<!-- FEED MODAL -->
+<div class="auth-overlay" id="feedOverlay">
+  <div class="auth-modal">
+    <h2>🍼 Registrar toma</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+      <button type="button" class="feed-kind" data-k="breast_l">🤱 Pecho izq</button>
+      <button type="button" class="feed-kind" data-k="breast_r">Pecho der 🤱</button>
+      <button type="button" class="feed-kind" data-k="bottle">🍼 Biberón</button>
+      <button type="button" class="feed-kind" data-k="pumping">🥛 Extracción</button>
+    </div>
+    <div id="feedTimerBox" style="display:none;text-align:center;margin-top:1rem">
+      <div style="font-size:2.5rem;font-family:monospace" id="feedTimer">00:00</div>
+      <button type="button" class="auth-submit" onclick="Diary.stopFeedTimer()">Terminar</button>
+    </div>
+    <div id="feedAmountBox" style="display:none;margin-top:1rem">
+      <label>Cantidad (ml)</label>
+      <input type="number" id="feedAmount" min="0" max="500" step="10" style="width:100%;padding:0.7rem;font-size:1.4rem;text-align:center;border:1px solid #ddd;border-radius:10px;box-sizing:border-box" placeholder="120">
+      <button type="button" class="auth-submit" onclick="Diary.saveFeedAmount()" style="margin-top:8px">Guardar</button>
+    </div>
+    <div class="auth-offline"><button type="button" onclick="Diary.closeFeed()">Cancelar</button></div>
+  </div>
+</div>
+
+<!-- DIAPER MODAL -->
+<div class="auth-overlay" id="diaperOverlay">
+  <div class="auth-modal">
+    <h2>👶 Pañal</h2>
+    <p class="subtitle">¿Qué había?</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px">
+      <button type="button" class="diaper-btn" onclick="Diary.saveDiaper('wet')">
+        <div style="font-size:2rem">💧</div><div>Pipí</div>
+      </button>
+      <button type="button" class="diaper-btn" onclick="Diary.saveDiaper('dirty')">
+        <div style="font-size:2rem">💩</div><div>Popó</div>
+      </button>
+      <button type="button" class="diaper-btn" onclick="Diary.saveDiaper('mixed')">
+        <div style="font-size:2rem">💦</div><div>Mixto</div>
+      </button>
+    </div>
+    <div class="auth-offline"><button type="button" onclick="Diary.closeDiaper()">Cancelar</button></div>
+  </div>
+</div>
+
 <!-- RECETAS -->
 <div class="section" id="recSection">
   <div class="card">
@@ -1533,6 +1683,9 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
 <div class="tab-bar">
   <button class="tab active" data-tab="dash" onclick="switchTab('dash', this)">
     <span class="tab-icon">🏠</span>Inicio
+  </button>
+  <button class="tab" data-tab="diary" onclick="switchTab('diary', this)">
+    <span class="tab-icon">📔</span>Diario
   </button>
   <button class="tab" data-tab="growth" onclick="switchTab('growth', this)">
     <span class="tab-icon">📏</span>Medidas
@@ -1902,7 +2055,7 @@ const PhotoDB = (() => {
 // ===== SERVER SYNC =====
 const SYNC = (() => {
   const API = new URL('api/', location.href).href;
-  const SYNCED_KEYS = ['info', 'growth', 'medicines', 'studies', 'vaccines', 'appointments', 'activities', 'feedings'];
+  const SYNCED_KEYS = ['info', 'growth', 'medicines', 'studies', 'vaccines', 'appointments', 'activities', 'feedings', 'events'];
 
   async function api(path, opts = {}) {
     return fetch(API + path.replace(/^\//, ''), {
@@ -3393,6 +3546,287 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+// ===== DIARY =====
+const Diary = (() => {
+  let currentDate = new Date();
+  currentDate.setHours(0,0,0,0);
+  let feedKind = null;
+  let feedStart = null;
+  let feedTimerInt = null;
+  let sleepTickInt = null;
+
+  function events() { return DB.get('events') || []; }
+  function saveEvents(arr) { DB.set('events', arr); }
+  function push(ev) {
+    const arr = events();
+    ev.id = ev.id || (Date.now() + Math.floor(Math.random()*1000));
+    arr.push(ev);
+    saveEvents(arr);
+    render();
+    return ev;
+  }
+  function update(id, fields) {
+    const arr = events();
+    const i = arr.findIndex(e => e.id === id);
+    if (i >= 0) { arr[i] = { ...arr[i], ...fields }; saveEvents(arr); render(); }
+  }
+  function remove(id) {
+    const arr = events().filter(e => e.id !== id);
+    saveEvents(arr);
+    render();
+  }
+
+  function sameDay(ts, date) {
+    const d = new Date(ts);
+    return d.getFullYear() === date.getFullYear() && d.getMonth() === date.getMonth() && d.getDate() === date.getDate();
+  }
+  function eventsForDate(date) {
+    return events().filter(e => sameDay(e.ts_start || e.ts, date));
+  }
+
+  function activeSleep() {
+    return events().find(e => e.type === 'sleep' && !e.ts_end);
+  }
+
+  function toggleSleep() {
+    const active = activeSleep();
+    if (active) {
+      update(active.id, { ts_end: Date.now() });
+      Toast.show('Sueño terminado ✓');
+    } else {
+      push({ type: 'sleep', ts_start: Date.now(), kind: 'nap' });
+      Toast.show('Sueño iniciado ✓');
+    }
+    render();
+  }
+
+  function openFeed() {
+    document.getElementById('feedOverlay').classList.add('show');
+    document.getElementById('feedTimerBox').style.display = 'none';
+    document.getElementById('feedAmountBox').style.display = 'none';
+    document.querySelectorAll('#feedOverlay .feed-kind').forEach(b => {
+      b.onclick = () => selectFeedKind(b.dataset.k);
+    });
+  }
+  function closeFeed() {
+    document.getElementById('feedOverlay').classList.remove('show');
+    clearInterval(feedTimerInt);
+  }
+  function selectFeedKind(kind) {
+    feedKind = kind;
+    if (kind === 'breast_l' || kind === 'breast_r') {
+      // Timer
+      feedStart = Date.now();
+      document.getElementById('feedTimerBox').style.display = 'block';
+      document.getElementById('feedAmountBox').style.display = 'none';
+      const el = document.getElementById('feedTimer');
+      el.textContent = '00:00';
+      feedTimerInt = setInterval(() => {
+        const s = Math.floor((Date.now() - feedStart) / 1000);
+        el.textContent = String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+      }, 500);
+    } else {
+      // Amount input
+      document.getElementById('feedAmountBox').style.display = 'block';
+      document.getElementById('feedTimerBox').style.display = 'none';
+      setTimeout(() => document.getElementById('feedAmount').focus(), 100);
+    }
+  }
+  function stopFeedTimer() {
+    clearInterval(feedTimerInt);
+    const dur = Math.floor((Date.now() - feedStart) / 1000);
+    push({ type: 'feed', kind: feedKind, ts_start: feedStart, ts_end: Date.now(), duration_s: dur });
+    closeFeed();
+    Toast.show('Toma registrada ✓');
+  }
+  function saveFeedAmount() {
+    const ml = parseInt(document.getElementById('feedAmount').value, 10);
+    if (!ml || ml <= 0) return;
+    push({ type: 'feed', kind: feedKind, ts_start: Date.now(), amount_ml: ml });
+    closeFeed();
+    Toast.show('Toma registrada ✓');
+  }
+
+  function openDiaper() { document.getElementById('diaperOverlay').classList.add('show'); }
+  function closeDiaper() { document.getElementById('diaperOverlay').classList.remove('show'); }
+  function saveDiaper(kind) {
+    push({ type: 'diaper', kind, ts_start: Date.now() });
+    closeDiaper();
+    Toast.show('Pañal registrado ✓');
+  }
+
+  function addNote() {
+    const text = window.prompt('Nota rápida:');
+    if (!text || !text.trim()) return;
+    push({ type: 'note', ts_start: Date.now(), text: text.trim() });
+    Toast.show('Nota guardada ✓');
+  }
+
+  function shiftDay(delta) {
+    const d = new Date(currentDate);
+    d.setDate(d.getDate() + delta);
+    const now = new Date(); now.setHours(23,59,59,999);
+    if (d.getTime() > now.getTime()) return;
+    currentDate = d;
+    render();
+  }
+
+  function fmtDate(d) {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const yest = new Date(today); yest.setDate(yest.getDate()-1);
+    if (d.getTime() === today.getTime()) return 'Hoy';
+    if (d.getTime() === yest.getTime()) return 'Ayer';
+    return d.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+  function fmtTime(ts) {
+    return new Date(ts).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  }
+  function fmtDurationMs(ms) {
+    const m = Math.floor(ms / 60000);
+    if (m < 60) return m + 'm';
+    return Math.floor(m/60) + 'h ' + (m%60) + 'm';
+  }
+  function fmtRelative(ts) {
+    const diff = Date.now() - ts;
+    if (diff < 60000) return 'ahora';
+    const m = Math.floor(diff/60000);
+    if (m < 60) return 'hace ' + m + 'm';
+    const h = Math.floor(m/60);
+    if (h < 24) return 'hace ' + h + 'h';
+    return 'hace ' + Math.floor(h/24) + 'd';
+  }
+
+  const TYPE_ICON = { sleep: '😴', feed: '🍼', diaper: '👶', note: '📝' };
+  const FEED_KIND_LABEL = {
+    breast_l: 'Pecho izquierdo', breast_r: 'Pecho derecho',
+    bottle: 'Biberón', pumping: 'Extracción'
+  };
+  const DIAPER_KIND_LABEL = { wet: 'Pipí 💧', dirty: 'Popó 💩', mixed: 'Mixto 💦' };
+
+  function renderTimeline() {
+    const box = document.getElementById('diaryTimeline');
+    if (!box) return;
+    const items = eventsForDate(currentDate).sort((a,b) => (b.ts_start||b.ts) - (a.ts_start||a.ts));
+    if (items.length === 0) {
+      box.innerHTML = '<div class="timeline-empty">Sin registros este día.<br><small>Usa los botones de arriba para empezar.</small></div>';
+      return;
+    }
+    box.innerHTML = items.map(e => {
+      const icon = TYPE_ICON[e.type] || '·';
+      let title = '', sub = '';
+      if (e.type === 'sleep') {
+        title = 'Sueño';
+        if (e.ts_end) sub = fmtDurationMs(e.ts_end - e.ts_start);
+        else sub = '⏱️ en curso...';
+      } else if (e.type === 'feed') {
+        title = FEED_KIND_LABEL[e.kind] || 'Toma';
+        if (e.amount_ml) sub = e.amount_ml + ' ml';
+        else if (e.duration_s) sub = Math.floor(e.duration_s/60) + ' min';
+      } else if (e.type === 'diaper') {
+        title = DIAPER_KIND_LABEL[e.kind] || 'Pañal';
+      } else if (e.type === 'note') {
+        title = 'Nota';
+        sub = e.text || '';
+      }
+      const time = fmtTime(e.ts_start || e.ts);
+      return `
+        <div class="timeline-item" onclick="Diary.editEvent(${e.id})">
+          <span class="timeline-icon">${icon}</span>
+          <div class="timeline-body">
+            <div class="timeline-title">${escapeHTML(title)}</div>
+            <div class="timeline-sub">${escapeHTML(sub)}</div>
+          </div>
+          <span class="timeline-time">${time}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function editEvent(id) {
+    const e = events().find(x => x.id === id);
+    if (!e) return;
+    if (!confirm('¿Eliminar este registro?\n\n' + (TYPE_ICON[e.type]||'') + ' ' + fmtTime(e.ts_start||e.ts))) return;
+    remove(id);
+    Toast.show('Registro eliminado ✓');
+  }
+
+  function renderSummary() {
+    const box = document.getElementById('diarySummary');
+    if (!box) return;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayEvents = eventsForDate(today);
+    const sleeps = todayEvents.filter(e => e.type === 'sleep' && e.ts_end);
+    const feeds = todayEvents.filter(e => e.type === 'feed');
+    const diapers = todayEvents.filter(e => e.type === 'diaper');
+    const totalSleepMs = sleeps.reduce((s, e) => s + (e.ts_end - e.ts_start), 0);
+    box.innerHTML = `
+      <div class="diary-stat">
+        <div class="diary-stat-val">${totalSleepMs > 0 ? fmtDurationMs(totalSleepMs) : '0m'}</div>
+        <div class="diary-stat-label">😴 Sueño hoy</div>
+      </div>
+      <div class="diary-stat">
+        <div class="diary-stat-val">${feeds.length}</div>
+        <div class="diary-stat-label">🍼 Tomas hoy</div>
+      </div>
+      <div class="diary-stat">
+        <div class="diary-stat-val">${diapers.length}</div>
+        <div class="diary-stat-label">👶 Pañales hoy</div>
+      </div>
+    `;
+  }
+
+  function renderQuickButtons() {
+    const active = activeSleep();
+    const sleepBtn = document.querySelector('.ql-sleep');
+    const sleepLabel = document.getElementById('qlSleepLabel');
+    const sleepSub = document.getElementById('qlSleepSub');
+    const sleepIcon = document.getElementById('qlSleepIcon');
+    if (active) {
+      sleepBtn?.classList.add('active');
+      sleepLabel.textContent = 'Terminar sueño';
+      sleepIcon.textContent = '⏱️';
+      const dur = Date.now() - active.ts_start;
+      sleepSub.textContent = fmtDurationMs(dur);
+    } else {
+      sleepBtn?.classList.remove('active');
+      sleepLabel.textContent = 'Iniciar sueño';
+      sleepIcon.textContent = '😴';
+      sleepSub.textContent = '';
+    }
+    // Sub-labels con "hace X"
+    const feeds = events().filter(e => e.type === 'feed').sort((a,b) => (b.ts_start||b.ts) - (a.ts_start||a.ts));
+    const diapers = events().filter(e => e.type === 'diaper').sort((a,b) => (b.ts_start||b.ts) - (a.ts_start||a.ts));
+    const feedSub = document.getElementById('qlFeedSub');
+    const diaperSub = document.getElementById('qlDiaperSub');
+    if (feedSub) feedSub.textContent = feeds[0] ? fmtRelative(feeds[0].ts_start||feeds[0].ts) : '—';
+    if (diaperSub) diaperSub.textContent = diapers[0] ? fmtRelative(diapers[0].ts_start||diapers[0].ts) : '—';
+  }
+
+  function render() {
+    document.getElementById('diaryDate').textContent = fmtDate(currentDate);
+    const today = new Date(); today.setHours(0,0,0,0);
+    document.getElementById('diaryNext').disabled = currentDate.getTime() >= today.getTime();
+    renderSummary();
+    renderTimeline();
+    renderQuickButtons();
+  }
+
+  // Tick para timers en vivo
+  function startTicker() {
+    if (sleepTickInt) return;
+    sleepTickInt = setInterval(() => {
+      if (document.getElementById('diarySection')?.classList.contains('active')) {
+        renderQuickButtons();
+      }
+    }, 30000);
+  }
+
+  return {
+    render, toggleSleep, openFeed, closeFeed, stopFeedTimer, saveFeedAmount,
+    openDiaper, closeDiaper, saveDiaper, addNote, shiftDay, editEvent, startTicker,
+  };
+})();
+
 // ===== TABS =====
 function switchTab(name, btn) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -3403,6 +3837,7 @@ function switchTab(name, btn) {
   if (name === 'vac') renderVaccines();
   if (name === 'act') renderActivities();
   if (name === 'rec') Recipes.render();
+  if (name === 'diary') { Diary.render(); Diary.startTicker(); }
   if (name === 'settings') { Babies.refresh(); Security.refresh(); Security.listPasskeys(); Security.refreshEmailStatus(); }
   window.scrollTo(0, 0);
 }
