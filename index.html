@@ -1844,6 +1844,32 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
   </div>
 </div>
 
+<!-- MILESTONE EDITOR MODAL -->
+<div class="auth-overlay" id="mileEditorOverlay">
+  <div class="auth-modal" style="max-width:400px">
+    <h2 id="mileEdTitle" style="text-align:center;font-size:1.2rem;margin-bottom:0.3rem"></h2>
+    <p id="mileEdDesc" style="text-align:center;color:var(--text-light);font-size:0.85rem;margin-bottom:1rem"></p>
+    <form class="auth-form" id="mileEdForm" autocomplete="off">
+      <label>Fecha</label>
+      <input type="date" id="mileEdDate" required>
+      <label>Nota (opcional)</label>
+      <textarea id="mileEdNote" rows="2" placeholder="Ej: Le salió el diente inferior derecho" style="width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-family:inherit;font-size:1em;background:var(--input-bg);color:var(--text);box-sizing:border-box;resize:vertical;min-height:60px"></textarea>
+      <label>Foto (opcional)</label>
+      <input type="file" id="mileEdPhoto" accept="image/*" capture="environment" style="width:100%;padding:8px;font-size:0.9em">
+      <div id="mileEdPhotoPreview" style="display:none;margin-top:8px;text-align:center">
+        <img id="mileEdPhotoImg" style="max-width:100%;max-height:200px;border-radius:12px">
+        <button type="button" onclick="removeMilePhoto()" style="display:block;margin:8px auto 0;background:none;border:none;color:var(--danger);cursor:pointer;font-size:0.85rem">Quitar foto</button>
+      </div>
+      <div class="auth-error" id="mileEdError"></div>
+      <div class="rec-actions" style="margin-top:1rem">
+        <button type="button" class="rec-btn" style="background:var(--danger);color:#fff;flex:0 0 auto;padding:12px 16px" id="mileEdDeleteBtn">🗑️</button>
+        <button type="submit" class="rec-btn primary">Guardar</button>
+      </div>
+    </form>
+    <div class="auth-offline"><button type="button" id="mileEdCancel">Cancelar</button></div>
+  </div>
+</div>
+
 <!-- FEED MODAL -->
 <div class="auth-overlay" id="feedOverlay">
   <div class="auth-modal">
@@ -4543,12 +4569,20 @@ const Milestones = (() => {
   function customList() { return DB.get('milestones_custom') || []; }
   function saveCustom(list) { DB.set('milestones_custom', list); }
 
-  function toggleAchieved(id) {
+  async function toggleAchieved(id) {
     const a = achieved();
-    if (a[id]) delete a[id];
-    else a[id] = new Date().toISOString().slice(0, 10);
-    saveAchieved(a);
-    render();
+    if (a[id]) {
+      // Ya logrado: preguntar si quiere quitarlo o editarlo
+      const item = allMiles().find(m => m.id === id);
+      const info = typeof a[id] === 'object' ? a[id] : { date: a[id] };
+      const opts = ['Editar', 'Quitar'];
+      // Mostrar detalles + botón editar/eliminar
+      openMilestoneEditor(id, item, info);
+      return;
+    }
+    // No logrado aún: abrir editor para llenar fecha/nota/foto
+    const item = allMiles().find(m => m.id === id);
+    openMilestoneEditor(id, item, { date: new Date().toISOString().slice(0,10), note: '' });
   }
 
   function addCustom() {
@@ -4619,16 +4653,20 @@ const Milestones = (() => {
       return;
     }
     box.innerHTML = items.map(m => {
-      const isAch = !!ach[m.id];
+      const rec = ach[m.id];
+      const isAch = !!rec;
+      const achData = typeof rec === 'object' ? rec : (rec ? { date: rec } : null);
       const ageLabel = m.age_min_weeks !== undefined ?
         Math.floor(m.age_min_weeks/4.34) + '-' + Math.floor((m.age_max_weeks||m.age_min_weeks)/4.34) + ' meses' : 'Custom';
+      const hasNote = achData?.note;
+      const hasPhoto = achData?.photoId;
       return `
         <div class="miles-item ${isAch ? 'achieved' : ''}" onclick="Milestones.toggle('${m.id}')">
           <span class="miles-icon">${m.emoji || '⭐'}</span>
           <div class="miles-body">
             <div class="miles-title">${escapeHTML(m.title)}</div>
-            <div class="miles-desc">${escapeHTML(m.description || '')}</div>
-            <div class="miles-age">${ageLabel}${isAch ? ' · ✓ ' + ach[m.id] : ''}</div>
+            ${hasNote ? `<div class="miles-desc" style="font-style:italic">"${escapeHTML(hasNote)}"</div>` : `<div class="miles-desc">${escapeHTML(m.description || '')}</div>`}
+            <div class="miles-age">${ageLabel}${achData ? ' · ✓ ' + achData.date : ''}${hasPhoto ? ' · 📸' : ''}</div>
           </div>
           <div class="miles-check">${isAch ? '✓' : ''}</div>
         </div>
@@ -4660,8 +4698,108 @@ const Milestones = (() => {
   }
   function setCategory(c) { categoryFilter = c; renderChips(); renderList(); }
 
-  return { render, toggle: toggleAchieved, setCategory, addCustom, load, babyAgeWeeks, babyAgeMonths, getData: () => data };
+  return { render, toggle: toggleAchieved, setCategory, addCustom, load, babyAgeWeeks, babyAgeMonths, getData: () => data, openMilestoneEditor };
 })();
+
+let _currentMileEditor = null;
+async function openMilestoneEditor(id, item, info) {
+  const overlay = document.getElementById('mileEditorOverlay');
+  const title = document.getElementById('mileEdTitle');
+  const desc = document.getElementById('mileEdDesc');
+  const dateEl = document.getElementById('mileEdDate');
+  const noteEl = document.getElementById('mileEdNote');
+  const photoInput = document.getElementById('mileEdPhoto');
+  const preview = document.getElementById('mileEdPhotoPreview');
+  const previewImg = document.getElementById('mileEdPhotoImg');
+  const err = document.getElementById('mileEdError');
+  const form = document.getElementById('mileEdForm');
+  const cancel = document.getElementById('mileEdCancel');
+  const delBtn = document.getElementById('mileEdDeleteBtn');
+
+  title.textContent = (item?.emoji || '⭐') + ' ' + (item?.title || 'Logro');
+  desc.textContent = item?.description || '';
+  dateEl.value = info?.date || new Date().toISOString().slice(0,10);
+  noteEl.value = info?.note || '';
+  err.classList.remove('show');
+  preview.style.display = 'none';
+  photoInput.value = '';
+  let photoBlob = null;
+
+  // Foto existente?
+  const existingPhotoId = info?.photoId;
+  if (existingPhotoId) {
+    try {
+      const p = await PhotoDB.get(existingPhotoId);
+      if (p) {
+        previewImg.src = URL.createObjectURL(p.blob);
+        preview.style.display = 'block';
+      }
+    } catch (e) {}
+  }
+  delBtn.style.display = info?.date && Milestones && (Milestones.getData ? true : false) ? 'block' : 'none';
+  // Only show delete if already achieved
+  const achievedNow = DB.get('milestones') || {};
+  delBtn.style.display = achievedNow[id] ? 'block' : 'none';
+
+  overlay.classList.add('show');
+
+  photoInput.onchange = async (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    photoBlob = f;
+    previewImg.src = URL.createObjectURL(f);
+    preview.style.display = 'block';
+  };
+  window.removeMilePhoto = () => {
+    photoBlob = null;
+    preview.style.display = 'none';
+    photoInput.value = '';
+    if (info) info._removePhoto = true;
+  };
+
+  cancel.onclick = () => overlay.classList.remove('show');
+  delBtn.onclick = async () => {
+    const ok = await Modal.confirm('¿Eliminar este logro?', { okText: 'Eliminar', danger: true });
+    if (!ok) return;
+    const ach = DB.get('milestones') || {};
+    const old = ach[id];
+    if (typeof old === 'object' && old.photoId) {
+      try { await PhotoDB.delete(old.photoId); } catch (e) {}
+    }
+    delete ach[id];
+    DB.set('milestones', ach);
+    Milestones.render();
+    overlay.classList.remove('show');
+    Toast.show('Logro eliminado');
+  };
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    if (!dateEl.value) { err.textContent = 'Fecha requerida'; err.classList.add('show'); return; }
+    const ach = DB.get('milestones') || {};
+    const record = { date: dateEl.value };
+    if (noteEl.value.trim()) record.note = noteEl.value.trim();
+    // Foto: subir si nueva, mantener si existente y no removida, eliminar si _removePhoto
+    if (photoBlob) {
+      try {
+        const photoId = await PhotoDB.add('milestone', id, photoBlob, item?.title || 'logro');
+        record.photoId = photoId;
+        // Borrar foto vieja si existía
+        if (info?.photoId && info.photoId !== photoId) {
+          try { await PhotoDB.delete(info.photoId); } catch (e) {}
+        }
+      } catch (e) { console.warn('photo save:', e); }
+    } else if (info?.photoId && !info?._removePhoto) {
+      record.photoId = info.photoId;
+    } else if (info?._removePhoto && info?.photoId) {
+      try { await PhotoDB.delete(info.photoId); } catch (e) {}
+    }
+    ach[id] = record;
+    DB.set('milestones', ach);
+    Milestones.render();
+    overlay.classList.remove('show');
+    Toast.show('Logro guardado ✓');
+  };
+}
 
 // ===== WEEKLY CARD (dashboard) =====
 const Weekly = (() => {
