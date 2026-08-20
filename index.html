@@ -5870,15 +5870,21 @@ const Security = (() => {
     }
   }
 
-  // ---- WebAuthn helpers ------
+  // ---- WebAuthn helpers (soportan base64 estándar Y base64URL) ------
   function bufToB64(buf) {
+    // WebAuthn API devuelve ArrayBuffer; convertir a base64 estándar
     const bytes = new Uint8Array(buf);
     let bin = '';
     for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
     return btoa(bin);
   }
-  function b64ToBuf(b64) {
-    const bin = atob(b64);
+  function b64ToBuf(input) {
+    if (input instanceof ArrayBuffer) return input;
+    if (input && typeof input === 'object' && input.buffer instanceof ArrayBuffer) return input.buffer;
+    // Convertir base64URL a base64 estándar y añadir padding
+    let s = String(input || '').replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4) s += '=';
+    const bin = atob(s);
     const bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     return bytes.buffer;
@@ -5941,7 +5947,13 @@ const Security = (() => {
         Modal.alert(j2.detail || j2.error || 'No se pudo registrar', 'Error');
       }
     } catch (e) {
-      Modal.alert('Registro cancelado o falló', 'Error');
+      console.error('Passkey error:', e);
+      let msg = e.message || 'Error desconocido';
+      if (e.name === 'NotAllowedError') msg = 'Cancelaste la operación o tardaste mucho. Vuelve a intentar.';
+      if (e.name === 'InvalidStateError') msg = 'Este dispositivo ya está registrado.';
+      if (e.name === 'NotSupportedError') msg = 'Este navegador o dispositivo no soporta passkeys.';
+      if (e.name === 'SecurityError') msg = 'Requiere HTTPS y dominio válido. Recarga la página.';
+      Modal.alert(msg + '\n\n(' + (e.name || 'Error') + ')', 'Error al registrar');
     }
   }
 
