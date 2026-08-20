@@ -621,6 +621,138 @@ try {
         json_out(['ok' => true]);
     }
 
+    // ---- Weekly digest (envía resumen inmediato al email) ---------------
+    if (($parts[0] ?? '') === 'digest' && ($parts[1] ?? '') === 'send' && $method === 'POST') {
+        $stmt = db()->prepare("SELECT email FROM users WHERE id = ?");
+        $stmt->execute([$uid]);
+        $u = $stmt->fetch();
+        if (!$u) json_out(['error' => 'no_user'], 404);
+        // Bebé activo
+        $bid = $_SESSION['baby_id'] ?? null;
+        if (!$bid) {
+            $b = db()->prepare("SELECT id, name FROM babies WHERE owner_id = ? ORDER BY id LIMIT 1");
+            $b->execute([$uid]);
+            $row = $b->fetch();
+            if (!$row) json_out(['error' => 'no_baby'], 400);
+            $bid = $row['id'];
+        }
+        // Últimos 7 días de events
+        $e = db()->prepare("SELECT data_json FROM entries WHERE baby_id = ? AND data_key = 'events'");
+        $e->execute([$bid]);
+        $r = $e->fetch();
+        $events = $r ? json_decode($r['data_json'], true) : [];
+        $now = time();
+        $weekAgo = $now - 7 * 86400;
+        $recent = array_filter($events, fn($ev) => (($ev['ts_start'] ?? $ev['ts'] ?? 0) / 1000) >= $weekAgo);
+        $sleepMs = 0; $feeds = 0; $diapers = 0;
+        foreach ($recent as $ev) {
+            if ($ev['type'] === 'sleep' && !empty($ev['ts_end'])) $sleepMs += ($ev['ts_end'] - $ev['ts_start']);
+            if ($ev['type'] === 'feed') $feeds++;
+            if ($ev['type'] === 'diaper') $diapers++;
+        }
+        $sleepH = round($sleepMs / 3600000, 1);
+        $babyName = 'tu bebé';
+        $bn = db()->prepare("SELECT name FROM babies WHERE id = ?");
+        $bn->execute([$bid]);
+        $bnRow = $bn->fetch();
+        if ($bnRow) $babyName = $bnRow['name'];
+
+        $html = "<h2>📊 Resumen semanal de $babyName</h2>"
+            . "<p>Últimos 7 días:</p>"
+            . "<ul style='font-size:16px'>"
+            . "<li>😴 <b>$sleepH horas</b> de sueño total</li>"
+            . "<li>🍼 <b>$feeds tomas</b> registradas</li>"
+            . "<li>👶 <b>$diapers pañales</b></li>"
+            . "</ul>"
+            . "<p style='color:#666;font-size:14px'>Abre la app para ver el detalle: <a href='https://" . ($_SERVER['HTTP_HOST'] ?? 'baby.angaes.com') . "/'>Baby Tracker</a></p>";
+        $text = "Resumen semanal de $babyName:\n\nSueño: $sleepH h\nTomas: $feeds\nPañales: $diapers\n\nAbre la app: https://" . ($_SERVER['HTTP_HOST'] ?? 'baby.angaes.com') . "/";
+        $ok = send_email($u['email'], "📊 Resumen semanal — $babyName", $html, $text);
+        json_out(['ok' => (bool)$ok]);
+    }
+
+    // ---- AI pediatric chat (proxy a Anthropic) --------------------------
+    if (($parts[0] ?? '') === 'ai' && ($parts[1] ?? '') === 'chat' && $method === 'POST') {
+        if (empty($config['anthropic_api_key'])) json_out(['error' => 'not_configured'], 503);
+        // Rate limit: 30 mensajes por usuario por hora
+        if (is_ip_locked_out('ai_chat', 30, 3600)) json_out(['error' => 'rate_limited'], 429);
+        $body = json_body();
+        $messages = $body['messages'] ?? [];
+        $babyContext = trim((string)($body['baby_context'] ?? ''));
+        if (!is_array($messages) || empty($messages)) json_out(['error' => 'no_messages'], 400);
+        // Cap 20 mensajes de historia
+        $messages = array_slice($messages, -20);
+        // Validar roles
+        $clean = [];
+        foreach ($messages as $m) {
+            if (!isset($m['role']) || !isset($m['content'])) continue;
+            if (!in_array($m['role'], ['user','assistant'], true)) continue;
+            $clean[] = ['role' => $m['role'], 'content' => substr((string)$m['content'], 0, 4000)];
+        }
+        if (empty($clean)) json_out(['error' => 'no_messages'], 400);
+
+        $systemPrompt = "Eres un asistente de puericultura amable y confiable en español mexicano, especializado en bebés de 0-2 años. Responde de forma clara, empática y práctica.\n\n"
+            . "REGLAS:\n"
+            . "1. NUNCA reemplazas al pediatra. Ante síntomas graves, fiebre >38.5°C, dificultad respiratoria, deshidratación, o cualquier duda seria: recomienda contactar al pediatra o ir a urgencias.\n"
+            . "2. Enfócate en preguntas comunes: sueño, alimentación (papillas, LME, fórmula), desarrollo motor/cognitivo/social, higiene, rutinas, hitos, cólicos, dentición.\n"
+            . "3. Base científica: OMS, AAP, Secretaría de Salud MX.\n"
+            . "4. Español coloquial mexicano pero respetuoso. Usa 'tu bebé' o 'tu peque'. Evita jerga médica compleja.\n"
+            . "5. Máximo 4-5 oraciones por respuesta salvo que se pida más detalle.\n"
+            . "6. Si te preguntan algo fuera de puericultura, redirige amablemente.\n"
+            . "7. Sin diagnósticos, sin recetar medicamentos, sin garantizar resultados.\n";
+        if ($babyContext) $systemPrompt .= "\n" . $babyContext;
+
+        // Prompt caching: marca el system prompt como cacheable
+        $payload = [
+            'model' => 'claude-haiku-4-5-20251001',
+            'max_tokens' => 500,
+            'system' => [
+                [
+                    'type' => 'text',
+                    'text' => $systemPrompt,
+                    'cache_control' => ['type' => 'ephemeral'],
+                ],
+            ],
+            'messages' => $clean,
+        ];
+
+        $ch = curl_init('https://api.anthropic.com/v1/messages');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 45);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'x-api-key: ' . $config['anthropic_api_key'],
+            'anthropic-version: 2023-06-01',
+        ]);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        $resp = curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        curl_close($ch);
+
+        if ($resp === false || $code >= 500) {
+            record_attempt('ai_chat', false, 'upstream_error');
+            error_log('[AI] Anthropic error: ' . ($err ?: $resp));
+            json_out(['error' => 'upstream_error'], 502);
+        }
+        if ($code >= 400) {
+            record_attempt('ai_chat', false, 'api_error_' . $code);
+            $j = json_decode($resp, true);
+            json_out(['error' => 'api_error', 'detail' => $j['error']['message'] ?? 'unknown'], 400);
+        }
+        $data = json_decode($resp, true);
+        $reply = '';
+        foreach (($data['content'] ?? []) as $block) {
+            if (($block['type'] ?? '') === 'text') $reply .= $block['text'];
+        }
+        if (!$reply) json_out(['error' => 'empty_reply'], 502);
+        record_attempt('ai_chat', true);
+        json_out([
+            'reply' => trim($reply),
+            'usage' => $data['usage'] ?? null,
+        ]);
+    }
+
     // ---- Delete account -------------------------------------------------
     if (($parts[0] ?? '') === 'account' && $method === 'DELETE') {
         $body = json_body();

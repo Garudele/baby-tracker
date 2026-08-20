@@ -51,6 +51,33 @@ body.dark .next-appt-box .days { color: #B2C4FF; }
 body.dark .editing-banner { background: #4A3A0F; color: #FFE9A8; }
 body.dark .btn-cancel { background: var(--border); color: var(--text); }
 body.dark .tab-bar { background: var(--card); }
+
+/* ===== Themes ===== */
+body.theme-mint {
+  --primary: #06B6A2; --primary-light: #4DD9C9;
+  --baby-blue: #4DD9C9; --baby-pink: #FFB4A2;
+  --shadow: 0 4px 15px rgba(6,182,162,0.15);
+}
+body.theme-purple {
+  --primary: #8B5CF6; --primary-light: #A78BFA;
+  --baby-blue: #A78BFA; --baby-pink: #F472B6;
+  --shadow: 0 4px 15px rgba(139,92,246,0.15);
+}
+body.theme-coral {
+  --primary: #FF6B6B; --primary-light: #FF8E8E;
+  --baby-blue: #FFA5A5; --baby-pink: #FFD3A5;
+  --shadow: 0 4px 15px rgba(255,107,107,0.15);
+}
+body.theme-neutral {
+  --primary: #64748B; --primary-light: #94A3B8;
+  --baby-blue: #94A3B8; --baby-pink: #C7B7A3;
+  --shadow: 0 4px 15px rgba(100,116,139,0.15);
+}
+body.theme-sunny {
+  --primary: #F59E0B; --primary-light: #FBBF24;
+  --baby-blue: #FBBF24; --baby-pink: #F472B6;
+  --shadow: 0 4px 15px rgba(245,158,11,0.15);
+}
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: var(--bg);
@@ -1109,6 +1136,66 @@ body.dark .glance-item { background: rgba(255,255,255,0.04); }
   width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
 }
 
+/* ===== Theme picker ===== */
+.theme-picker { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.theme-btn {
+  padding: 14px 6px; border: 3px solid transparent; border-radius: 12px;
+  color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+  transition: transform 0.15s;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.theme-btn:hover { transform: translateY(-2px); }
+.theme-btn.active { border-color: #fff; box-shadow: 0 0 0 3px var(--primary); }
+
+/* ===== PWA install banner ===== */
+.install-banner {
+  position: fixed; bottom: 90px; left: 12px; right: 12px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: #fff; padding: 14px 16px; border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  display: none; align-items: center; gap: 12px;
+  z-index: 200;
+  animation: slideUpBanner 0.3s ease-out;
+}
+.install-banner.show { display: flex; }
+@keyframes slideUpBanner { from { transform: translateY(100%); opacity: 0; } to { transform: none; opacity: 1; } }
+.install-banner-icon { font-size: 2rem; }
+.install-banner-body { flex: 1; }
+.install-banner-title { font-weight: 700; font-size: 0.95rem; }
+.install-banner-desc { font-size: 0.78rem; opacity: 0.9; margin-top: 2px; }
+.install-banner-btn {
+  padding: 8px 14px; border: none; border-radius: 10px;
+  background: rgba(255,255,255,0.9); color: var(--primary);
+  font-weight: 700; cursor: pointer; font-size: 0.85rem;
+}
+.install-banner-close {
+  background: none; border: none; color: #fff; font-size: 1.4rem;
+  cursor: pointer; padding: 4px; opacity: 0.8;
+}
+
+/* ===== AI Chat ===== */
+.ai-chat-messages {
+  min-height: 200px; max-height: 400px; overflow-y: auto;
+  padding: 12px; background: var(--input-bg, #fafafa);
+  border-radius: 12px; margin-bottom: 8px;
+}
+.ai-msg {
+  padding: 10px 14px; border-radius: 14px; margin-bottom: 8px;
+  max-width: 85%; font-size: 0.9rem; line-height: 1.4;
+  white-space: pre-wrap; word-wrap: break-word;
+}
+.ai-msg.user { background: var(--primary); color: #fff; margin-left: auto; }
+.ai-msg.assistant { background: var(--card, #fff); border: 1px solid #ddd; }
+.ai-msg.system { background: rgba(255,193,7,0.15); font-size: 0.75rem; color: var(--text-light,#666); text-align: center; }
+.ai-typing { font-style: italic; opacity: 0.7; }
+body.dark .ai-chat-messages { background: rgba(255,255,255,0.04); }
+body.dark .ai-msg.assistant { background: var(--card-alt, #2A2D52); border-color: #444; color: #eee; }
+.ai-disclaimer {
+  font-size: 0.72rem; color: var(--text-light, #888);
+  padding: 8px 12px; background: rgba(255,193,7,0.1);
+  border-radius: 8px; margin-bottom: 8px;
+}
+
 /* ===== Stats bars ===== */
 .stats-week-grid {
   display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
@@ -1235,6 +1322,17 @@ body.dark .stats-bar { background: rgba(116,185,255,0.1); }
 .emoji-pick.selected { border-color: var(--baby-blue, #74B9FF); background: rgba(116,185,255,0.15); }
 body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
 </style>
+
+<!-- PWA INSTALL BANNER -->
+<div class="install-banner" id="installBanner">
+  <span class="install-banner-icon">📱</span>
+  <div class="install-banner-body">
+    <div class="install-banner-title">Instala Baby Tracker</div>
+    <div class="install-banner-desc">Acceso rápido desde tu pantalla de inicio</div>
+  </div>
+  <button class="install-banner-btn" id="installBtn">Instalar</button>
+  <button class="install-banner-close" id="installClose" aria-label="Cerrar">✕</button>
+</div>
 
 <!-- ===== RESET PASSWORD MODAL ===== -->
 <div class="auth-overlay" id="resetOverlay">
@@ -1766,6 +1864,12 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
   </div>
 
   <div class="card">
+    <h3>📧 Resumen semanal</h3>
+    <p style="font-size:0.82em;color:var(--text-light);margin-bottom:12px">Recibe un email con el resumen de la semana (sueño, tomas, pañales).</p>
+    <button class="btn btn-primary btn-small" onclick="sendDigest()">Enviarme el resumen ahora</button>
+  </div>
+
+  <div class="card">
     <h3>🔔 Notificaciones</h3>
     <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Recibe recordatorios de citas próximas y medicinas activas.</p>
     <button class="btn btn-primary btn-small" onclick="Notify.requestPermission().then(ok => { if (ok) Notify.startPolling(); })">Activar notificaciones</button>
@@ -1832,7 +1936,40 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
 
   <div class="card">
     <h3>🎨 Apariencia</h3>
-    <button class="btn btn-primary btn-small" onclick="toggleDarkMode()" id="darkToggleBtn">🌙 Activar modo oscuro</button>
+    <div style="margin-bottom:12px">
+      <button class="btn btn-primary btn-small" onclick="toggleDarkMode()" id="darkToggleBtn">🌙 Activar modo oscuro</button>
+    </div>
+    <div style="margin-bottom:8px;font-size:0.85em;color:var(--text-light)">Color de la app:</div>
+    <div class="theme-picker" id="themePicker">
+      <button class="theme-btn" data-theme="" style="background:linear-gradient(135deg,#6C63FF,#8B83FF)" onclick="Themes.set('')">Baby</button>
+      <button class="theme-btn" data-theme="mint" style="background:linear-gradient(135deg,#06B6A2,#4DD9C9)" onclick="Themes.set('mint')">Menta</button>
+      <button class="theme-btn" data-theme="purple" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA)" onclick="Themes.set('purple')">Púrpura</button>
+      <button class="theme-btn" data-theme="coral" style="background:linear-gradient(135deg,#FF6B6B,#FF8E8E)" onclick="Themes.set('coral')">Coral</button>
+      <button class="theme-btn" data-theme="sunny" style="background:linear-gradient(135deg,#F59E0B,#FBBF24)" onclick="Themes.set('sunny')">Sol</button>
+      <button class="theme-btn" data-theme="neutral" style="background:linear-gradient(135deg,#64748B,#94A3B8)" onclick="Themes.set('neutral')">Neutro</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🤖 Pregúntale al pediatra AI</h3>
+    <p style="font-size:0.82em;color:var(--text-light);margin-bottom:12px">Chat para dudas de puericultura. No reemplaza a tu pediatra.</p>
+    <button class="btn btn-primary btn-small" onclick="AiChat.open()">Abrir chat</button>
+  </div>
+
+  <div class="auth-overlay" id="aiChatOverlay">
+    <div class="auth-modal" style="max-width:520px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h2 style="margin:0">🤖 Pediatra AI</h2>
+        <button class="btn btn-small" onclick="AiChat.clear()" title="Borrar historial">🗑️</button>
+      </div>
+      <div class="ai-disclaimer">⚠️ Guía informativa. Ante síntomas graves o dudas serias, contacta a tu pediatra.</div>
+      <div class="ai-chat-messages" id="aiChatMessages"></div>
+      <form onsubmit="event.preventDefault();AiChat.send()" style="display:flex;gap:6px">
+        <input type="text" id="aiChatInput" placeholder="Ej: ¿Cuánto debe dormir a los 3 meses?" style="flex:1;padding:10px;font-size:0.95rem;border:1px solid #ddd;border-radius:10px;background:var(--input-bg,#fafafa);color:var(--text,#222)">
+        <button type="submit" id="aiChatSend" class="btn btn-primary" style="padding:10px 16px">➤</button>
+      </form>
+      <div class="auth-offline"><button type="button" onclick="AiChat.close()">Cerrar</button></div>
+    </div>
   </div>
 
   <div class="card">
@@ -3752,6 +3889,185 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+// ===== THEMES =====
+const Themes = (() => {
+  const THEMES = ['', 'mint', 'purple', 'coral', 'sunny', 'neutral'];
+  function set(name) {
+    // Remove all theme classes
+    THEMES.forEach(t => { if (t) document.body.classList.remove('theme-' + t); });
+    if (name) document.body.classList.add('theme-' + name);
+    localStorage.setItem('theme', name);
+    refresh();
+  }
+  function refresh() {
+    const current = localStorage.getItem('theme') || '';
+    document.querySelectorAll('#themePicker .theme-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.theme === current);
+    });
+  }
+  function apply() {
+    const saved = localStorage.getItem('theme') || '';
+    if (saved) document.body.classList.add('theme-' + saved);
+  }
+  return { set, refresh, apply };
+})();
+
+// ===== PWA INSTALL =====
+const InstallPWA = (() => {
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    maybeShowBanner();
+  });
+
+  function isIOSStandalone() {
+    return window.navigator.standalone === true;
+  }
+  function isInstalled() {
+    return window.matchMedia('(display-mode: standalone)').matches || isIOSStandalone();
+  }
+  function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+  function dismissed() {
+    const t = localStorage.getItem('install_dismissed');
+    if (!t) return false;
+    return (Date.now() - parseInt(t, 10)) < 7 * 86400000; // 7 días
+  }
+  function maybeShowBanner() {
+    if (isInstalled() || dismissed()) return;
+    const banner = document.getElementById('installBanner');
+    if (!banner) return;
+    // Solo mostrar si tiene prompt (Android/Chrome) o iOS (con instrucciones)
+    if (deferredPrompt || isIOS()) {
+      setTimeout(() => banner.classList.add('show'), 3000);
+    }
+  }
+  function init() {
+    const banner = document.getElementById('installBanner');
+    const btn = document.getElementById('installBtn');
+    const close = document.getElementById('installClose');
+    if (!banner) return;
+    btn?.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') banner.classList.remove('show');
+        deferredPrompt = null;
+      } else if (isIOS()) {
+        alert('En Safari:\n1. Toca el botón compartir 􀈂\n2. Elige "Añadir a pantalla de inicio"');
+      }
+    });
+    close?.addEventListener('click', () => {
+      banner.classList.remove('show');
+      localStorage.setItem('install_dismissed', Date.now().toString());
+    });
+    maybeShowBanner();
+  }
+  return { init, isInstalled };
+})();
+
+// ===== AI PEDIATRIC CHAT =====
+const AiChat = (() => {
+  const HISTORY_KEY = 'ai_chat_history';
+  function history() { return DB.get(HISTORY_KEY) || []; }
+  function saveHistory(h) { DB.set(HISTORY_KEY, h.slice(-20)); } // últimos 20 mensajes
+
+  function open() {
+    const overlay = document.getElementById('aiChatOverlay');
+    if (!overlay) return;
+    overlay.classList.add('show');
+    render();
+    setTimeout(() => document.getElementById('aiChatInput')?.focus(), 200);
+  }
+  function close() { document.getElementById('aiChatOverlay')?.classList.remove('show'); }
+  function clear() {
+    if (!confirm('¿Borrar historial del chat?')) return;
+    saveHistory([]);
+    render();
+  }
+
+  function render() {
+    const box = document.getElementById('aiChatMessages');
+    if (!box) return;
+    const h = history();
+    if (h.length === 0) {
+      box.innerHTML = '<div class="ai-msg system">👋 Soy tu asistente de puericultura. Pregúntame sobre sueño, alimentación, desarrollo, síntomas comunes. Recuerda: no reemplazo a tu pediatra.</div>';
+      return;
+    }
+    box.innerHTML = h.map(m => `<div class="ai-msg ${m.role}">${escapeHTML(m.content)}</div>`).join('');
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async function send() {
+    const input = document.getElementById('aiChatInput');
+    const submit = document.getElementById('aiChatSend');
+    if (!input || !input.value.trim()) return;
+    const text = input.value.trim();
+    input.value = '';
+    const h = history();
+    h.push({ role: 'user', content: text });
+    saveHistory(h);
+    render();
+    submit.disabled = true;
+
+    // Agregar mensaje typing
+    const box = document.getElementById('aiChatMessages');
+    const typing = document.createElement('div');
+    typing.className = 'ai-msg assistant ai-typing';
+    typing.textContent = 'Pensando...';
+    box.appendChild(typing);
+    box.scrollTop = box.scrollHeight;
+
+    try {
+      // Contexto del bebé
+      const info = DB.get('info') || {};
+      const ageM = Milestones.babyAgeMonths();
+      const context = info.birth
+        ? `Contexto: bebé ${info.name || ''}, ${ageM !== null ? ageM + ' meses' : 'edad desconocida'}, ${info.sex === 'girl' ? 'niña' : info.sex === 'boy' ? 'niño' : ''}.`
+        : '';
+
+      const r = await fetch(new URL('api/ai/chat', location.href), {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: history().map(m => ({ role: m.role, content: m.content })),
+          baby_context: context,
+        }),
+      });
+      typing.remove();
+      const j = await r.json();
+      if (r.ok && j.reply) {
+        const h2 = history();
+        h2.push({ role: 'assistant', content: j.reply });
+        saveHistory(h2);
+        render();
+      } else {
+        const errMsg = j.error === 'not_configured'
+          ? '⚠️ AI chat no está configurado. El admin debe agregar ANTHROPIC_API_KEY en config.php.'
+          : '⚠️ Error: ' + (j.error || 'no se pudo responder');
+        const h2 = history();
+        h2.push({ role: 'assistant', content: errMsg });
+        saveHistory(h2);
+        render();
+      }
+    } catch (e) {
+      typing.remove();
+      const h2 = history();
+      h2.push({ role: 'assistant', content: '⚠️ Sin conexión, intenta más tarde.' });
+      saveHistory(h2);
+      render();
+    } finally {
+      submit.disabled = false;
+    }
+  }
+
+  return { open, close, clear, send };
+})();
+
 // ===== ALBUM =====
 const Album = (() => {
   async function open() {
@@ -4538,7 +4854,7 @@ function switchTab(name, btn) {
   if (name === 'miles') Milestones.render();
   if (name === 'dash') { Weekly.render(); Glance.render(); }
   if (name === 'diary') { Diary.render(); Diary.startTicker(); }
-  if (name === 'settings') { Babies.refresh(); Security.refresh(); Security.listPasskeys(); Security.refreshEmailStatus(); }
+  if (name === 'settings') { Babies.refresh(); Security.refresh(); Security.listPasskeys(); Security.refreshEmailStatus(); Themes.refresh(); }
   window.scrollTo(0, 0);
 }
 
@@ -4744,6 +5060,15 @@ const Recipes = (() => {
 
 function closeRecDetail() {
   document.getElementById('recDetailOverlay')?.classList.remove('show');
+}
+
+async function sendDigest() {
+  const r = await fetch(new URL('api/digest/send', location.href), {
+    method: 'POST', credentials: 'include',
+  });
+  const j = await r.json();
+  if (r.ok && j.ok) Toast.show('Resumen enviado ✓ revisa tu email');
+  else Toast.show('Error: ' + (j.error || 'no se pudo enviar'));
 }
 
 // ===== BABIES MANAGER =====
@@ -5443,6 +5768,8 @@ function renderAll() {
 
 // Start
 applyDarkMode();
+Themes.apply();
+InstallPWA.init();
 (async () => {
   // Reset de contraseña PRIMERO (no requiere login)
   await checkResetInUrl();
