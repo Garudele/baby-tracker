@@ -82,21 +82,45 @@ body {
   background: white;
   box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
   z-index: 100;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 0 max(2px, env(safe-area-inset-bottom));
 }
+.tab-bar::-webkit-scrollbar { display: none; }
 .tab {
-  flex: 1;
-  padding: 8px 2px;
+  flex: 0 0 auto;
+  min-width: 64px;
+  padding: 8px 10px;
   text-align: center;
-  font-size: 0.65em;
+  font-size: 0.72em;
   color: var(--text-light);
   border: none;
   background: none;
   cursor: pointer;
-  transition: all 0.3s;
-  min-width: 0;
+  transition: all 0.2s;
+  border-radius: 12px;
+  position: relative;
 }
-.tab.active { color: var(--primary); font-weight: 700; }
-.tab-icon { font-size: 1.5em; display: block; margin-bottom: 2px; }
+.tab.active {
+  color: var(--primary);
+  font-weight: 700;
+  background: rgba(116,185,255,0.1);
+}
+.tab.active::after {
+  content: '';
+  position: absolute;
+  top: 4px; left: 50%; transform: translateX(-50%);
+  width: 20px; height: 3px; border-radius: 2px;
+  background: var(--primary);
+}
+.tab-icon { font-size: 1.4em; display: block; margin-bottom: 2px; margin-top: 4px; }
+body.dark .tab.active { background: rgba(116,185,255,0.18); }
+@media (min-width: 600px) {
+  .tab-bar { justify-content: center; overflow-x: visible; }
+  .tab { min-width: 76px; }
+}
 
 /* Sections */
 .section { display: none; padding: 15px; }
@@ -849,9 +873,149 @@ body.dark .rec-card { background: #2b2b3a; border-color: rgba(255,255,255,0.06);
 .baby-item-del:hover { opacity: 1; background: rgba(255,0,0,0.1); }
 body.dark .baby-item { background: rgba(255,255,255,0.05); }
 body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
+
+/* ===== Password strength meter ===== */
+.pw-meter { margin-top: 6px; }
+.pw-bar {
+  height: 5px; border-radius: 3px; background: rgba(0,0,0,0.1);
+  overflow: hidden; margin-bottom: 6px;
+}
+.pw-bar-fill {
+  height: 100%; width: 0%; transition: width 0.25s, background 0.25s;
+  border-radius: 3px;
+}
+.pw-checks {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px;
+  font-size: 0.72rem; color: var(--text-light, #888);
+}
+.pw-check { display: flex; align-items: center; gap: 4px; }
+.pw-check.met { color: #0a7; }
+.pw-check .pw-ico { display: inline-block; width: 14px; text-align: center; }
+body.dark .pw-bar { background: rgba(255,255,255,0.1); }
+
+/* Copy-link box */
+.copy-box {
+  display: flex; gap: 6px; margin-top: 8px;
+}
+.copy-box input {
+  flex: 1; padding: 8px 10px; font-size: 0.85rem;
+  border: 1px solid #ddd; border-radius: 8px;
+  font-family: monospace; background: var(--input-bg, #fafafa); color: var(--text, #222);
+  min-width: 0;
+}
+.copy-box button {
+  padding: 8px 14px; border: none; border-radius: 8px;
+  background: var(--baby-blue, #74B9FF); color: #fff; cursor: pointer;
+  font-size: 0.85rem; font-weight: 600;
+}
 </style>
 </head>
 <body>
+
+<!-- ===== ADD BABY MODAL ===== -->
+<div class="auth-overlay" id="addBabyOverlay">
+  <div class="auth-modal">
+    <h2>👶 Nuevo bebé</h2>
+    <p class="subtitle">Agrega los datos de tu bebé</p>
+    <form class="auth-form" id="addBabyForm" autocomplete="off">
+      <label>Nombre</label>
+      <input type="text" id="abName" required maxlength="100" placeholder="Ej: Annia">
+      <label>Fecha de nacimiento</label>
+      <input type="date" id="abBirth">
+      <label>Sexo</label>
+      <select id="abSex" style="width:100%;padding:0.7rem;font-size:1rem;border:1px solid #ddd;border-radius:10px;background:var(--input-bg,#fafafa);box-sizing:border-box">
+        <option value="girl">Niña 👧</option>
+        <option value="boy">Niño 👦</option>
+        <option value="other">Prefiero no decir</option>
+      </select>
+      <label>Emoji</label>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px" id="abEmojiRow">
+        <button type="button" class="emoji-pick" data-e="👶">👶</button>
+        <button type="button" class="emoji-pick" data-e="👧">👧</button>
+        <button type="button" class="emoji-pick" data-e="👦">👦</button>
+        <button type="button" class="emoji-pick" data-e="🍼">🍼</button>
+        <button type="button" class="emoji-pick" data-e="🧸">🧸</button>
+        <button type="button" class="emoji-pick" data-e="🎈">🎈</button>
+        <button type="button" class="emoji-pick" data-e="⭐">⭐</button>
+        <button type="button" class="emoji-pick" data-e="🌟">🌟</button>
+      </div>
+      <div class="auth-error" id="addBabyError"></div>
+      <button type="submit" class="auth-submit" id="addBabySubmit">Crear</button>
+    </form>
+    <div class="auth-offline"><button type="button" id="addBabyCancel">Cancelar</button></div>
+  </div>
+</div>
+
+<!-- ===== SHARE BABY MODAL ===== -->
+<div class="auth-overlay" id="shareBabyOverlay">
+  <div class="auth-modal">
+    <h2>🔗 Compartir bebé</h2>
+    <p class="subtitle" id="shareBabySub">Genera un link para invitar a alguien</p>
+    <form class="auth-form" id="shareBabyForm" autocomplete="off">
+      <label>Email del invitado (opcional)</label>
+      <input type="email" id="shEmail" placeholder="ej: esteban@ejemplo.com" inputmode="email">
+      <div class="auth-hint" style="display:block">Si dejas vacío, cualquiera con el link podrá aceptar.</div>
+      <label style="margin-top:1rem">Permisos</label>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid #ddd;border-radius:10px;cursor:pointer;font-weight:normal">
+          <input type="radio" name="shRole" value="viewer">
+          <span><strong>Solo ver</strong><br><small style="color:var(--text-light,#666)">Puede ver todo pero no editar</small></span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid var(--baby-blue,#74B9FF);border-radius:10px;cursor:pointer;font-weight:normal;background:rgba(116,185,255,0.08)">
+          <input type="radio" name="shRole" value="editor" checked>
+          <span><strong>Editar</strong><br><small style="color:var(--text-light,#666)">Puede agregar y modificar datos (recomendado para pareja)</small></span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:8px;padding:8px;border:1px solid #ddd;border-radius:10px;cursor:pointer;font-weight:normal">
+          <input type="radio" name="shRole" value="admin">
+          <span><strong>Admin</strong><br><small style="color:var(--text-light,#666)">Editar + invitar a otros</small></span>
+        </label>
+      </div>
+      <div class="auth-error" id="shError"></div>
+      <button type="submit" class="auth-submit" id="shSubmit">Generar link</button>
+    </form>
+    <div id="shResult" style="display:none;margin-top:12px">
+      <p style="font-size:0.85rem;color:var(--text-light,#666)">Link generado (válido 7 días):</p>
+      <div class="copy-box">
+        <input type="text" id="shLink" readonly onclick="this.select()">
+        <button type="button" id="shCopyBtn">Copiar</button>
+      </div>
+      <button type="button" id="shShareBtn" class="auth-submit" style="margin-top:10px;display:none">Compartir por WhatsApp</button>
+    </div>
+    <div class="auth-offline"><button type="button" id="shCancel">Cerrar</button></div>
+  </div>
+</div>
+
+<!-- ===== CHANGE PASSWORD MODAL ===== -->
+<div class="auth-overlay" id="chgPwOverlay">
+  <div class="auth-modal">
+    <h2>🔑 Cambiar contraseña</h2>
+    <form class="auth-form" id="chgPwForm" autocomplete="off">
+      <label>Contraseña actual</label>
+      <input type="password" id="chgPwOld" required autocomplete="current-password">
+      <label>Nueva contraseña</label>
+      <input type="password" id="chgPwNew" required minlength="12" autocomplete="new-password">
+      <div class="pw-meter">
+        <div class="pw-bar"><div class="pw-bar-fill" id="chgPwFill"></div></div>
+        <div class="pw-checks" id="chgPwChecks"></div>
+      </div>
+      <label>Confirmar</label>
+      <input type="password" id="chgPwConfirm" required minlength="12" autocomplete="new-password">
+      <div class="auth-error" id="chgPwError"></div>
+      <button type="submit" class="auth-submit">Cambiar</button>
+    </form>
+    <div class="auth-offline"><button type="button" id="chgPwCancel">Cancelar</button></div>
+  </div>
+</div>
+
+<style>
+.emoji-pick {
+  font-size: 1.5rem; padding: 8px 10px; border: 2px solid transparent;
+  border-radius: 10px; background: var(--input-bg, #fafafa); cursor: pointer;
+}
+.emoji-pick:hover { background: rgba(116,185,255,0.15); }
+.emoji-pick.selected { border-color: var(--baby-blue, #74B9FF); background: rgba(116,185,255,0.15); }
+body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
+</style>
 
 <!-- ===== RESET PASSWORD MODAL ===== -->
 <div class="auth-overlay" id="resetOverlay">
@@ -861,9 +1025,12 @@ body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
     <form class="auth-form" id="resetForm" autocomplete="off">
       <label for="resetPw1">Nueva contraseña</label>
       <input type="password" id="resetPw1" required minlength="12" autocomplete="new-password">
+      <div class="pw-meter">
+        <div class="pw-bar"><div class="pw-bar-fill" id="resetPwFill"></div></div>
+        <div class="pw-checks" id="resetPwChecks"></div>
+      </div>
       <label for="resetPw2">Confirmar</label>
       <input type="password" id="resetPw2" required minlength="12" autocomplete="new-password">
-      <div class="auth-hint" style="display:block">Mínimo 12 caracteres.</div>
       <div class="auth-error" id="resetError"></div>
       <button type="submit" class="auth-submit" id="resetSubmit">Guardar</button>
     </form>
@@ -888,7 +1055,10 @@ body.dark .baby-item:hover { background: rgba(116,185,255,0.15); }
         <input type="email" id="authEmail" name="email" required autocomplete="email" inputmode="email">
         <label for="authPassword">Contraseña</label>
         <input type="password" id="authPassword" name="password" required minlength="12" autocomplete="current-password">
-        <div class="auth-hint" id="authHint" style="display:none;">Mínimo 12 caracteres.</div>
+        <div id="authPwMeter" class="pw-meter" style="display:none;">
+          <div class="pw-bar"><div class="pw-bar-fill" id="authPwFill"></div></div>
+          <div class="pw-checks" id="authPwChecks"></div>
+        </div>
       </div>
       <div id="authTotpFields" style="display:none;">
         <label for="authTotp">Código de 6 dígitos</label>
@@ -1922,10 +2092,12 @@ const AuthUI = (() => {
 
   function setMode(m) {
     mode = m;
+    const meter = document.getElementById('authPwMeter');
     if (m === 'totp') {
       tabs.style.display = 'none';
       credFields.style.display = 'none';
       totpFields.style.display = '';
+      if (meter) meter.style.display = 'none';
       submit.textContent = 'Verificar';
       subtitle.textContent = 'Verificación en dos pasos';
       setTimeout(() => totpInput.focus(), 100);
@@ -1938,7 +2110,8 @@ const AuthUI = (() => {
       tabSignup.classList.toggle('active', m === 'signup');
       submit.textContent = m === 'login' ? 'Entrar' : 'Crear cuenta';
       pw.setAttribute('autocomplete', m === 'login' ? 'current-password' : 'new-password');
-      hint.style.display = m === 'signup' ? 'block' : 'none';
+      hint.style.display = 'none';
+      if (meter) meter.style.display = m === 'signup' ? 'block' : 'none';
     }
     errBox.classList.remove('show');
   }
@@ -3524,19 +3697,59 @@ const Babies = (() => {
     }
   }
 
-  async function share(id) {
-    const role = window.prompt('Rol para el invitado:\n- viewer (solo lectura)\n- editor (puede editar)\n- admin (puede invitar a otros)', 'editor');
-    if (!role || !['viewer','editor','admin'].includes(role)) return;
-    const email = window.prompt('Email del invitado (opcional — deja vacío para link universal):', '') || null;
-    const r = await api('babies/' + id + '/invite', { method: 'POST', body: JSON.stringify({ role, email }) });
-    if (!r.ok) { alert('Error al crear invitación'); return; }
-    const j = await r.json();
-    const link = location.origin + location.pathname + '?invite=' + j.token;
-    if (navigator.share) {
-      navigator.share({ title: 'Baby Tracker — Invitación', text: 'Te invito a ver a mi bebé', url: link }).catch(() => {});
-    } else {
-      window.prompt('Copia y comparte este link (válido 7 días):', link);
-    }
+  function share(id) {
+    const overlay = document.getElementById('shareBabyOverlay');
+    const form    = document.getElementById('shareBabyForm');
+    const emailEl = document.getElementById('shEmail');
+    const errBox  = document.getElementById('shError');
+    const result  = document.getElementById('shResult');
+    const linkEl  = document.getElementById('shLink');
+    const copyBtn = document.getElementById('shCopyBtn');
+    const shareBtn = document.getElementById('shShareBtn');
+    const cancel  = document.getElementById('shCancel');
+    const sub     = document.getElementById('shareBabySub');
+    const submit  = document.getElementById('shSubmit');
+
+    const baby = list.find(b => b.id == id);
+    sub.textContent = 'Compartir "' + (baby?.emoji || '👶') + ' ' + (baby?.name || 'bebé') + '"';
+    emailEl.value = '';
+    errBox.classList.remove('show');
+    result.style.display = 'none';
+    form.querySelectorAll('input[name="shRole"]').forEach(r => r.checked = r.value === 'editor');
+    submit.style.display = '';
+    overlay.classList.add('show');
+
+    cancel.onclick = () => overlay.classList.remove('show');
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      errBox.classList.remove('show');
+      const role = form.querySelector('input[name="shRole"]:checked')?.value || 'editor';
+      const email = emailEl.value.trim().toLowerCase() || null;
+      submit.disabled = true;
+      try {
+        const r = await api('babies/' + id + '/invite', { method: 'POST', body: JSON.stringify({ role, email }) });
+        if (!r.ok) { errBox.textContent = 'Error al crear invitación'; errBox.classList.add('show'); return; }
+        const j = await r.json();
+        const link = location.origin + location.pathname + '?invite=' + j.token;
+        linkEl.value = link;
+        result.style.display = 'block';
+        submit.style.display = 'none';
+        shareBtn.style.display = navigator.share ? 'block' : 'none';
+      } finally {
+        submit.disabled = false;
+      }
+    };
+    copyBtn.onclick = async () => {
+      linkEl.select();
+      try {
+        await navigator.clipboard.writeText(linkEl.value);
+        copyBtn.textContent = '¡Copiado!';
+        setTimeout(() => copyBtn.textContent = 'Copiar', 1600);
+      } catch { document.execCommand('copy'); }
+    };
+    shareBtn.onclick = () => {
+      if (navigator.share) navigator.share({ title: 'Baby Tracker', text: 'Te invito a ver a nuestro bebé', url: linkEl.value }).catch(() => {});
+    };
   }
 
   return { refresh, switch: switchTo, add, remove, share, get list() { return list; }, get activeId() { return activeId; } };
@@ -3599,6 +3812,83 @@ function checkResetInUrl() {
     };
   });
 }
+
+// ===== PASSWORD STRENGTH METER =====
+const PwMeter = (() => {
+  const CHECKS = [
+    { key: 'len',    label: '12+ caracteres', test: v => v.length >= 12 },
+    { key: 'upper',  label: 'Mayúscula (A-Z)', test: v => /[A-Z]/.test(v) },
+    { key: 'lower',  label: 'Minúscula (a-z)', test: v => /[a-z]/.test(v) },
+    { key: 'num',    label: 'Número (0-9)',    test: v => /\d/.test(v) },
+    { key: 'sym',    label: 'Símbolo',         test: v => /[^A-Za-z0-9]/.test(v) },
+  ];
+  function score(v) {
+    if (!v) return 0;
+    let s = 0;
+    for (const c of CHECKS) if (c.test(v)) s++;
+    if (v.length >= 16) s = Math.min(5, s + 0.5);
+    if (v.length >= 20) s = Math.min(5, s + 0.5);
+    return s;
+  }
+  function attach(input, fillEl, checksEl) {
+    if (!input || !fillEl || !checksEl) return;
+    if (input._pwMeter) return;
+    input._pwMeter = true;
+    // Render initial checks
+    checksEl.innerHTML = CHECKS.map(c => `
+      <span class="pw-check" data-c="${c.key}"><span class="pw-ico">○</span>${c.label}</span>
+    `).join('');
+    function update() {
+      const v = input.value;
+      let met = 0;
+      for (const c of CHECKS) {
+        const el = checksEl.querySelector(`[data-c="${c.key}"]`);
+        if (!el) continue;
+        if (c.test(v)) {
+          el.classList.add('met');
+          el.querySelector('.pw-ico').textContent = '✓';
+          met++;
+        } else {
+          el.classList.remove('met');
+          el.querySelector('.pw-ico').textContent = '○';
+        }
+      }
+      const s = score(v);
+      const pct = Math.round((s / 5) * 100);
+      fillEl.style.width = pct + '%';
+      let color = '#dc3545';       // rojo (weak)
+      if (s >= 3) color = '#ffc107'; // amarillo (medium)
+      if (s >= 4) color = '#28a745'; // verde (strong)
+      if (s >= 5) color = '#0a7';    // verde oscuro (very strong)
+      fillEl.style.background = color;
+    }
+    input.addEventListener('input', update);
+    update();
+  }
+  function isValid(v) {
+    return CHECKS.filter(c => c.test(v)).length >= 3 && v.length >= 12;
+  }
+  return { attach, score, isValid, CHECKS };
+})();
+
+// Attach a los meters existentes en cuanto el DOM esté listo
+setTimeout(() => {
+  PwMeter.attach(
+    document.getElementById('authPassword'),
+    document.getElementById('authPwFill'),
+    document.getElementById('authPwChecks')
+  );
+  PwMeter.attach(
+    document.getElementById('resetPw1'),
+    document.getElementById('resetPwFill'),
+    document.getElementById('resetPwChecks')
+  );
+  PwMeter.attach(
+    document.getElementById('chgPwNew'),
+    document.getElementById('chgPwFill'),
+    document.getElementById('chgPwChecks')
+  );
+}, 100);
 
 // Toast helper (para no depender de alert)
 const Toast = {
@@ -3800,17 +4090,35 @@ const Security = (() => {
     listPasskeys();
   }
 
-  async function changePassword() {
-    const oldPw = window.prompt('Contraseña actual:');
-    if (!oldPw) return;
-    const newPw = window.prompt('Nueva contraseña (mín 12 caracteres):');
-    if (!newPw) return;
-    if (newPw.length < 12) { alert('Mín 12 caracteres'); return; }
-    const confirmPw = window.prompt('Confírmala:');
-    if (newPw !== confirmPw) { alert('No coinciden'); return; }
-    const r = await api('password/change', { method: 'POST', body: JSON.stringify({ old_password: oldPw, new_password: newPw }) });
-    if (r.ok) alert('Contraseña actualizada ✓');
-    else alert('Error: contraseña actual incorrecta');
+  function changePassword() {
+    const overlay = document.getElementById('chgPwOverlay');
+    const form    = document.getElementById('chgPwForm');
+    const oldEl   = document.getElementById('chgPwOld');
+    const newEl   = document.getElementById('chgPwNew');
+    const confEl  = document.getElementById('chgPwConfirm');
+    const errBox  = document.getElementById('chgPwError');
+    const cancel  = document.getElementById('chgPwCancel');
+    oldEl.value = ''; newEl.value = ''; confEl.value = '';
+    errBox.classList.remove('show');
+    overlay.classList.add('show');
+    setTimeout(() => oldEl.focus(), 100);
+    cancel.onclick = () => overlay.classList.remove('show');
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      errBox.classList.remove('show');
+      if (newEl.value.length < 12) { errBox.textContent = 'Nueva contraseña mín 12 caracteres'; errBox.classList.add('show'); return; }
+      if (newEl.value !== confEl.value) { errBox.textContent = 'Las contraseñas no coinciden'; errBox.classList.add('show'); return; }
+      const r = await api('password/change', { method: 'POST', body: JSON.stringify({ old_password: oldEl.value, new_password: newEl.value }) });
+      if (r.ok) {
+        overlay.classList.remove('show');
+        Toast.show('Contraseña actualizada ✓');
+      } else {
+        errBox.textContent = 'Contraseña actual incorrecta';
+        errBox.classList.add('show');
+      }
+    };
+    // trigger meter update
+    newEl.dispatchEvent(new Event('input'));
   }
 
   async function verifyEmail() {
@@ -3857,14 +4165,40 @@ function closeTotpSetup() {
 }
 
 function promptAddBaby() {
-  const name = window.prompt('Nombre del bebé:');
-  if (!name || !name.trim()) return;
-  const birth = window.prompt('Fecha de nacimiento (YYYY-MM-DD, opcional):') || null;
-  const sex = window.prompt('Sexo (girl/boy/other):', 'other') || 'other';
-  const emoji = window.prompt('Emoji (opcional):', '👶') || '👶';
-  Babies.add(name.trim(), birth, sex, emoji).then(ok => {
-    if (!ok) alert('Error al crear bebé');
-  });
+  const overlay = document.getElementById('addBabyOverlay');
+  const form    = document.getElementById('addBabyForm');
+  const nameEl  = document.getElementById('abName');
+  const birthEl = document.getElementById('abBirth');
+  const sexEl   = document.getElementById('abSex');
+  const errBox  = document.getElementById('addBabyError');
+  const cancel  = document.getElementById('addBabyCancel');
+  const emojiRow = document.getElementById('abEmojiRow');
+  let emoji = '👶';
+  // wire emoji picker (once)
+  if (!emojiRow._wired) {
+    emojiRow._wired = true;
+    emojiRow.querySelectorAll('.emoji-pick').forEach(b => {
+      b.addEventListener('click', () => {
+        emojiRow.querySelectorAll('.emoji-pick').forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+        emoji = b.dataset.e;
+      });
+    });
+  }
+  emojiRow.querySelectorAll('.emoji-pick').forEach((b, i) => b.classList.toggle('selected', i === 0));
+  nameEl.value = ''; birthEl.value = ''; sexEl.value = 'girl';
+  errBox.classList.remove('show');
+  overlay.classList.add('show');
+  setTimeout(() => nameEl.focus(), 100);
+  cancel.onclick = () => overlay.classList.remove('show');
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    errBox.classList.remove('show');
+    if (!nameEl.value.trim()) { errBox.textContent = 'Escribe el nombre'; errBox.classList.add('show'); return; }
+    const ok = await Babies.add(nameEl.value.trim(), birthEl.value || null, sexEl.value, emoji);
+    if (ok) overlay.classList.remove('show');
+    else { errBox.textContent = 'Error al crear bebé'; errBox.classList.add('show'); }
+  };
 }
 
 // ===== EXPORT / IMPORT =====
