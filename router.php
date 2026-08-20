@@ -21,6 +21,12 @@ if (!$config) {
     exit;
 }
 
+// ---------- Security headers ------------------------------------------------
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: geolocation=(), microphone=(), camera=(self), publickey-credentials-get=(self), publickey-credentials-create=(self)');
+
 // ---------- CORS ------------------------------------------------------------
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($origin, $config['allowed_origins'], true)) {
@@ -340,6 +346,7 @@ try {
 
     // ---- Login 2do paso: TOTP -------------------------------------------
     if (($parts[0] ?? '') === 'login' && ($parts[1] ?? '') === 'totp' && $method === 'POST') {
+        if (is_ip_locked_out('login_totp', $loginMax, $loginWindow)) json_out(['error' => 'locked_out', 'retry_after' => $loginWindow], 429);
         if (empty($_SESSION['pending_totp_uid'])) json_out(['error' => 'no_pending_login'], 400);
         $uid = (int)$_SESSION['pending_totp_uid'];
         $body = json_body();
@@ -455,6 +462,8 @@ try {
         $u = $stmt->fetch();
         // Siempre 200 (evita user enumeration)
         if ($u) {
+            // Invalidar tokens previos sin usar del mismo user
+            db()->prepare("DELETE FROM password_resets WHERE user_id = ? AND used_at IS NULL")->execute([$u['id']]);
             $token = bin2hex(random_bytes(32));
             $ins = db()->prepare("INSERT INTO password_resets (token, user_id, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 1 HOUR))");
             $ins->execute([$token, $u['id']]);
@@ -922,5 +931,11 @@ try {
 
     json_out(['error' => 'not_found', 'path' => $path], 404);
 } catch (Throwable $e) {
-    json_out(['error' => 'server_error', 'detail' => $e->getMessage()], 500);
+    // No filtrar detalles de excepción en prod para evitar leak de info
+    // (nombres de tablas, paths, stack trace). Solo en dev/debug.
+    $debug = !empty($config['debug']);
+    error_log('[BabyTracker] ' . $e->getMessage() . ' @ ' . $e->getFile() . ':' . $e->getLine());
+    $resp = ['error' => 'server_error'];
+    if ($debug) $resp['detail'] = $e->getMessage();
+    json_out($resp, 500);
 }
