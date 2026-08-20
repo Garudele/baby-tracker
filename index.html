@@ -1055,6 +1055,78 @@ body.dark .miles-item.achieved { background: rgba(40,167,69,0.15); }
   transition: all 0.2s;
 }
 .onboard-dot.active { background: var(--baby-blue, #74B9FF); width: 24px; border-radius: 4px; }
+
+/* ===== Today at a glance ===== */
+.glance-card { padding: 14px !important; }
+.glance-title {
+  font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--text-light, #888); margin-bottom: 10px;
+}
+.glance-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;
+}
+.glance-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px; border-radius: 12px;
+  background: var(--input-bg, #fafafa);
+  cursor: pointer; transition: background 0.15s;
+}
+.glance-item:hover { background: rgba(116,185,255,0.08); }
+.glance-item .g-emoji { font-size: 1.5rem; }
+.glance-item .g-body { flex: 1; min-width: 0; }
+.glance-item .g-label { font-size: 0.72rem; color: var(--text-light, #888); }
+.glance-item .g-val { font-size: 0.9rem; font-weight: 700; color: var(--text, #222); }
+body.dark .glance-item { background: rgba(255,255,255,0.04); }
+
+/* ===== Empty state ===== */
+.empty-state {
+  text-align: center; padding: 2rem 1rem; color: var(--text-light, #888);
+}
+.empty-emoji { font-size: 3rem; margin-bottom: 8px; opacity: 0.8; }
+.empty-title { font-weight: 600; margin-bottom: 4px; color: var(--text, #444); }
+.empty-desc { font-size: 0.85rem; margin-bottom: 12px; }
+
+/* ===== Photo album ===== */
+.album-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;
+}
+@media (min-width: 600px) { .album-grid { grid-template-columns: repeat(5, 1fr); } }
+.album-tile {
+  aspect-ratio: 1; overflow: hidden; border-radius: 8px;
+  cursor: pointer; position: relative; background: #e0e0e0;
+}
+.album-tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.album-viewer {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+  z-index: 10000; display: none; align-items: center; justify-content: center;
+  padding: 1rem;
+}
+.album-viewer.show { display: flex; }
+.album-viewer img { max-width: 100%; max-height: 90vh; border-radius: 8px; }
+.album-close {
+  position: absolute; top: 20px; right: 20px;
+  background: rgba(255,255,255,0.2); border: none; color: #fff;
+  width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; cursor: pointer;
+}
+
+/* ===== Stats bars ===== */
+.stats-week-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+  align-items: end; margin-top: 8px;
+}
+.stats-day { text-align: center; }
+.stats-bar {
+  height: 60px; background: rgba(116,185,255,0.15); border-radius: 4px 4px 0 0;
+  position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;
+}
+.stats-bar-fill {
+  background: linear-gradient(180deg, #74B9FF, #A29BFE);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.4s;
+}
+.stats-day-label { font-size: 0.68rem; color: var(--text-light, #888); margin-top: 4px; }
+.stats-day-val { font-size: 0.7rem; font-weight: 600; margin-top: 2px; }
+body.dark .stats-bar { background: rgba(116,185,255,0.1); }
 </style>
 </head>
 <body>
@@ -1276,6 +1348,7 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
 <!-- DASHBOARD -->
 <div class="section" id="dashSection">
   <div id="weeklyCard"></div>
+  <div id="todayGlance"></div>
   <div id="remindersCard"></div>
 
   <div class="growth-summary">
@@ -1530,6 +1603,7 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
 <!-- DIARIO -->
 <div class="section" id="diarySection">
   <div class="card diary-summary" id="diarySummary"></div>
+  <div id="diaryStats"></div>
 
   <div class="card">
     <h3>⚡ Registro rápido</h3>
@@ -1759,6 +1833,26 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
   <div class="card">
     <h3>🎨 Apariencia</h3>
     <button class="btn btn-primary btn-small" onclick="toggleDarkMode()" id="darkToggleBtn">🌙 Activar modo oscuro</button>
+  </div>
+
+  <div class="card">
+    <h3>📸 Álbum de fotos</h3>
+    <p style="font-size:0.82em;color:var(--text-light);margin-bottom:12px">Todas las fotos que has adjuntado (estudios, etc.).</p>
+    <button class="btn btn-primary btn-small" onclick="Album.open()">Ver álbum</button>
+  </div>
+
+  <div class="album-viewer" id="albumViewer" onclick="Album.closeViewer()">
+    <button class="album-close" onclick="event.stopPropagation();Album.closeViewer()">✕</button>
+    <img id="albumViewerImg" src="" alt="">
+  </div>
+
+  <div class="auth-overlay" id="albumOverlay">
+    <div class="auth-modal" style="max-width:640px">
+      <h2>📸 Álbum</h2>
+      <div id="albumCount" style="font-size:0.85rem;color:var(--text-light,#888);margin-bottom:12px"></div>
+      <div id="albumGrid" class="album-grid"></div>
+      <div class="auth-offline"><button type="button" onclick="Album.close()">Cerrar</button></div>
+    </div>
   </div>
 
   <div class="card">
@@ -2701,7 +2795,7 @@ function editGrowth(id) {
 function renderGrowth() {
   const list = (DB.get('growth') || []).sort((a, b) => b.date.localeCompare(a.date));
   const el = document.getElementById('growthList');
-  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📏</div>Sin registros aún</div>'; return; }
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-emoji">📏</div><div class="empty-title">Sin medidas aún</div><div class="empty-desc">Registra la primera medida usando el formulario de arriba.<br>Verás las curvas de crecimiento de la OMS.</div></div>'; return; }
   el.innerHTML = list.map(r => `
     <div class="record">
       <button class="edit-btn" onclick="editGrowth(${r.id})">✏️</button>
@@ -2769,7 +2863,7 @@ function editMedicine(id) {
 function renderMedicines() {
   const list = (DB.get('medicines') || []).sort((a, b) => b.date.localeCompare(a.date));
   const el = document.getElementById('medList');
-  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">💊</div>Sin medicinas registradas</div>'; return; }
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-emoji">💊</div><div class="empty-title">Sin medicinas registradas</div><div class="empty-desc">Cuando le des un medicamento, regístralo arriba para llevar historial.</div></div>'; return; }
   el.innerHTML = list.map(r => `
     <div class="record medicine">
       <button class="edit-btn" onclick="editMedicine(${r.id})">✏️</button>
@@ -2844,7 +2938,7 @@ function renderStudies() {
   };
   const list = (DB.get('studies') || []).sort((a, b) => b.date.localeCompare(a.date));
   const el = document.getElementById('studyList');
-  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🔬</div>Sin estudios registrados</div>'; return; }
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-emoji">🔬</div><div class="empty-title">Sin estudios aún</div><div class="empty-desc">Agrega laboratorios o rayos X con fotos adjuntas para tenerlos a la mano en las citas.</div></div>'; return; }
   el.innerHTML = list.map(r => `
     <div class="record study">
       <button class="edit-btn" onclick="editStudy(${r.id})">✏️</button>
@@ -2948,7 +3042,7 @@ function renderRecentRecords() {
 
   const el = document.getElementById('recentRecords');
   const recent = all.slice(0, 5);
-  if (!recent.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📝</div>Agrega tu primer registro</div>'; return; }
+  if (!recent.length) { el.innerHTML = '<div class="empty-state"><div class="empty-emoji">📝</div><div class="empty-title">Sin registros recientes</div><div class="empty-desc">Empieza registrando en el tab 📔 Diario o agrega una medida en 📏 Medidas.</div></div>'; return; }
 
   el.innerHTML = recent.map(r => {
     let text = '';
@@ -3159,7 +3253,7 @@ function editAppt(id) {
 function renderAppointments() {
   const list = (DB.get('appointments') || []).sort((a, b) => a.date.localeCompare(b.date));
   const el = document.getElementById('apptList');
-  if (!list.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📅</div>Sin citas agendadas</div>'; return; }
+  if (!list.length) { el.innerHTML = '<div class="empty-state"><div class="empty-emoji">📅</div><div class="empty-title">Sin citas agendadas</div><div class="empty-desc">Agenda la próxima cita con el pediatra para recibir recordatorio.</div></div>'; return; }
   const today = new Date().toISOString().split('T')[0];
   el.innerHTML = list.map(r => {
     const isPast = r.date < today;
@@ -3657,6 +3751,123 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
 }
+
+// ===== ALBUM =====
+const Album = (() => {
+  async function open() {
+    const overlay = document.getElementById('albumOverlay');
+    const grid = document.getElementById('albumGrid');
+    const count = document.getElementById('albumCount');
+    grid.innerHTML = '<div class="empty-state">Cargando...</div>';
+    overlay.classList.add('show');
+    try {
+      const store = await PhotoDB._localPut ? await (async () => {
+        const db = await new Promise((res, rej) => {
+          const req = indexedDB.open('baby-photos', 2);
+          req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error);
+        });
+        return db.transaction('photos', 'readonly').objectStore('photos');
+      })() : null;
+      const all = await new Promise((res) => {
+        if (!store) return res([]);
+        const items = [];
+        const req = store.openCursor();
+        req.onsuccess = (e) => {
+          const c = e.target.result;
+          if (c) { items.push(c.value); c.continue(); } else res(items);
+        };
+        req.onerror = () => res([]);
+      });
+      all.sort((a,b) => (b.ts||0) - (a.ts||0));
+      count.textContent = all.length + ' foto' + (all.length === 1 ? '' : 's');
+      if (all.length === 0) {
+        grid.innerHTML = '<div class="empty-state"><div class="empty-emoji">📷</div><div class="empty-title">Sin fotos aún</div><div class="empty-desc">Adjunta fotos desde Estudios para verlas aquí.</div></div>';
+        return;
+      }
+      grid.innerHTML = all.map(p => {
+        const url = URL.createObjectURL(p.blob);
+        return `<div class="album-tile" onclick="Album.view('${p.id}')"><img src="${url}" alt="foto" loading="lazy"></div>`;
+      }).join('');
+      window._albumPhotos = all;
+    } catch (e) {
+      grid.innerHTML = '<div class="empty-state">Error cargando fotos</div>';
+    }
+  }
+  function close() { document.getElementById('albumOverlay').classList.remove('show'); }
+  function view(id) {
+    const p = (window._albumPhotos || []).find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('albumViewerImg').src = URL.createObjectURL(p.blob);
+    document.getElementById('albumViewer').classList.add('show');
+  }
+  function closeViewer() { document.getElementById('albumViewer').classList.remove('show'); }
+  return { open, close, view, closeViewer };
+})();
+
+// ===== TODAY AT A GLANCE =====
+const Glance = (() => {
+  function fmtRel(ts) {
+    const d = Date.now() - ts;
+    if (d < 60000) return 'ahora';
+    const m = Math.floor(d/60000);
+    if (m < 60) return 'hace ' + m + 'm';
+    const h = Math.floor(m/60);
+    if (h < 24) return 'hace ' + h + 'h';
+    return 'hace ' + Math.floor(h/24) + 'd';
+  }
+  function render() {
+    const box = document.getElementById('todayGlance');
+    if (!box) return;
+    const events = DB.get('events') || [];
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayEvents = events.filter(e => (e.ts_start || e.ts) >= today.getTime());
+
+    const lastFeed = events.filter(e => e.type === 'feed').sort((a,b) => (b.ts_start||b.ts) - (a.ts_start||a.ts))[0];
+    const lastSleep = events.filter(e => e.type === 'sleep').sort((a,b) => (b.ts_start||b.ts) - (a.ts_start||a.ts))[0];
+    const todayDiapers = todayEvents.filter(e => e.type === 'diaper').length;
+
+    const appts = (DB.get('appointments') || []).filter(a => a.date && new Date(a.date + 'T' + (a.time||'23:59')) >= new Date())
+      .sort((a,b) => new Date(a.date) - new Date(b.date));
+    const nextAppt = appts[0];
+
+    box.innerHTML = `
+      <div class="card glance-card">
+        <div class="glance-title">📊 Hoy a un vistazo</div>
+        <div class="glance-grid">
+          <div class="glance-item" onclick="switchTab('diary')">
+            <span class="g-emoji">🍼</span>
+            <div class="g-body">
+              <div class="g-label">Última toma</div>
+              <div class="g-val">${lastFeed ? fmtRel(lastFeed.ts_start||lastFeed.ts) : 'Sin registro'}</div>
+            </div>
+          </div>
+          <div class="glance-item" onclick="switchTab('diary')">
+            <span class="g-emoji">😴</span>
+            <div class="g-body">
+              <div class="g-label">Último sueño</div>
+              <div class="g-val">${lastSleep ? fmtRel(lastSleep.ts_start||lastSleep.ts) : 'Sin registro'}</div>
+            </div>
+          </div>
+          <div class="glance-item" onclick="switchTab('diary')">
+            <span class="g-emoji">👶</span>
+            <div class="g-body">
+              <div class="g-label">Pañales hoy</div>
+              <div class="g-val">${todayDiapers}</div>
+            </div>
+          </div>
+          <div class="glance-item" onclick="switchTab('appt')">
+            <span class="g-emoji">🏥</span>
+            <div class="g-body">
+              <div class="g-label">Próxima cita</div>
+              <div class="g-val">${nextAppt ? new Date(nextAppt.date).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' }) : 'Ninguna'}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  return { render };
+})();
 
 // ===== MILESTONES =====
 const Milestones = (() => {
@@ -4241,11 +4452,59 @@ const Diary = (() => {
     if (diaperSub) diaperSub.textContent = diapers[0] ? fmtRelative(diapers[0].ts_start||diapers[0].ts) : '—';
   }
 
+  function renderWeekStats() {
+    const box = document.getElementById('diaryStats');
+    if (!box) return;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const dayEvents = events().filter(e => sameDay(e.ts_start || e.ts, d));
+      const sleepMs = dayEvents.filter(e => e.type === 'sleep' && e.ts_end).reduce((s,e) => s + (e.ts_end - e.ts_start), 0);
+      const feeds = dayEvents.filter(e => e.type === 'feed').length;
+      days.push({ d, sleepMs, feeds });
+    }
+    const maxSleep = Math.max(...days.map(x => x.sleepMs), 3600000);
+    const maxFeeds = Math.max(...days.map(x => x.feeds), 1);
+    const dayNames = ['D','L','M','X','J','V','S'];
+    box.innerHTML = `
+      <div class="card">
+        <h3 style="margin-bottom:6px">📊 Últimos 7 días</h3>
+        <div style="font-size:0.75rem;color:var(--text-light,#888);margin-bottom:8px">😴 Sueño total por día</div>
+        <div class="stats-week-grid">
+          ${days.map(x => `
+            <div class="stats-day">
+              <div class="stats-bar">
+                <div class="stats-bar-fill" style="height:${(x.sleepMs/maxSleep)*100}%"></div>
+              </div>
+              <div class="stats-day-label">${dayNames[x.d.getDay()]}</div>
+              <div class="stats-day-val">${x.sleepMs>0 ? fmtDurationMs(x.sleepMs) : '—'}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="font-size:0.75rem;color:var(--text-light,#888);margin:14px 0 8px">🍼 Tomas por día</div>
+        <div class="stats-week-grid">
+          ${days.map(x => `
+            <div class="stats-day">
+              <div class="stats-bar">
+                <div class="stats-bar-fill" style="height:${(x.feeds/maxFeeds)*100}%;background:linear-gradient(180deg,#FF9A9E,#FBC2EB)"></div>
+              </div>
+              <div class="stats-day-label">${dayNames[x.d.getDay()]}</div>
+              <div class="stats-day-val">${x.feeds || '—'}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
   function render() {
     document.getElementById('diaryDate').textContent = fmtDate(currentDate);
     const today = new Date(); today.setHours(0,0,0,0);
     document.getElementById('diaryNext').disabled = currentDate.getTime() >= today.getTime();
     renderSummary();
+    renderWeekStats();
     renderTimeline();
     renderQuickButtons();
   }
@@ -4277,7 +4536,7 @@ function switchTab(name, btn) {
   if (name === 'act') renderActivities();
   if (name === 'rec') Recipes.render();
   if (name === 'miles') Milestones.render();
-  if (name === 'dash') Weekly.render();
+  if (name === 'dash') { Weekly.render(); Glance.render(); }
   if (name === 'diary') { Diary.render(); Diary.startTicker(); }
   if (name === 'settings') { Babies.refresh(); Security.refresh(); Security.listPasskeys(); Security.refreshEmailStatus(); }
   window.scrollTo(0, 0);
@@ -5198,8 +5457,9 @@ applyDarkMode();
   }
   initApp();
   checkInvitationInUrl();
-  // Weekly card en dashboard
+  // Weekly card + glance en dashboard
   Weekly.render();
+  Glance.render();
   // Onboarding si nunca lo hizo
   setTimeout(() => Onboarding.show(), 500);
   // Notificaciones si están activadas
