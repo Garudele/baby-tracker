@@ -754,21 +754,42 @@ body.dark .act-check { background: var(--card-alt); }
   display: inline-block;
 }
 
-/* ===== Auth Modal ===== */
+/* ===== Auth Modal / Bottom Sheet ===== */
 .auth-overlay {
   position: fixed; inset: 0; z-index: 9999;
-  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
-  display: none; align-items: center; justify-content: center; padding: 1rem;
+  background: rgba(15,17,26,0.55); backdrop-filter: blur(6px);
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeIn 0.2s var(--ease-out);
 }
 .auth-overlay.show { display: flex; }
 .auth-modal {
-  background: var(--card-bg, #fff);
+  background: var(--card, #fff);
   color: var(--text, #222);
-  border-radius: 18px;
-  max-width: 400px; width: 100%;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-  padding: 1.5rem;
-  animation: authIn 0.25s ease-out;
+  border-radius: 20px 20px 0 0;
+  max-width: 480px; width: 100%;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+  padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom));
+  max-height: 88vh; overflow-y: auto;
+  position: relative;
+  animation: sheetUp 0.32s var(--ease-spring);
+}
+.auth-modal::before {
+  content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  width: 40px; height: 4px; background: rgba(0,0,0,0.15); border-radius: 2px;
+}
+body.dark .auth-modal::before { background: rgba(255,255,255,0.2); }
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@media (min-width: 600px) {
+  .auth-overlay { align-items: center; padding: 1rem; }
+  .auth-modal { border-radius: 20px; max-width: 440px; animation: sheetIn 0.25s var(--ease-out); }
+  .auth-modal::before { display: none; }
+  @keyframes sheetIn { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
 }
 @keyframes authIn { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
 .auth-modal h2 { margin: 0 0 0.3rem; font-size: 1.4rem; text-align: center; }
@@ -1119,6 +1140,7 @@ body.dark .miles-item.achieved { background: rgba(40,167,69,0.15); }
 .onboard-slide { display: none; text-align: center; padding: 1rem; }
 .onboard-slide.active { display: block; animation: fadeIn 0.3s; }
 .onboard-emoji { font-size: 4rem; margin: 1rem 0; }
+.onboard-illustration { margin: 0.5rem auto; display: flex; justify-content: center; animation: bounceIn 0.5s var(--ease-spring); }
 .onboard-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; }
 .onboard-desc { color: var(--text-light, #666); margin-bottom: 1rem; }
 .onboard-nav {
@@ -3970,6 +3992,39 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+// ===== BOTTOM SHEET DRAG-TO-CLOSE =====
+document.addEventListener('touchstart', (e) => {
+  const modal = e.target.closest('.auth-modal');
+  if (!modal) return;
+  if (window.innerWidth >= 600) return; // solo mobile
+  // Solo si toca el drag handle o los primeros 60px del modal
+  const rect = modal.getBoundingClientRect();
+  const touchY = e.touches[0].clientY;
+  if (touchY - rect.top > 60) return;
+  modal._dragStart = touchY;
+  modal._dragging = true;
+  modal.style.transition = 'none';
+}, { passive: true });
+document.addEventListener('touchmove', (e) => {
+  const modal = e.target.closest('.auth-modal');
+  if (!modal || !modal._dragging) return;
+  const dy = e.touches[0].clientY - modal._dragStart;
+  if (dy > 0) modal.style.transform = `translateY(${dy}px)`;
+}, { passive: true });
+document.addEventListener('touchend', (e) => {
+  const modal = e.target.closest('.auth-modal');
+  if (!modal || !modal._dragging) return;
+  modal._dragging = false;
+  modal.style.transition = '';
+  const dy = e.changedTouches[0].clientY - modal._dragStart;
+  if (dy > 100) {
+    const overlay = modal.closest('.auth-overlay');
+    if (overlay) overlay.classList.remove('show');
+    Haptic.light();
+  }
+  modal.style.transform = '';
+}, { passive: true });
+
 // ===== HAPTIC FEEDBACK =====
 const Haptic = {
   light() { if (navigator.vibrate) navigator.vibrate(10); },
@@ -4542,13 +4597,76 @@ const Weekly = (() => {
 
 // ===== ONBOARDING =====
 const Onboarding = (() => {
+  // Ilustraciones SVG inline (originales, sin dependencias externas)
+  const ILL = {
+    welcome: `<svg viewBox="0 0 200 160" width="180" height="140" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB3D9"/><stop offset="1" stop-color="#B8E1FF"/></linearGradient></defs>
+      <ellipse cx="100" cy="140" rx="80" ry="10" fill="#00000010"/>
+      <circle cx="100" cy="90" r="55" fill="url(#g1)"/>
+      <circle cx="85" cy="85" r="5" fill="#2D3436"/>
+      <circle cx="115" cy="85" r="5" fill="#2D3436"/>
+      <path d="M85 105 Q100 118 115 105" stroke="#2D3436" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="70" cy="70" r="3" fill="#FF8AB5" opacity="0.6"/>
+      <circle cx="130" cy="70" r="3" fill="#FF8AB5" opacity="0.6"/>
+      <path d="M65 55 Q100 40 135 55" stroke="#FDCB6E" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </svg>`,
+    diary: `<svg viewBox="0 0 200 160" width="180" height="140" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="145" rx="70" ry="8" fill="#00000010"/>
+      <rect x="55" y="30" width="90" height="110" rx="8" fill="#74B9FF"/>
+      <rect x="60" y="35" width="80" height="100" rx="4" fill="#fff"/>
+      <line x1="70" y1="55" x2="130" y2="55" stroke="#E0E0E0" stroke-width="2"/>
+      <line x1="70" y1="70" x2="130" y2="70" stroke="#E0E0E0" stroke-width="2"/>
+      <line x1="70" y1="85" x2="120" y2="85" stroke="#E0E0E0" stroke-width="2"/>
+      <line x1="70" y1="100" x2="115" y2="100" stroke="#E0E0E0" stroke-width="2"/>
+      <line x1="70" y1="115" x2="125" y2="115" stroke="#E0E0E0" stroke-width="2"/>
+      <circle cx="145" cy="30" r="15" fill="#FD79A8"/>
+      <path d="M138 30 L143 35 L152 25" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`,
+    health: `<svg viewBox="0 0 200 160" width="180" height="140" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="145" rx="70" ry="8" fill="#00000010"/>
+      <path d="M100 130 L60 85 Q60 50 90 55 Q100 60 100 75 Q100 60 110 55 Q140 50 140 85 Z" fill="#FF6B6B"/>
+      <rect x="90" y="75" width="20" height="40" fill="#fff"/>
+      <rect x="80" y="85" width="40" height="20" fill="#fff"/>
+    </svg>`,
+    recipes: `<svg viewBox="0 0 200 160" width="180" height="140" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="145" rx="70" ry="8" fill="#00000010"/>
+      <ellipse cx="100" cy="90" rx="60" ry="25" fill="#F4D03F"/>
+      <ellipse cx="100" cy="85" rx="60" ry="25" fill="#F1C40F"/>
+      <circle cx="80" cy="82" r="8" fill="#E74C3C"/>
+      <circle cx="105" cy="80" r="7" fill="#27AE60"/>
+      <circle cx="120" cy="85" r="6" fill="#E67E22"/>
+      <path d="M40 90 Q45 105 60 100" stroke="#8B4513" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M160 90 Q155 105 140 100" stroke="#8B4513" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </svg>`,
+    share: `<svg viewBox="0 0 200 160" width="180" height="140" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="145" rx="70" ry="8" fill="#00000010"/>
+      <circle cx="60" cy="80" r="25" fill="#74B9FF"/>
+      <circle cx="60" cy="72" r="10" fill="#fff"/>
+      <path d="M45 95 Q60 85 75 95 L75 105 L45 105 Z" fill="#fff"/>
+      <circle cx="140" cy="80" r="25" fill="#FD79A8"/>
+      <circle cx="140" cy="72" r="10" fill="#fff"/>
+      <path d="M125 95 Q140 85 155 95 L155 105 L125 105 Z" fill="#fff"/>
+      <path d="M85 80 L115 80" stroke="#00B894" stroke-width="4" stroke-dasharray="4,4"/>
+      <circle cx="100" cy="80" r="10" fill="#00B894"/>
+      <path d="M95 80 L98 83 L105 76" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </svg>`,
+    done: `<svg viewBox="0 0 200 160" width="180" height="140" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="100" cy="145" rx="70" ry="8" fill="#00000010"/>
+      <circle cx="100" cy="80" r="55" fill="#00B894"/>
+      <path d="M75 80 L92 97 L128 60" stroke="#fff" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="40" cy="35" r="4" fill="#FDCB6E"/>
+      <circle cx="160" cy="35" r="4" fill="#FD79A8"/>
+      <circle cx="30" cy="100" r="3" fill="#74B9FF"/>
+      <circle cx="170" cy="110" r="3" fill="#FF6B6B"/>
+    </svg>`,
+  };
   const SLIDES = [
-    { emoji: '👶', title: '¡Bienvenido/a a Baby Tracker!', desc: 'Tu compañero para seguir el crecimiento y desarrollo de tu bebé.' },
-    { emoji: '📔', title: 'Registra el día a día', desc: 'Sueño, tomas, pañales, notas — todo con un toque desde el tab Diario.' },
-    { emoji: '📏', title: 'Salud completa', desc: 'Medidas con curvas OMS, vacunas del esquema mexicano, medicinas, citas y estudios.' },
-    { emoji: '🍽️', title: 'Recetas por edad', desc: '110 recetas mexicanas adaptadas por edad, con porciones de nutrientes.' },
-    { emoji: '👨‍👩‍👧', title: 'Comparte con tu pareja', desc: 'Invita a papá/mamá desde Ajustes > Mis Bebés. Verán los mismos datos.' },
-    { emoji: '🎉', title: '¡Listo!', desc: 'Empieza registrando la fecha de nacimiento de tu bebé en Ajustes.' },
+    { ill: ILL.welcome, title: '¡Bienvenido/a a Baby Tracker!', desc: 'Tu compañero para seguir el crecimiento y desarrollo de tu bebé.' },
+    { ill: ILL.diary, title: 'Registra el día a día', desc: 'Sueño, tomas, pañales, notas — todo con un toque desde el tab Diario.' },
+    { ill: ILL.health, title: 'Salud completa', desc: 'Medidas con curvas OMS, vacunas del esquema mexicano, medicinas, citas y estudios.' },
+    { ill: ILL.recipes, title: 'Recetas por edad', desc: '110 recetas mexicanas adaptadas por edad, con porciones de nutrientes.' },
+    { ill: ILL.share, title: 'Comparte con tu pareja', desc: 'Invita a papá/mamá desde Ajustes > Mis Bebés. Verán los mismos datos.' },
+    { ill: ILL.done, title: '¡Listo!', desc: 'Empieza registrando la fecha de nacimiento de tu bebé en Ajustes.' },
   ];
   let idx = 0;
 
@@ -4583,7 +4701,7 @@ const Onboarding = (() => {
     const s = SLIDES[idx];
     document.getElementById('onboardBody').innerHTML = `
       <div class="onboard-slide active">
-        <div class="onboard-emoji">${s.emoji}</div>
+        <div class="onboard-illustration">${s.ill || ''}</div>
         <div class="onboard-title">${s.title}</div>
         <div class="onboard-desc">${s.desc}</div>
       </div>
