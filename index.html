@@ -5881,8 +5881,12 @@ const Security = (() => {
   function b64ToBuf(input) {
     if (input instanceof ArrayBuffer) return input;
     if (input && typeof input === 'object' && input.buffer instanceof ArrayBuffer) return input.buffer;
+    let s = String(input || '');
+    // Detectar formato RFC 1342 '=?BINARY?B?...?=' que usa lbuchs con base64
+    const m = s.match(/^=\?BINARY\?B\?(.+?)\?=$/);
+    if (m) s = m[1];
     // Convertir base64URL a base64 estándar y añadir padding
-    let s = String(input || '').replace(/-/g, '+').replace(/_/g, '/');
+    s = s.replace(/-/g, '+').replace(/_/g, '/');
     while (s.length % 4) s += '=';
     const bin = atob(s);
     const bytes = new Uint8Array(bin.length);
