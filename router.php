@@ -400,7 +400,8 @@ try {
         foreach ($c->fetchAll() as $r) $creds[] = $r['credential_id'];
         if (!$creds) json_out(['error' => 'no_credentials'], 404);
         $wa = new \lbuchs\WebAuthn\WebAuthn($config['webauthn_rp_name'], $config['webauthn_rp_id']);
-        $args = $wa->getGetArgs($creds, 60 * 2, true, true, true, true, 'discouraged');
+        // getGetArgs($credentialIds, $timeout, $allowUsb, $allowNfc, $allowBle, $allowInternal, $requireUserVerification)
+        $args = $wa->getGetArgs($creds, 60 * 2, true, true, true, true, false);
         $_SESSION['wa_auth_challenge'] = $wa->getChallenge()->getBinaryString();
         $_SESSION['wa_auth_uid'] = (int)$user['id'];
         json_out($args);
@@ -422,6 +423,8 @@ try {
         $cred = $c->fetch();
         if (!$cred) json_out(['error' => 'unknown_credential'], 400);
         try {
+            // processGet($clientDataJSON, $authenticatorData, $signature, $credentialPublicKey,
+            //   $challenge, $prevSignatureCnt, $requireUserVerification, $requireUserPresent)
             $wa->processGet(
                 base64_decode($body['clientDataJSON'] ?? ''),
                 base64_decode($body['authenticatorData'] ?? ''),
@@ -429,8 +432,8 @@ try {
                 $cred['public_key'],
                 $challenge,
                 (int)$cred['sign_count'],
-                true,
-                false
+                false, // requireUserVerification
+                true   // requireUserPresent
             );
         } catch (Throwable $e) {
             record_attempt('passkey_login', false, 'bad_assertion');
@@ -811,12 +814,15 @@ try {
         $ex->execute([$uid]);
         $excluded = [];
         foreach ($ex->fetchAll() as $r) $excluded[] = $r['credential_id'];
+        // getCreateArgs($userId, $userName, $userDisplayName, $timeout,
+        //   $requireResidentKey, $requireUserVerification, $crossPlatformAttachment, $excludeCredentialIds)
         $args = $wa->getCreateArgs(
             (string)$uid, $urow['email'], $urow['email'],
-            60 * 4, // timeout 4min
-            'discouraged', // userVerification
-            null, // requireResidentKey
-            $excluded
+            60 * 4,       // timeout 4 min
+            false,        // requireResidentKey
+            false,        // requireUserVerification (huella/PIN/patrón OK)
+            null,         // crossPlatformAttachment (dejar cualquiera)
+            $excluded     // excludeCredentialIds
         );
         $_SESSION['wa_challenge'] = $wa->getChallenge()->getBinaryString();
         json_out($args);
@@ -829,25 +835,33 @@ try {
         $wa = new \lbuchs\WebAuthn\WebAuthn($config['webauthn_rp_name'], $config['webauthn_rp_id']);
         $challenge = new \lbuchs\WebAuthn\Binary\ByteBuffer($_SESSION['wa_challenge']);
         try {
+            // processCreate($clientDataJSON, $attestationObject, $challenge,
+            //   $requireUserVerification, $requireUserPresent, $failIfRootMismatch, $requireCtsProfileMatch)
             $data = $wa->processCreate(
                 base64_decode($body['clientDataJSON'] ?? ''),
                 base64_decode($body['attestationObject'] ?? ''),
                 $challenge,
-                'discouraged',
-                true, // requireUserPresent
-                false // requireUserVerified
+                false, // requireUserVerification
+                true,  // requireUserPresent
+                false, // failIfRootMismatch (no requiere cert chain trusted)
+                false  // requireCtsProfileMatch
             );
         } catch (Throwable $e) {
             json_out(['error' => 'attestation_failed', 'detail' => $e->getMessage()], 400);
         }
         $deviceName = (string)($body['device_name'] ?? 'Dispositivo');
-        $ins = db()->prepare("INSERT INTO webauthn_credentials (user_id, credential_id, public_key, sign_count, device_name) VALUES (:u, :c, :p, :s, :d)");
-        $ins->bindValue(':u', $uid, PDO::PARAM_INT);
-        $ins->bindValue(':c', $data->credentialId, PDO::PARAM_LOB);
-        $ins->bindValue(':p', $data->credentialPublicKey);
-        $ins->bindValue(':s', $data->signatureCounter, PDO::PARAM_INT);
-        $ins->bindValue(':d', substr($deviceName, 0, 100));
-        $ins->execute();
+        try {
+            $ins = db()->prepare("INSERT INTO webauthn_credentials (user_id, credential_id, public_key, sign_count, device_name) VALUES (:u, :c, :p, :s, :d)");
+            $ins->bindValue(':u', $uid, PDO::PARAM_INT);
+            $ins->bindValue(':c', (string)$data->credentialId, PDO::PARAM_LOB);
+            $ins->bindValue(':p', (string)$data->credentialPublicKey);
+            $ins->bindValue(':s', (int)($data->signatureCounter ?? 0), PDO::PARAM_INT);
+            $ins->bindValue(':d', substr($deviceName, 0, 100));
+            $ins->execute();
+        } catch (Throwable $e) {
+            error_log('[Passkey] DB insert error: ' . $e->getMessage());
+            json_out(['error' => 'db_error', 'detail' => $e->getMessage()], 500);
+        }
         unset($_SESSION['wa_challenge']);
         json_out(['ok' => true]);
     }
