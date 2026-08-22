@@ -5135,8 +5135,22 @@ const Push = (() => {
   async function test() {
     const r = await api('push/test', { method: 'POST' });
     const j = await r.json();
-    if (r.ok) Toast.show('Enviado (' + (j.sent || 0) + ' dispositivo(s))');
-    else Toast.show('Error: ' + (j.error || 'server'));
+    if (!r.ok) { Modal.alert(j.error || 'server', 'Error'); return; }
+    const results = j.results || [];
+    if (results.length === 0) {
+      Modal.alert('No hay suscripciones. Reactiva push primero.', 'Sin dispositivos');
+      return;
+    }
+    const failed = results.filter(x => !x.ok);
+    if (failed.length === 0) {
+      Toast.show('✓ Enviado a ' + results.length + ' dispositivo(s)');
+    } else {
+      const first = failed[0];
+      Modal.alert(
+        'Fallo: código HTTP ' + first.code + '\n' + (first.error || '(sin detalle)'),
+        'Error al enviar push'
+      );
+    }
   }
   return { enable, disable, test, refresh };
 })();
