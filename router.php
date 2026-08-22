@@ -675,6 +675,56 @@ try {
         json_out(['ok' => (bool)$ok]);
     }
 
+    // ---- Push subscriptions --------------------------------------------
+    if (($parts[0] ?? '') === 'push' && ($parts[1] ?? '') === 'vapid_public' && $method === 'GET') {
+        json_out(['key' => $config['vapid_public_key'] ?? null]);
+    }
+    if (($parts[0] ?? '') === 'push' && ($parts[1] ?? '') === 'subscribe' && $method === 'POST') {
+        $body = json_body();
+        $ep = (string)($body['endpoint'] ?? '');
+        $p256dh = (string)($body['keys']['p256dh'] ?? '');
+        $auth = (string)($body['keys']['auth'] ?? '');
+        if (!$ep || !$p256dh || !$auth) json_out(['error' => 'bad_subscription'], 400);
+        try {
+            $stmt = db()->prepare("INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth) VALUES (?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE user_id = VALUES(user_id), p256dh = VALUES(p256dh), auth = VALUES(auth)");
+            $stmt->execute([$uid, $ep, $p256dh, $auth]);
+            json_out(['ok' => true]);
+        } catch (Throwable $e) {
+            json_out(['error' => 'db_error', 'detail' => $e->getMessage()], 500);
+        }
+    }
+    if (($parts[0] ?? '') === 'push' && ($parts[1] ?? '') === 'unsubscribe' && $method === 'POST') {
+        $body = json_body();
+        $ep = (string)($body['endpoint'] ?? '');
+        db()->prepare("DELETE FROM push_subscriptions WHERE user_id = ? AND endpoint = ?")->execute([$uid, $ep]);
+        json_out(['ok' => true]);
+    }
+    if (($parts[0] ?? '') === 'push' && ($parts[1] ?? '') === 'test' && $method === 'POST') {
+        if (empty($config['vapid_public_key']) || empty($config['vapid_private_key'])) json_out(['error' => 'not_configured'], 503);
+        require_once __DIR__ . '/lib/WebPush.php';
+        $wp = new \BabyTracker\WebPush(
+            $config['vapid_public_key'],
+            $config['vapid_private_key'],
+            $config['vapid_subject'] ?? ('mailto:' . ($config['mail_from'] ?? 'admin@localhost'))
+        );
+        $stmt = db()->prepare("SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE user_id = ?");
+        $stmt->execute([$uid]);
+        $results = [];
+        foreach ($stmt->fetchAll() as $sub) {
+            $payload = json_encode(['title' => '🎉 Prueba Baby Tracker', 'body' => 'Las notificaciones están funcionando ✓']);
+            $r = $wp->send(['endpoint' => $sub['endpoint'], 'p256dh' => $sub['p256dh'], 'auth' => $sub['auth']], $payload);
+            $results[] = $r;
+            if ($r['ok']) {
+                db()->prepare("UPDATE push_subscriptions SET last_used_at = NOW() WHERE endpoint = ?")->execute([$sub['endpoint']]);
+            } elseif ($r['code'] === 404 || $r['code'] === 410) {
+                // Gone/NotFound: eliminar suscripción muerta
+                db()->prepare("DELETE FROM push_subscriptions WHERE endpoint = ?")->execute([$sub['endpoint']]);
+            }
+        }
+        json_out(['ok' => true, 'sent' => count($results), 'results' => $results]);
+    }
+
     // ---- AI pediatric chat (proxy a Anthropic) --------------------------
     if (($parts[0] ?? '') === 'ai' && ($parts[1] ?? '') === 'chat' && $method === 'POST') {
         if (empty($config['anthropic_api_key'])) json_out(['error' => 'not_configured'], 503);

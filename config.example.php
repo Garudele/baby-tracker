@@ -43,10 +43,14 @@ return [
     'mail_from_name' => 'Baby Tracker',
 
     // ---------- AI Pediatric Chat (opcional) ----------
-    // Consigue tu API key en https://console.anthropic.com
-    // Si vacío, el chat AI muestra "no configurado" y no cobra nada.
-    // Modelo usado: Claude Haiku 4.5 (barato, ~$0.001 por conversación típica)
     'anthropic_api_key' => '',
+
+    // ---------- Web Push notifications (opcional) ----------
+    // Genera las llaves UNA VEZ con /install.php → "Generar VAPID keys"
+    // O manualmente en PHP: WebPush::generateVapidKeys()
+    'vapid_public_key'  => '',  // base64url 65 bytes
+    'vapid_private_key' => '',  // base64url 32 bytes
+    'vapid_subject'     => 'mailto:no-reply@angaes.com',
 
     // ---------- Rate limiting ----------
     'auth_max_attempts'   => 5,          // intentos fallidos de login antes de bloquear

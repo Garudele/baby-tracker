@@ -1,4 +1,4 @@
-const CACHE = 'baby-tracker-v31';
+const CACHE = 'baby-tracker-v32';
 const ASSETS = [
   './',
   './index.html',
@@ -57,4 +57,37 @@ self.addEventListener('fetch', e => {
       }))
     );
   }
+});
+
+// ===== PUSH NOTIFICATIONS =====
+self.addEventListener('push', (event) => {
+  let data = { title: 'Baby Tracker', body: 'Tienes una notificación' };
+  try {
+    if (event.data) data = { ...data, ...event.data.json() };
+  } catch (e) {
+    try { data.body = event.data.text(); } catch {}
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: 'icon-192.png',
+      badge: 'icon-192.png',
+      tag: data.tag || 'baby-tracker',
+      data: data,
+      renotify: true,
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of clients) {
+      if (c.url.includes(self.location.host)) {
+        return c.focus();
+      }
+    }
+    return self.clients.openWindow('/');
+  })());
 });

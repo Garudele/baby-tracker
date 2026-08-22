@@ -1285,6 +1285,30 @@ body.dark .ai-msg.assistant { background: var(--card-alt, #2A2D52); border-color
 .stats-day-val { font-size: 0.7rem; font-weight: 600; margin-top: 2px; }
 body.dark .stats-bar { background: rgba(116,185,255,0.1); }
 
+/* ===== Insights ===== */
+.insight-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border-radius: 12px; margin-bottom: 8px;
+  background: var(--input-bg, #fafafa);
+}
+.insight-icon { font-size: 1.6rem; flex-shrink: 0; }
+.insight-body { flex: 1; min-width: 0; }
+.insight-metric { font-size: 0.72rem; color: var(--text-light, #888); text-transform: uppercase; letter-spacing: 0.03em; }
+.insight-value { font-size: 1.05rem; font-weight: 700; margin-top: 2px; }
+.insight-delta {
+  font-size: 0.75rem; font-weight: 600;
+  padding: 3px 8px; border-radius: 8px; margin-left: auto;
+  white-space: nowrap;
+}
+.insight-delta.up { background: rgba(16,185,129,0.15); color: #059669; }
+.insight-delta.down { background: rgba(239,68,68,0.15); color: #DC2626; }
+.insight-delta.neutral { background: rgba(100,116,139,0.15); color: #64748B; }
+.insight-interp {
+  font-size: 0.78rem; color: var(--text-light, #888); margin-top: 4px;
+  font-style: italic;
+}
+body.dark .insight-item { background: rgba(255,255,255,0.04); }
+
 /* ===== Skeleton loaders ===== */
 @keyframes shimmer {
   0% { background-position: -400px 0; }
@@ -1803,6 +1827,7 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
 <!-- DIARIO -->
 <div class="section" id="diarySection">
   <div class="card diary-summary" id="diarySummary"></div>
+  <div id="diaryInsights"></div>
   <div id="diaryStats"></div>
 
   <div class="card">
@@ -1999,8 +2024,13 @@ body.dark .emoji-pick { background: rgba(255,255,255,0.06); }
 
   <div class="card">
     <h3>🔔 Notificaciones</h3>
-    <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Recibe recordatorios de citas próximas y medicinas activas.</p>
-    <button class="btn btn-primary btn-small" onclick="Notify.requestPermission().then(ok => { if (ok) Notify.startPolling(); })">Activar notificaciones</button>
+    <p style="font-size:0.85em;color:var(--text-light);margin-bottom:12px">Recordatorios de citas y medicinas. Push funciona aunque tengas la app cerrada.</p>
+    <div id="pushStatus" style="font-size:0.85em;margin-bottom:8px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-small" id="pushEnableBtn" onclick="Push.enable()">Activar push</button>
+      <button class="btn btn-primary btn-small" id="pushTestBtn" onclick="Push.test()" style="display:none">Enviar prueba</button>
+      <button class="btn btn-primary btn-small" id="pushDisableBtn" onclick="Push.disable()" style="display:none;background:#666">Desactivar</button>
+    </div>
   </div>
 
   <div class="card">
@@ -3779,6 +3809,34 @@ async function printReport() {
       }).join('')
     : emptyRow(6, 'Sin registros');
 
+  // Milestones achieved
+  let milesData = null;
+  try { const r = await fetch('milestones.json'); milesData = await r.json(); } catch (e) {}
+  const achieved = DB.get('milestones') || {};
+  const allMilesList = [...(milesData?.milestones || []), ...(DB.get('milestones_custom') || [])];
+  const achievedItems = Object.entries(achieved).map(([id, val]) => {
+    const m = allMilesList.find(x => x.id === id);
+    const info = typeof val === 'object' ? val : { date: val };
+    return { m, info, date: info.date };
+  }).filter(x => x.m).sort((a,b) => (a.date||'').localeCompare(b.date||''));
+  const milesRows = achievedItems.length
+    ? achievedItems.map(x => `<tr>
+        <td>${formatDate(x.date)}</td>
+        <td>${x.m.emoji || '⭐'} ${escapeHTML(x.m.title)}</td>
+        <td>${escapeHTML(x.info.note || x.m.description || '')}</td>
+      </tr>`).join('')
+    : emptyRow(3, 'Sin logros marcados aún');
+
+  // Diary summary (last 7 days)
+  const evAll = DB.get('events') || [];
+  const wkAgo = Date.now() - 7 * 86400000;
+  const evRecent = evAll.filter(e => (e.ts_start||e.ts||0) >= wkAgo);
+  const sleepTotal = evRecent.filter(e => e.type === 'sleep' && e.ts_end).reduce((s,e) => s + (e.ts_end - e.ts_start), 0);
+  const feedsTotal = evRecent.filter(e => e.type === 'feed').length;
+  const diapersTotal = evRecent.filter(e => e.type === 'diaper').length;
+  const notes = evRecent.filter(e => e.type === 'note').sort((a,b) => (b.ts_start||b.ts) - (a.ts_start||a.ts));
+  const notesHTML = notes.length ? notes.map(n => `<li><b>${new Date(n.ts_start||n.ts).toLocaleDateString('es-MX')}</b>: ${escapeHTML(n.text)}</li>`).join('') : '<li>Sin notas</li>';
+
   // Appointments table
   const apptRows = appointments.length
     ? appointments.map(r => {
@@ -3846,6 +3904,24 @@ async function printReport() {
     <table>
       <thead><tr><th>Fecha</th><th>Estado</th><th>Doctor</th><th>Lugar</th><th>Motivo</th><th>Notas</th></tr></thead>
       <tbody>${apptRows}</tbody>
+    </table>
+
+    <div class="pgbreak"></div>
+    <h2>Últimos 7 días — Diario</h2>
+    <table>
+      <thead><tr><th>Métrica</th><th>Total</th><th>Promedio/día</th></tr></thead>
+      <tbody>
+        <tr><td>😴 Sueño</td><td>${(sleepTotal/3600000).toFixed(1)} h</td><td>${(sleepTotal/7/3600000).toFixed(1)} h</td></tr>
+        <tr><td>🍼 Tomas</td><td>${feedsTotal}</td><td>${(feedsTotal/7).toFixed(1)}</td></tr>
+        <tr><td>👶 Pañales</td><td>${diapersTotal}</td><td>${(diapersTotal/7).toFixed(1)}</td></tr>
+      </tbody>
+    </table>
+    ${notes.length ? '<h3>Notas relevantes</h3><ul style="padding-left:1.5em">' + notesHTML + '</ul>' : ''}
+
+    <h2>🏆 Logros alcanzados</h2>
+    <table>
+      <thead><tr><th>Fecha</th><th>Logro</th><th>Nota / Descripción</th></tr></thead>
+      <tbody>${milesRows}</tbody>
     </table>
   `;
 
@@ -4969,6 +5045,102 @@ const Onboarding = (() => {
   return { show };
 })();
 
+// ===== WEB PUSH NOTIFICATIONS =====
+const Push = (() => {
+  const API = new URL('api/', location.href).href;
+  async function api(p, o = {}) {
+    return fetch(API + p, { credentials: 'include', ...o, headers: { 'Content-Type': 'application/json', ...(o.headers || {}) } });
+  }
+  function urlB64ToUint8(b64) {
+    const padding = '='.repeat((4 - b64.length % 4) % 4);
+    const s = (b64 + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const bin = atob(s);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  async function getRegistration() {
+    return navigator.serviceWorker.ready;
+  }
+  async function refresh() {
+    const status = document.getElementById('pushStatus');
+    const enableBtn = document.getElementById('pushEnableBtn');
+    const testBtn = document.getElementById('pushTestBtn');
+    const disableBtn = document.getElementById('pushDisableBtn');
+    if (!status) return;
+
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+      status.textContent = '❌ Este navegador no soporta push';
+      enableBtn.style.display = 'none';
+      return;
+    }
+    if (Notification.permission === 'denied') {
+      status.textContent = '⚠️ Bloqueaste las notificaciones. Ajusta permisos del navegador.';
+      enableBtn.style.display = 'none';
+      return;
+    }
+    const reg = await getRegistration();
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) {
+      status.innerHTML = '✅ <strong>Push activado</strong> — Recibirás recordatorios';
+      enableBtn.style.display = 'none';
+      testBtn.style.display = 'inline-flex';
+      disableBtn.style.display = 'inline-flex';
+    } else {
+      status.textContent = 'Push desactivado';
+      enableBtn.style.display = 'inline-flex';
+      testBtn.style.display = 'none';
+      disableBtn.style.display = 'none';
+    }
+  }
+  async function enable() {
+    if (!('PushManager' in window)) { Toast.show('No soportado'); return; }
+    // Permission
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { Toast.show('Permiso denegado'); return; }
+    // Get VAPID public key from server
+    const r = await api('push/vapid_public');
+    const j = await r.json();
+    if (!j.key) { Toast.show('Server no configurado — genera VAPID keys'); return; }
+    // Subscribe
+    const reg = await getRegistration();
+    let sub;
+    try {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8(j.key),
+      });
+    } catch (e) {
+      Toast.show('Error al suscribir: ' + e.message);
+      return;
+    }
+    // Send to server
+    const sr = await api('push/subscribe', {
+      method: 'POST',
+      body: JSON.stringify(sub.toJSON()),
+    });
+    if (sr.ok) { Toast.show('Push activado ✓'); refresh(); }
+    else Toast.show('Error al guardar suscripción');
+  }
+  async function disable() {
+    const reg = await getRegistration();
+    const sub = await reg.pushManager.getSubscription();
+    if (!sub) return;
+    const ep = sub.endpoint;
+    await sub.unsubscribe();
+    await api('push/unsubscribe', { method: 'POST', body: JSON.stringify({ endpoint: ep }) });
+    Toast.show('Push desactivado');
+    refresh();
+  }
+  async function test() {
+    const r = await api('push/test', { method: 'POST' });
+    const j = await r.json();
+    if (r.ok) Toast.show('Enviado (' + (j.sent || 0) + ' dispositivo(s))');
+    else Toast.show('Error: ' + (j.error || 'server'));
+  }
+  return { enable, disable, test, refresh };
+})();
+
 // ===== NOTIFICATIONS (recordatorios locales) =====
 const Notify = (() => {
   const LAST_KEY = 'notify_last_check';
@@ -5291,6 +5463,131 @@ const Diary = (() => {
     if (diaperSub) diaperSub.textContent = diapers[0] ? fmtRelative(diapers[0].ts_start||diapers[0].ts) : '—';
   }
 
+  function renderInsights() {
+    const box = document.getElementById('diaryInsights');
+    if (!box) return;
+    const now = Date.now();
+    const day = 86400000;
+    const wk1From = now - 7 * day;
+    const wk2From = now - 14 * day;
+    const wk2To = wk1From;
+    const evAll = events();
+    const ev1 = evAll.filter(e => (e.ts_start||e.ts||0) >= wk1From);
+    const ev2 = evAll.filter(e => { const t = (e.ts_start||e.ts||0); return t >= wk2From && t < wk2To; });
+
+    function stats(evs) {
+      const s = { sleepMs: 0, feeds: 0, diapers: 0 };
+      for (const e of evs) {
+        if (e.type === 'sleep' && e.ts_end) s.sleepMs += (e.ts_end - e.ts_start);
+        if (e.type === 'feed') s.feeds++;
+        if (e.type === 'diaper') s.diapers++;
+      }
+      return s;
+    }
+    const a = stats(ev1);
+    const b = stats(ev2);
+
+    function delta(cur, prev) {
+      if (!prev) return { pct: null, cls: 'neutral', text: 'nuevo' };
+      const d = ((cur - prev) / prev) * 100;
+      const cls = Math.abs(d) < 5 ? 'neutral' : (d > 0 ? 'up' : 'down');
+      return { pct: d, cls, text: (d > 0 ? '↑ ' : '↓ ') + Math.abs(Math.round(d)) + '%' };
+    }
+    const sleepAvgH1 = a.sleepMs / 7 / 3600000;
+    const sleepAvgH2 = b.sleepMs / 7 / 3600000;
+    const feedsAvg1 = a.feeds / 7;
+    const feedsAvg2 = b.feeds / 7;
+    const diapersAvg1 = a.diapers / 7;
+    const diapersAvg2 = b.diapers / 7;
+
+    const dSleep = delta(sleepAvgH1, sleepAvgH2);
+    const dFeeds = delta(feedsAvg1, feedsAvg2);
+    const dDiapers = delta(diapersAvg1, diapersAvg2);
+
+    // Growth delta
+    const growth = (DB.get('growth') || []).sort((x,y) => (x.date||'').localeCompare(y.date||''));
+    let growthLine = '';
+    if (growth.length >= 2) {
+      const last = growth[growth.length - 1];
+      const prev = growth[growth.length - 2];
+      if (last.weight && prev.weight) {
+        const diff = (last.weight - prev.weight).toFixed(2);
+        const sign = diff > 0 ? '+' : '';
+        growthLine = `
+          <div class="insight-item">
+            <span class="insight-icon">📏</span>
+            <div class="insight-body">
+              <div class="insight-metric">Peso último registro</div>
+              <div class="insight-value">${last.weight} kg</div>
+              <div class="insight-interp">${sign}${diff} kg vs. anterior (${prev.date})</div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Si no hay datos suficientes, no mostrar
+    if (a.sleepMs === 0 && a.feeds === 0 && a.diapers === 0 && !growthLine) {
+      box.innerHTML = '';
+      return;
+    }
+
+    function interpret(metric, delta, current) {
+      if (metric === 'sleep') {
+        if (delta.cls === 'neutral') return 'Patrón estable de sueño';
+        if (delta.cls === 'up') return '¡Duerme más! 🎉';
+        return 'Duerme menos que la semana pasada';
+      }
+      if (metric === 'feeds') {
+        if (delta.cls === 'neutral') return 'Frecuencia normal de tomas';
+        return delta.cls === 'up' ? 'Aumentó las tomas' : 'Disminuyeron las tomas';
+      }
+      if (metric === 'diapers') {
+        if (delta.cls === 'neutral') return 'Cambios estables';
+        return delta.cls === 'up' ? 'Más pañales esta semana' : 'Menos pañales';
+      }
+    }
+
+    box.innerHTML = `
+      <div class="card">
+        <h3>💡 Insights de la semana</h3>
+        <p style="font-size:0.82em;color:var(--text-light);margin-bottom:10px">Comparado con la semana anterior</p>
+
+        <div class="insight-item">
+          <span class="insight-icon">😴</span>
+          <div class="insight-body">
+            <div class="insight-metric">Sueño promedio</div>
+            <div class="insight-value">${sleepAvgH1.toFixed(1)} h/día</div>
+            <div class="insight-interp">${interpret('sleep', dSleep)}</div>
+          </div>
+          ${dSleep.pct !== null ? `<span class="insight-delta ${dSleep.cls}">${dSleep.text}</span>` : ''}
+        </div>
+
+        <div class="insight-item">
+          <span class="insight-icon">🍼</span>
+          <div class="insight-body">
+            <div class="insight-metric">Tomas promedio</div>
+            <div class="insight-value">${feedsAvg1.toFixed(1)}/día</div>
+            <div class="insight-interp">${interpret('feeds', dFeeds)}</div>
+          </div>
+          ${dFeeds.pct !== null ? `<span class="insight-delta ${dFeeds.cls}">${dFeeds.text}</span>` : ''}
+        </div>
+
+        <div class="insight-item">
+          <span class="insight-icon">👶</span>
+          <div class="insight-body">
+            <div class="insight-metric">Pañales promedio</div>
+            <div class="insight-value">${diapersAvg1.toFixed(1)}/día</div>
+            <div class="insight-interp">${interpret('diapers', dDiapers)}</div>
+          </div>
+          ${dDiapers.pct !== null ? `<span class="insight-delta ${dDiapers.cls}">${dDiapers.text}</span>` : ''}
+        </div>
+
+        ${growthLine}
+      </div>
+    `;
+  }
+
   function renderWeekStats() {
     const box = document.getElementById('diaryStats');
     if (!box) return;
@@ -5343,6 +5640,7 @@ const Diary = (() => {
     const today = new Date(); today.setHours(0,0,0,0);
     document.getElementById('diaryNext').disabled = currentDate.getTime() >= today.getTime();
     renderSummary();
+    renderInsights();
     renderWeekStats();
     renderTimeline();
     renderQuickButtons();
@@ -5377,7 +5675,7 @@ function switchTab(name, btn) {
   if (name === 'miles') Milestones.render();
   if (name === 'dash') { Weekly.render(); Glance.render(); }
   if (name === 'diary') { Diary.render(); Diary.startTicker(); }
-  if (name === 'settings') { Babies.refresh(); Security.refresh(); Security.listPasskeys(); Security.refreshEmailStatus(); Themes.refresh(); }
+  if (name === 'settings') { Babies.refresh(); Security.refresh(); Security.listPasskeys(); Security.refreshEmailStatus(); Themes.refresh(); Push.refresh(); }
   window.scrollTo(0, 0);
 }
 

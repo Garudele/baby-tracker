@@ -149,6 +149,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->exec("DROP TABLE IF EXISTS photos");
             run_schema_sql($pdo);
             $msg = "Tablas entries y photos recreadas con nuevo schema ✓";
+        } elseif ($action === 'gen_vapid') {
+            require_once __DIR__ . '/lib/WebPush.php';
+            $keys = \BabyTracker\WebPush::generateVapidKeys();
+            $msg = "VAPID keys generadas ✓ — COPIA a private/config.php:\n\n"
+                . "'vapid_public_key'  => '" . $keys['public'] . "',\n"
+                . "'vapid_private_key' => '" . $keys['private'] . "',";
         } elseif ($action === 'create_user') {
             $email = strtolower(trim((string)($_POST['email'] ?? '')));
             $pw    = (string)($_POST['password'] ?? '');
@@ -206,7 +212,7 @@ try {
 <h1>Baby Tracker — Setup / Migración</h1>
 <p style="color:#666;font-size:.85rem;margin-top:.3rem">Multi-tenant + Bebés</p>
 
-<?php if($msg):?><div class="box ok"><?=htmlspecialchars($msg)?></div><?php endif;?>
+<?php if($msg):?><div class="box ok" style="white-space:pre-wrap;font-family:monospace;font-size:0.85rem"><?=htmlspecialchars($msg)?></div><?php endif;?>
 <?php if($err):?><div class="box err"><?=htmlspecialchars($err)?></div><?php endif;?>
 
 <div class="box">
@@ -235,7 +241,16 @@ try {
 </div>
 
 <div class="box">
-  <h2>3. Crear usuario manual (opcional)</h2>
+  <h2>3. Generar VAPID keys (para Push notifications)</h2>
+  <p>Genera un par de llaves ECDSA P-256 para autenticar el envío de push notifications. Copia el resultado a <code>private/config.php</code>.</p>
+  <form method="POST">
+    <input type="hidden" name="action" value="gen_vapid">
+    <button type="submit">Generar VAPID keys</button>
+  </form>
+</div>
+
+<div class="box">
+  <h2>4. Crear usuario manual (opcional)</h2>
   <form method="POST" autocomplete="off">
     <input type="hidden" name="action" value="create_user">
     <label>Email</label><input type="email" name="email" required>
