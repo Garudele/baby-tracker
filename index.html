@@ -5950,9 +5950,13 @@ const Babies = (() => {
         <span class="baby-item-name">${escapeHTML(b.name)}</span>
         ${b.role !== 'owner' ? `<span class="baby-item-role">${b.role}</span>` : ''}
         ${b.id == activeId ? '<span class="baby-item-check">✓</span>' : ''}
-        ${b.role === 'owner' ? `<button class="baby-item-del" title="Compartir" onclick="event.stopPropagation();Babies.share(${b.id})">🔗</button>` : ''}
-        ${b.role === 'owner' && list.length > 1 ? `<button class="baby-item-del" onclick="event.stopPropagation();Babies.remove(${b.id})">🗑️</button>` : ''}
+        ${b.role === 'owner' && list.length > 1 ? `<button class="baby-item-del" title="Eliminar bebé" onclick="event.stopPropagation();Babies.remove(${b.id})">🗑️</button>` : ''}
       </div>
+      ${b.role === 'owner' ? `
+        <button class="btn btn-primary btn-small" style="width:100%;margin-bottom:10px;background:linear-gradient(135deg,#10B981,#34D399);box-shadow:0 4px 12px -2px rgba(16,185,129,0.35)" onclick="Babies.share(${b.id})">
+          🔗 Compartir "${escapeHTML(b.name)}" con familia
+        </button>
+      ` : ''}
     `).join('');
   }
 
