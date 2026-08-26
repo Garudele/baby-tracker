@@ -2987,7 +2987,7 @@ function closePhotoModal(event) {
 }
 
 // ===== BABY SETUP =====
-function saveBaby() {
+async function saveBaby() {
   const name = document.getElementById('babyName').value.trim();
   const birth = document.getElementById('babyBirth').value;
   if (!name || !birth) { Toast.show('Completa nombre y fecha de nacimiento'); return; }
@@ -3002,6 +3002,30 @@ function saveBaby() {
     birthHeight: parseFloat(document.getElementById('birthHeight').value) || null
   };
   DB.set('info', baby);
+
+  // Sincronizar con multi-tenant babies (crea o actualiza el bebé activo)
+  try {
+    const meRes = await fetch(new URL('api/me', location.href), { credentials: 'include' });
+    const me = await meRes.json();
+    if (me.auth) {
+      const activeBaby = (me.babies || []).find(b => b.id == me.active_baby_id);
+      if (activeBaby && activeBaby.role === 'owner') {
+        // Actualizar bebé existente
+        await fetch(new URL('api/babies/' + activeBaby.id, location.href), {
+          method: 'PUT', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, birthdate: birth, sex: baby.sex }),
+        });
+      } else if (!me.babies || me.babies.length === 0) {
+        // Crear nuevo
+        await fetch(new URL('api/babies', location.href), {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, birthdate: birth, sex: baby.sex, emoji: baby.sex === 'girl' ? '👧' : '👦' }),
+        });
+      }
+    }
+  } catch (e) { console.warn('sync baby to multi-tenant:', e); }
 
   // Save birth measurements as first growth record
   if (baby.birthWeight || baby.birthHeight) {
@@ -5995,13 +6019,20 @@ const Babies = (() => {
     });
     if (r.ok) {
       const j = await r.json();
+      // Siempre sincronizar con baby_info local (para pantallas legacy)
+      const existingInfo = DB.get('info') || {};
+      DB.set('info', {
+        ...existingInfo,
+        name,
+        birth: birth || existingInfo.birth || '',
+        sex: sex || existingInfo.sex || 'other',
+      });
       if (hadNoBabies) {
-        // Primer bebé: solo activar en sesión, NO borrar localStorage (preserva datos legacy)
         activeId = j.id;
         await refresh();
-        // Sync push del info actual al nuevo baby_id
         if (window.SYNC) SYNC.pullData().catch(() => {});
         Toast.show('Bebé creado ✓');
+        location.reload();
       } else {
         await refresh();
         if (j.id) await switchTo(j.id);

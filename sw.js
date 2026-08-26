@@ -1,4 +1,4 @@
-const CACHE = 'baby-tracker-v35';
+const CACHE = 'baby-tracker-v36';
 const ASSETS = [
   './',
   './index.html',
