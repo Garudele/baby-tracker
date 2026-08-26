@@ -5966,8 +5966,18 @@ const Babies = (() => {
       if (r.ok) {
         activeId = id;
         renderList();
-        // Refresh app data for new baby
-        localStorage.clear();
+        // Preservar prefs UI antes de limpiar keys de bebé
+        const preserved = {};
+        ['theme','dark','baby_onboarded','install_dismissed'].forEach(k => {
+          const v = localStorage.getItem(k);
+          if (v !== null) preserved[k] = v;
+        });
+        // Limpiar SOLO keys de bebé (baby_*)
+        Object.keys(localStorage).filter(k => k.startsWith('baby_')).forEach(k => {
+          if (!(k in preserved)) localStorage.removeItem(k);
+        });
+        // Restaurar prefs
+        for (const [k,v] of Object.entries(preserved)) localStorage.setItem(k, v);
         if (window.SYNC) {
           await SYNC.pullData();
           await SYNC.pullPhotos();
@@ -5978,14 +5988,24 @@ const Babies = (() => {
   }
 
   async function add(name, birth, sex, emoji) {
+    const hadNoBabies = list.length === 0;
     const r = await api('babies', {
       method: 'POST',
       body: JSON.stringify({ name, birthdate: birth || null, sex: sex || 'other', emoji: emoji || '👶' }),
     });
     if (r.ok) {
-      await refresh();
       const j = await r.json();
-      if (j.id) await switchTo(j.id);
+      if (hadNoBabies) {
+        // Primer bebé: solo activar en sesión, NO borrar localStorage (preserva datos legacy)
+        activeId = j.id;
+        await refresh();
+        // Sync push del info actual al nuevo baby_id
+        if (window.SYNC) SYNC.pullData().catch(() => {});
+        Toast.show('Bebé creado ✓');
+      } else {
+        await refresh();
+        if (j.id) await switchTo(j.id);
+      }
       return true;
     }
     return false;
